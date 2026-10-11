@@ -131,7 +131,7 @@ func (d *gLDriver) runGL() {
 		f()
 	}
 
-	frameInterval := time.Second / 60
+	const frameInterval = time.Second / 60
 	eventTick := time.NewTicker(frameInterval)
 	nextFrame := time.Now().Add(frameInterval)
 	for {

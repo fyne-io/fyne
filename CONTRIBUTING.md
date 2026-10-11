@@ -51,13 +51,31 @@ To manage this we have various checks and processes in place that everyone shoul
 For desktop event-loop changes, run the main-queue and scheduler tests with
 `go test -race -tags no_glfw,ci,migrated_fynedo ./internal/async ./internal/driver/glfw`.
 On macOS, add `accessibility` to check native element identity and in-place
-attribute updates without requiring Accessibility permission. Also exercise
-a real desktop application: queued `fyne.Do` work and shutdown must wake native
-event waiting, while rendering must retain its normal frame cadence.
+attribute updates without requiring Accessibility permission. The tagged suite
+also launches a real desktop fixture to check queued `fyne.Do` work, window
+teardown, menus, dialogs, shutdown, and rendering cadence.
 The native accessibility probes also check ownership, window teardown, and
 isolation between simultaneous windows and different content-view classes.
 The unchanged-tree benchmark measures synchronization of collected nodes, not
 the complete canvas traversal or repaint.
+
+To measure actual AX request latency, build the same fixture on each revision:
+
+```sh
+go build -tags accessibility,migrated_fynedo -ldflags=-linkmode=external -o /tmp/fyne-main-loop ./internal/driver/glfw/testdata/main_loop
+clang -framework Cocoa -framework ApplicationServices internal/driver/glfw/testdata/accessibility_query.m -o /tmp/fyne-ax-query
+/tmp/fyne-main-loop -duration=30s -elements=16 -repaint -repaint-delay=1s
+```
+
+After the fixture prints `READY <pid>`, run `/tmp/fyne-ax-query <pid> 200`
+from another terminal. The query process (or its launching application) needs
+macOS Accessibility permission. The probe reports median, p95, and maximum
+window-attribute and hit-test latency, plus changes or invalidation of a retained
+text element and the number of registered roots. The repaint delay gives the
+client time to retain an element before repainting starts. Repeat without
+`-repaint` and with `-elements=256`. The fixture reports
+animation frames, accessibility updates, and CPU time; its `-exercise` flag also
+checks queued work, menus, dialogs, and a second window.
 
 For detailed Code style, check [Contributing](https://github.com/fyne-io/fyne/wiki/Contributing#code-style) in our wiki please.
 
