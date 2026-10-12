@@ -29,7 +29,7 @@ type Painter interface {
 	Paint(fyne.CanvasObject, fyne.Position, fyne.Size, *internal.ClipItem)
 	// SetFrameBufferScale tells us when we have more than 1 framebuffer pixel for each output pixel
 	SetFrameBufferScale(float32)
-	// SetOutputSize is used to change the resolution of our output viewport
+	// SetOutputSize gives the size of the drawable so the viewport can be anchored to its top
 	SetOutputSize(int, int)
 	// StartClipping tells us that the following paint actions should be clipped to the specified area.
 	StartClipping(fyne.Position, fyne.Size)
@@ -66,6 +66,7 @@ type painter struct {
 	stats               drawStats               // FYNE_GL_DEBUG counters
 	texScale            float32
 	vertices            []float32 // updateBuffer's upload buffer, reused
+	viewportOffsetY     int       // y of the viewport within the framebuffer (GL origin)
 }
 
 // Declare conformity to Painter interface
@@ -133,9 +134,16 @@ func (p *painter) SetFrameBufferScale(scale float32) {
 	p.pixScale = p.canvas.Scale() * p.texScale
 }
 
-func (p *painter) SetOutputSize(width, height int) {
-	p.ctx.Viewport(0, 0, width, height)
+func (p *painter) SetOutputSize(_ int, height int) {
 	p.fbHeight = height
+
+	// OpenGL's origin is the bottom-left, so anchor the viewport to the top of
+	// the drawable - otherwise a smaller viewport sits at the bottom and the
+	// content jumps while resizing.
+	paintedWidth := int(float32(p.canvas.Size().Width) * p.pixScale)
+	paintedHeight := int(float32(p.canvas.Size().Height) * p.pixScale)
+	p.viewportOffsetY = height - paintedHeight
+	p.ctx.Viewport(0, p.viewportOffsetY, paintedWidth, paintedHeight)
 	p.logError()
 }
 
@@ -201,7 +209,8 @@ func (p *painter) SetUniform4f(pState programState, name string, v0, v1, v2, v3 
 func (p *painter) StartClipping(pos fyne.Position, size fyne.Size) {
 	p.FlushGlyphs() // queued quads belong to the outgoing scissor rectangle
 	x := p.textureScale(pos.X)
-	y := p.textureScale(p.canvas.Size().Height - pos.Y - size.Height)
+	// the scissor uses framebuffer coordinates, so shift it by the viewport offset
+	y := p.textureScale(p.canvas.Size().Height-pos.Y-size.Height) + float32(p.viewportOffsetY)
 	w := p.textureScale(size.Width)
 	h := p.textureScale(size.Height)
 	// must be positive, just clamp to 0
