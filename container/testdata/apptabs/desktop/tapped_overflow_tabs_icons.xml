@@ -1,0 +1,49 @@
+<canvas size="200x100">
+	<content>
+		<widget size="200x100" type="*container.AppTabs">
+			<container size="200x36">
+				<container size="160x36">
+					<widget size="52x36" type="*container.tabButton">
+						<text alignment="center" bold color="primary" pos="8,8" size="36x20">Test1</text>
+					</widget>
+					<widget pos="56,0" size="52x36" type="*container.tabButton">
+						<text alignment="center" bold pos="8,8" size="36x20">Test2</text>
+					</widget>
+				</container>
+				<widget pos="164,0" size="36x36" type="*widget.Button">
+					<rectangle radius="4" size="36x36"/>
+					<rectangle size="36x36"/>
+					<image fillMode="contain" pos="8,8" rsc="more-horizontal.svg" size="iconInlineSize" themed="foreground"/>
+				</widget>
+			</container>
+			<rectangle fillColor="shadow" pos="0,36" size="200x1"/>
+			<rectangle fillColor="primary" pos="0,36" radius="4" size="52x1"/>
+			<widget pos="0,40" size="200x60" type="*widget.Label">
+				<widget size="200x60" type="*widget.RichText">
+					<text pos="8,8" size="38x19">Text 1</text>
+				</widget>
+			</widget>
+		</widget>
+	</content>
+	<overlay>
+		<widget size="200x100" type="*widget.OverlayContainer">
+			<widget pos="121,25" size="78x74" type="*widget.PopUpMenu">
+				<rectangle fillColor="menuBackground" radius="4" shadowBlurRadius="6" shadowColor="shadow" shadowOffset="0,2" size="78x74"/>
+				<widget size="78x74" type="*widget.Scroll">
+					<widget size="78x74" type="*widget.menuBox">
+						<container size="78x74">
+							<widget size="78x35" type="*widget.menuItem">
+								<text pos="36,8" size="34x19">Test3</text>
+								<image pos="8,7" rsc="documentIcon" size="iconInlineSize" themed="foreground"/>
+							</widget>
+							<widget pos="0,39" size="78x35" type="*widget.menuItem">
+								<text pos="36,8" size="34x19"></text>
+								<image pos="8,7" rsc="settingsIcon" size="iconInlineSize" themed="foreground"/>
+							</widget>
+						</container>
+					</widget>
+				</widget>
+			</widget>
+		</widget>
+	</overlay>
+</canvas>
