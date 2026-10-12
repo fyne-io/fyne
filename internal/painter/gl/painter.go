@@ -29,7 +29,7 @@ type Painter interface {
 	Paint(fyne.CanvasObject, fyne.Position, fyne.Size, *internal.ClipItem)
 	// SetFrameBufferScale tells us when we have more than 1 framebuffer pixel for each output pixel
 	SetFrameBufferScale(float32)
-	// SetOutputSize gives the size of the drawable so the viewport can be anchored to its top
+	// SetOutputSize is used to change the resolution of our output viewport
 	SetOutputSize(int, int)
 	// StartClipping tells us that the following paint actions should be clipped to the specified area.
 	StartClipping(fyne.Position, fyne.Size)
