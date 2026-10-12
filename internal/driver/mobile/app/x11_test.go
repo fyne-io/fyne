@@ -122,8 +122,10 @@ func TestX11MouseButtons(t *testing.T) {
 	}{
 		{name: "left", button: x11ButtonLeft, want: []touch.Type{touch.TypeBegin, touch.TypeEnd}},
 		{name: "right", button: x11ButtonRight, want: []touch.Type{touch.TypeBegin, touch.TypeEnd}},
-		// the middle button does not produce any event
+		// the middle button and the scroll wheel must not be seen as a tap
 		{name: "middle", button: x11ButtonMiddle},
+		{name: "wheel up", button: x11ButtonWheelUp},
+		{name: "wheel down", button: x11ButtonWheelDown},
 		// the wheel tilt buttons 6 and 7 are not supported, no event
 		{name: "wheel tilt left", button: 6},
 		{name: "wheel tilt right", button: 7},
@@ -163,6 +165,15 @@ func TestX11MouseButtons(t *testing.T) {
 	}
 }
 
+func TestX11ButtonIsTouch(t *testing.T) {
+	for button := 1; button <= 10; button++ {
+		want := button == x11ButtonLeft || button == x11ButtonRight
+		if got := x11ButtonIsTouch(button); got != want {
+			t.Errorf("expected button %d to be a touch: %t, was %t", button, want, got)
+		}
+	}
+}
+
 func TestX11ScrollWheel(t *testing.T) {
 	tests := []struct {
 		name   string
@@ -193,15 +204,6 @@ func TestX11ScrollWheel(t *testing.T) {
 				t.Errorf("expected scroll event %#v for button %d, got %#v", tt.want, tt.button, got)
 			}
 		})
-	}
-}
-
-func TestX11ButtonIsTouch(t *testing.T) {
-	for button := 1; button <= 10; button++ {
-		want := button == x11ButtonLeft || button == x11ButtonRight
-		if got := x11ButtonIsTouch(button); got != want {
-			t.Errorf("expected button %d to be a touch: %t, was %t", button, want, got)
-		}
 	}
 }
 
