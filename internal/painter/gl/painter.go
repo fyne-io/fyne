@@ -137,9 +137,9 @@ func (p *painter) SetFrameBufferScale(scale float32) {
 func (p *painter) SetOutputSize(_ int, height int) {
 	p.fbHeight = height
 
-	// OpenGL's origin is the bottom-left, so anchor the viewport to the top of
-	// the drawable - otherwise a smaller viewport sits at the bottom and the
-	// content jumps while resizing.
+	// glViewport's origin is the bottom-left, so anchor the viewport to the top
+	// of the drawable - otherwise a smaller viewport sits at the bottom and
+	// the content jumps while resizing.
 	paintedWidth := int(float32(p.canvas.Size().Width) * p.pixScale)
 	paintedHeight := int(float32(p.canvas.Size().Height) * p.pixScale)
 	p.viewportOffsetY = height - paintedHeight
