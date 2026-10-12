@@ -1,0 +1,55 @@
+<canvas size="300x100">
+	<content>
+		<widget size="300x100" type="*container.DocTabs">
+			<container size="300x36">
+				<widget size="260x36" type="*widget.Scroll">
+					<container size="260x36">
+						<widget size="52x36" type="*container.tabButton">
+							<image pos="4,8" rsc="settingsIcon" size="iconInlineSize" themed="primary"/>
+						</widget>
+						<widget pos="56,0" size="100x36" type="*container.tabButton">
+							<text bold pos="32,8" size="60x20">Test2</text>
+							<image pos="8,8" rsc="documentIcon" size="iconInlineSize" themed="foreground"/>
+						</widget>
+					</container>
+				</widget>
+				<container pos="264,0" size="36x36">
+					<widget size="36x36" type="*widget.Button">
+						<rectangle radius="4" size="36x36"/>
+						<rectangle size="36x36"/>
+						<image fillMode="contain" pos="8,8" rsc="more-horizontal.svg" size="iconInlineSize" themed="foreground"/>
+					</widget>
+				</container>
+			</container>
+			<rectangle fillColor="shadow" pos="0,36" size="300x1"/>
+			<rectangle fillColor="primary" pos="0,36" radius="4" size="52x1"/>
+			<widget pos="0,40" size="300x60" type="*widget.Label">
+				<widget size="300x60" type="*widget.RichText">
+					<text pos="8,8" size="53x19">Settings</text>
+				</widget>
+			</widget>
+		</widget>
+	</content>
+	<overlay>
+		<widget size="300x100" type="*widget.OverlayContainer">
+			<widget pos="193,25" size="106x74" type="*widget.PopUpMenu">
+				<rectangle fillColor="menuBackground" radius="4" shadowBlurRadius="6" shadowColor="shadow" shadowOffset="0,2" size="106x74"/>
+				<widget size="106x74" type="*widget.Scroll">
+					<widget size="106x74" type="*widget.menuBox">
+						<container size="106x74">
+							<widget size="106x35" type="*widget.menuItem">
+								<text pos="64,8" size="34x19"></text>
+								<image pos="36,7" rsc="settingsIcon" size="iconInlineSize" themed="foreground"/>
+								<image pos="8,7" rsc="confirmIcon" size="iconInlineSize" themed="foreground"/>
+							</widget>
+							<widget pos="0,39" size="106x35" type="*widget.menuItem">
+								<text pos="64,8" size="34x19">Test2</text>
+								<image pos="36,7" rsc="documentIcon" size="iconInlineSize" themed="foreground"/>
+							</widget>
+						</container>
+					</widget>
+				</widget>
+			</widget>
+		</widget>
+	</overlay>
+</canvas>
