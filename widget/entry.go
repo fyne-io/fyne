@@ -300,9 +300,14 @@ func (e *Entry) DragEnd() {
 
 // Dragged is called when the pointer moves while a button is held down.
 // It updates the selection accordingly.
+// On mobile a drag is reserved for scrolling, so it never changes the selection.
 func (e *Entry) Dragged(d *fyne.DragEvent) {
+	if fyne.CurrentDevice().IsMobile() {
+		return
+	}
+
 	d.Position = d.Position.Add(fyne.NewPos(0, e.Theme().Size(theme.SizeNameInputBorder)))
-	e.sel.Dragged(d)
+	e.sel.dragSelect(d)
 	e.updateMousePointer(d.Position, false)
 }
 
@@ -1857,20 +1862,6 @@ func (e *entryContent) CreateRenderer() fyne.WidgetRenderer {
 	r.updateScrollDirections()
 	r.Layout(e.Size())
 	return r
-}
-
-// DragEnd is called at end of a drag event.
-func (e *entryContent) DragEnd() {
-	// we need to propagate the focus, top level widget handles focus APIs
-	e.entry.requestFocus()
-
-	e.entry.DragEnd()
-}
-
-// Dragged is called when the pointer moves while a button is held down.
-// It updates the selection accordingly.
-func (e *entryContent) Dragged(d *fyne.DragEvent) {
-	e.entry.Dragged(d)
 }
 
 var _ fyne.WidgetRenderer = (*entryContentRenderer)(nil)

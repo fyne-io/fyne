@@ -61,19 +61,8 @@ func (s *selectable) DoubleTapped(p *fyne.PointEvent) {
 	s.Refresh()
 }
 
-func (s *selectable) DragEnd() {
-	if s.cursorColumn == s.selectColumn && s.cursorRow == s.selectRow {
-		s.selecting = false
-	}
-
-	shouldRefresh := !s.selecting
-	if shouldRefresh {
-		s.Refresh()
-	}
-	s.selectEnded = true
-}
-
-func (s *selectable) Dragged(d *fyne.DragEvent) {
+// dragSelect extends the selection to follow a pointer drag, starting one if needed.
+func (s *selectable) dragSelect(d *fyne.DragEvent) {
 	if !s.selecting || s.selectEnded {
 		s.selectEnded = false
 		s.updateMousePointer(d.Position)
