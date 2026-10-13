@@ -633,7 +633,7 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 // TouchDown is called when this entry gets a touch down event on mobile device, we ensure we have focus.
 //
 // Since: 2.1
-func (e *Entry) TouchDown(ev *mobile.TouchEvent) {
+func (e *Entry) TouchDown(*mobile.TouchEvent) {
 	e.syncSegments()
 	if !e.Disabled() {
 		e.requestFocus()
