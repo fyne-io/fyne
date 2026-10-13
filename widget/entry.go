@@ -99,6 +99,8 @@ type Entry struct {
 
 	// selectKeyDown indicates whether left shift or right shift is currently held down
 	selectKeyDown bool
+	// tripleTapped records that the current touch selected a row, so the touch up must not move the cursor
+	tripleTapped bool
 
 	sel   *selectable
 	popUp *PopUpMenu
@@ -632,15 +634,27 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 //
 // Since: 2.1
 func (e *Entry) TouchDown(ev *mobile.TouchEvent) {
-	nowUnixMilli := time.Now().UnixMilli()
 	e.syncSegments()
 	if !e.Disabled() {
 		e.requestFocus()
 	}
-	if isTripleTap(e.sel.doubleTappedAtUnixMillis, nowUnixMilli) {
+
+	// a triple tap is timed from the touch down, so it must be detected here rather than on touch up
+	e.tripleTapped = isTripleTap(e.sel.doubleTappedAtUnixMillis, time.Now().UnixMilli())
+	if e.tripleTapped {
 		e.sel.selectCurrentRow(false)
 		e.CursorColumn = e.sel.cursorColumn
 		e.Refresh()
+	}
+}
+
+// TouchUp is called when this entry gets a touch up event on mobile device.
+// This is where a tap places the cursor, as the driver only sends it for a touch that did not scroll.
+//
+// Since: 2.1
+func (e *Entry) TouchUp(ev *mobile.TouchEvent) {
+	if e.tripleTapped {
+		e.tripleTapped = false
 		return
 	}
 
@@ -662,12 +676,6 @@ func (e *Entry) TouchDown(ev *mobile.TouchEvent) {
 	}
 
 	e.updateMousePointer(pos, false)
-}
-
-// TouchUp is called when this entry gets a touch up event on mobile device.
-//
-// Since: 2.1
-func (*Entry) TouchUp(*mobile.TouchEvent) {
 }
 
 // TouchCancel is called when this entry gets a touch cancel event on mobile device (app was removed from focus).
