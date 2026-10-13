@@ -188,7 +188,8 @@ func (p *painter) pushSolidRect(r *canvas.Rectangle, pos fyne.Position, frame fy
 	size := r.Size()
 	x1, x2, y1, y2 := p.scaleRectCoords(
 		roundToPixel(pos.X, p.pixScale), roundToPixel(pos.X+size.Width, p.pixScale),
-		roundToPixel(pos.Y, p.pixScale), roundToPixel(pos.Y+size.Height, p.pixScale))
+		roundToPixel(pos.Y, p.pixScale), roundToPixel(pos.Y+size.Height, p.pixScale),
+	)
 	fw, fh := p.scaleFrameSize(frame)
 	cr, cg, cb, ca := getFragmentColor(r.FillColor)
 	p.pushQuad(paint.GlyphQuad{X1: x1, Y1: y1, X2: x2, Y2: y2, U1: u, V1: v, U2: u, V2: v},
@@ -205,7 +206,8 @@ func (p *painter) pushQuad(q paint.GlyphQuad, col [4]float32, fw, fh float32) {
 	x1, y1 := q.X1/fw*2-1, 1-q.Y1/fh*2
 	x2, y2 := q.X2/fw*2-1, 1-q.Y2/fh*2
 	r, g, b, a := col[0], col[1], col[2], col[3]
-	p.glyphPending = append(p.glyphPending,
+	p.glyphPending = append(
+		p.glyphPending,
 		x1, y1, q.U1, q.V1, r, g, b, a,
 		x2, y1, q.U2, q.V1, r, g, b, a,
 		x1, y2, q.U1, q.V2, r, g, b, a,
