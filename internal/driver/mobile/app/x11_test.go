@@ -122,11 +122,8 @@ func TestX11MouseButtons(t *testing.T) {
 	}{
 		{name: "left", button: x11ButtonLeft, want: []touch.Type{touch.TypeBegin, touch.TypeEnd}},
 		{name: "right", button: x11ButtonRight, want: []touch.Type{touch.TypeBegin, touch.TypeEnd}},
-		// the middle button and the scroll wheel must not be seen as a tap
+		// the middle button and wheel tilt (6 & 7) generate no events. Scrill is in TextS11ScrollWheel.
 		{name: "middle", button: x11ButtonMiddle},
-		{name: "wheel up", button: x11ButtonWheelUp},
-		{name: "wheel down", button: x11ButtonWheelDown},
-		// the wheel tilt buttons 6 and 7 are not supported, no event
 		{name: "wheel tilt left", button: 6},
 		{name: "wheel tilt right", button: 7},
 	}
