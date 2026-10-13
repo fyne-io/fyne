@@ -23,3 +23,7 @@ func (a *fyneApp) storageRoot() string {
 func (p *preferences) watch() {
 	// no-op on mobile
 }
+
+func (p *preferences) ensureWatching() {
+	// no-op on mobile
+}
