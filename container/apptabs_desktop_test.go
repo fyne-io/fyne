@@ -328,3 +328,21 @@ func TestAppTabs_TappedAndDisabled(t *testing.T) {
 	test.TapCanvas(c, fyne.NewPos(186, 10))
 	test.AssertRendersToMarkup(t, "apptabs/desktop/tapped_overflow_tabs_disabled.xml", c)
 }
+
+func TestAppTabs_TappedOverflowWithIcons(t *testing.T) {
+	test.NewTempApp(t)
+
+	item1 := &container.TabItem{Text: "Test1", Content: widget.NewLabel("Text 1")}
+	item2 := &container.TabItem{Text: "Test2", Content: widget.NewLabel("Text 2")}
+	item3 := container.NewTabItemWithIcon("Test3", theme.DocumentIcon(), widget.NewLabel("Text 3"))
+	item4 := container.NewTabItemWithIcon("", theme.SettingsIcon(), widget.NewLabel("Settings"))
+	tabs := container.NewAppTabs(item1, item2, item3, item4)
+	w := test.NewWindow(tabs)
+	defer w.Close()
+	w.SetPadded(false)
+	w.Resize(fyne.NewSize(200, 100))
+	c := w.Canvas()
+
+	test.TapCanvas(c, fyne.NewPos(186, 10))
+	test.AssertRendersToMarkup(t, "apptabs/desktop/tapped_overflow_tabs_icons.xml", c)
+}

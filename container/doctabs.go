@@ -284,7 +284,6 @@ func (r *docTabsRenderer) buildAllTabsButton() (all *widget.Button) {
 		items := make([]*fyne.MenuItem, len(r.docTabs.Items))
 		for i := 0; i < len(r.docTabs.Items); i++ {
 			index := i // capture
-			// FIXME MenuItem doesn't support icons (#1752)
 			items[i] = fyne.NewMenuItem(r.docTabs.Items[i].Text, func() {
 				r.docTabs.SelectIndex(index)
 				if r.docTabs.popUpMenu != nil {
@@ -292,6 +291,7 @@ func (r *docTabsRenderer) buildAllTabsButton() (all *widget.Button) {
 					r.docTabs.popUpMenu = nil
 				}
 			})
+			items[i].Icon = r.docTabs.Items[i].Icon
 			items[i].Checked = index == r.docTabs.current
 		}
 
