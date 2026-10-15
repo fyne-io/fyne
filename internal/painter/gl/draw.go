@@ -927,7 +927,7 @@ func (p *painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size
 	}
 
 	if decorated {
-		_, baseline := cache.GetFontMetrics(text.Text, text.TextSize, text.TextStyle, text.FontSource)
+		_, baseline := cache.GetFontMetrics(text.Text, text.TextSize, text.TextStyle, text.FontSource, cache.WidgetScopeID(text))
 		line := canvas.NewLine(text.Color)
 		line.Resize(fyne.NewSize(size.Width, 0))
 		if text.TextStyle.Underline {
