@@ -273,7 +273,7 @@ func drawText(c fyne.Canvas, text *canvas.Text, pos fyne.Position, base *image.N
 	draw.Draw(base, clippedBounds, txtImg, srcPt, draw.Over)
 
 	if text.TextStyle.Underline || text.TextStyle.Strikethrough {
-		_, baseline := cache.GetFontMetrics(text.Text, text.TextSize, text.TextStyle, text.FontSource)
+		_, baseline := cache.GetFontMetrics(text.Text, text.TextSize, text.TextStyle, text.FontSource, cache.WidgetScopeID(text))
 		line := canvas.NewLine(textColor)
 		line.Resize(fyne.NewSize(bounds.Width, 0))
 		if text.TextStyle.Underline {
