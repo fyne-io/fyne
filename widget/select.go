@@ -98,7 +98,7 @@ func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 		s.PlaceHolder = defaultPlaceHolder()
 	}
 	txtProv := NewRichTextWithText(s.Selected)
-	txtProv.inset = fyne.NewSquareSize(th.Size(theme.SizeNamePadding))
+	txtProv.inset = fyne.NewSquareSize(th.Size(theme.SizeNameInnerPadding) / 2)
 	txtProv.ExtendBaseWidget(txtProv)
 	txtProv.Truncation = fyne.TextTruncateEllipsis
 	if s.Disabled() {
@@ -378,7 +378,7 @@ func (*selectRenderer) Destroy() {}
 // Layout the components of the button widget
 func (s *selectRenderer) Layout(size fyne.Size) {
 	th := s.combo.Theme()
-	pad := th.Size(theme.SizeNamePadding)
+	pad := th.Size(theme.SizeNameInnerPadding) / 2
 	iconSize := th.Size(theme.SizeNameInlineIcon)
 	innerPad := th.Size(theme.SizeNameInnerPadding)
 	s.background.Resize(fyne.NewSize(size.Width, size.Height))
