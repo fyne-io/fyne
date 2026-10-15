@@ -14,6 +14,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/internal/svg"
+	"fyne.io/fyne/v2/lang"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -28,22 +29,24 @@ void        assignDarwinSubmenu(const void*, const void*);
 void        completeDarwinMenu(void* menu, bool prepend);
 const void* createDarwinMenu(const char* label);
 const void* darwinAppMenu();
+const void* darwinMainMenu();
+const void* getNSMenuItemAtIndex(const void*, NSInteger);
+const void* getNSMenuItemSubmenu(const void*);
+NSInteger   getNSMenuNumberOfItems(const void*);
 void        getTextColorRGBA(int* r, int* g, int* b, int* a);
 const void* insertDarwinMenuItem(const void* menu, const char* label, const char* keyEquivalent, unsigned int keyEquivalentModifierMask, int id, int index, bool isSeparator, const void *imageData, unsigned int imageDataLength);
 int         menuFontSize();
 void        resetDarwinMenu();
+void        setNSMenuItemTitle(const void* item, const char* label);
+void        setNSMenuTitle(const void* menu, const char* label);
 
 // Used for tests.
-const void*   test_darwinMainMenu();
-const void*   test_NSMenu_itemAtIndex(const void*, NSInteger);
-NSInteger     test_NSMenu_numberOfItems(const void*);
 void          test_NSMenu_performActionForItemAtIndex(const void*, NSInteger);
 void          test_NSMenu_removeItemAtIndex(const void* m, NSInteger i);
 const char*   test_NSMenu_title(const void*);
 bool          test_NSMenuItem_isSeparatorItem(const void*);
 const char*   test_NSMenuItem_keyEquivalent(const void*);
 unsigned long test_NSMenuItem_keyEquivalentModifierMask(const void*);
-const void*   test_NSMenuItem_submenu(const void*);
 const char*   test_NSMenuItem_title(const void*);
 */
 import "C"
@@ -137,6 +140,10 @@ func createNativeMenu(w *window, menu *fyne.Menu, nextItemID int) (unsafe.Pointe
 	return nsMenu, nextItemID
 }
 
+func darwinMainMenu() unsafe.Pointer {
+	return C.darwinMainMenu()
+}
+
 //export exceptionCallback
 func exceptionCallback(e *C.char) {
 	msg := C.GoString(e)
@@ -144,6 +151,29 @@ func exceptionCallback(e *C.char) {
 		panic("unhandled Obj-C exception: " + msg)
 	}
 	ecb(msg)
+}
+
+func fixDarwinMenuLocalization(menu unsafe.Pointer) {
+	for i := range getNSMenuNumberOfItems(menu) {
+		item := C.getNSMenuItemAtIndex(menu, C.long(i))
+		sub := C.getNSMenuItemSubmenu(item)
+		if getNSMenuNumberOfItems(sub) > 0 {
+			fixDarwinMenuLocalization(sub)
+			label := C.GoString(C.test_NSMenu_title(sub))
+			if len(label) > 0 {
+				C.setNSMenuTitle(sub, C.CString(lang.L(label)))
+			}
+		} else {
+			label := C.GoString(C.test_NSMenuItem_title(item))
+			if len(label) > 0 {
+				C.setNSMenuItemTitle(item, C.CString(lang.L(label)))
+			}
+		}
+	}
+}
+
+func getNSMenuNumberOfItems(m unsafe.Pointer) int {
+	return int(C.getNSMenuNumberOfItems(m))
 }
 
 func handleSpecialItems(w *window, menu *fyne.Menu, nextItemID int, addSeparator bool) (*fyne.Menu, int) {
@@ -313,6 +343,8 @@ func setupNativeMenu(w *window, main *fyne.MainMenu) {
 	if helpMenu != nil {
 		addNativeMenu(w, helpMenu, nextItemID, false)
 	}
+	mainMenu := darwinMainMenu()
+	fixDarwinMenuLocalization(mainMenu)
 }
 
 //
@@ -321,15 +353,15 @@ func setupNativeMenu(w *window, main *fyne.MainMenu) {
 //
 
 func testDarwinMainMenu() unsafe.Pointer {
-	return C.test_darwinMainMenu()
+	return C.darwinMainMenu()
 }
 
 func testNSMenuItemAtIndex(m unsafe.Pointer, i int) unsafe.Pointer {
-	return C.test_NSMenu_itemAtIndex(m, C.long(i))
+	return C.getNSMenuItemAtIndex(m, C.long(i))
 }
 
 func testNSMenuNumberOfItems(m unsafe.Pointer) int {
-	return int(C.test_NSMenu_numberOfItems(m))
+	return int(C.getNSMenuNumberOfItems(m))
 }
 
 func testNSMenuPerformActionForItemAtIndex(m unsafe.Pointer, i int) {
@@ -357,7 +389,7 @@ func testNSMenuItemKeyEquivalentModifierMask(i unsafe.Pointer) uint64 {
 }
 
 func testNSMenuItemSubmenu(i unsafe.Pointer) unsafe.Pointer {
-	return C.test_NSMenuItem_submenu(i)
+	return C.getNSMenuItemSubmenu(i)
 }
 
 func testNSMenuItemTitle(i unsafe.Pointer) string {
