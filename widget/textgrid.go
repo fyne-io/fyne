@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/async"
+	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
@@ -694,6 +695,7 @@ func (t *textGridRow) appendTextCell(str rune) {
 
 	bg := canvas.NewRectangle(color.Transparent)
 
+	cache.OverrideThemeMatchingScope(text, t.text.text)
 	t.objects = append(t.objects, bg, text)
 }
 

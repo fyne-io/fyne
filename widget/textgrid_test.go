@@ -11,7 +11,9 @@ import (
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 
+	"fyne.io/fyne/v2/internal/cache"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewTextGrid(t *testing.T) {
@@ -489,4 +491,25 @@ func assertGridStyle(t *testing.T, g *TextGrid, content string, expectedStyles m
 func rendererCell(r *textGridRowRenderer, col int) (*canvas.Rectangle, *canvas.Text) {
 	i := col * 2
 	return r.obj.objects[i].(*canvas.Rectangle), r.obj.objects[i+1].(*canvas.Text)
+}
+
+func TestTextGrid_NewCellsInTheOverrideScope(t *testing.T) {
+	test.NewTempApp(t)
+	grid := NewTextGridFromString("a")
+	cache.OverrideTheme(grid, test.Theme())
+	w := test.NewTempWindow(t, grid)
+	w.Resize(fyne.NewSize(400, 300))
+	grid.SetText(strings.Repeat("longer row of text\n", 8))
+	scope := cache.WidgetScopeID(grid)
+	require.NotEmpty(t, scope)
+	cells := 0
+	for _, r := range grid.content.visible {
+		for _, o := range r.(*textGridRow).objects {
+			if txt, ok := o.(*canvas.Text); ok {
+				cells++
+				assert.Equal(t, scope, cache.WidgetScopeID(txt), "cell %q", txt.Text)
+			}
+		}
+	}
+	assert.Greater(t, cells, 50)
 }
