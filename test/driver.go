@@ -157,3 +157,8 @@ func (d *driver) DoubleTapDelay() time.Duration {
 func (d *driver) SetDisableScreenBlanking(_ bool) {
 	// no-op for test
 }
+
+// RenderedTextSizeFor measures text in the fonts of the theme scope o is in.
+func (*driver) RenderedTextSizeFor(o fyne.CanvasObject, text string, textSize float32, style fyne.TextStyle, source fyne.Resource) (fyne.Size, float32) {
+	return painter.RenderedTextSizeFor(o, text, textSize, style, source)
+}

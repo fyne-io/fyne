@@ -37,10 +37,19 @@ func (t *Text) Hide() {
 	repaint(t)
 }
 
+type scopedTextMeasurer interface {
+	RenderedTextSizeFor(fyne.CanvasObject, string, float32, fyne.TextStyle, fyne.Resource) (fyne.Size, float32)
+}
+
 // MinSize returns the minimum size of this text object based on its font size and content.
 // This is normally determined by the render implementation.
 func (t *Text) MinSize() fyne.Size {
-	s, _ := fyne.CurrentApp().Driver().RenderedTextSize(t.Text, t.TextSize, t.TextStyle, t.FontSource)
+	d := fyne.CurrentApp().Driver()
+	if scoped, ok := d.(scopedTextMeasurer); ok {
+		s, _ := scoped.RenderedTextSizeFor(t, t.Text, t.TextSize, t.TextStyle, t.FontSource)
+		return s
+	}
+	s, _ := d.RenderedTextSize(t.Text, t.TextSize, t.TextStyle, t.FontSource)
 	return s
 }
 

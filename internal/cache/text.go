@@ -21,6 +21,7 @@ type fontSizeEntry struct {
 	Size   float32
 	Style  fyne.TextStyle
 	Source string
+	Scope  string
 }
 
 type FontCacheEntry struct {
@@ -31,12 +32,13 @@ type FontCacheEntry struct {
 }
 
 // GetFontMetrics looks up a calculated size and baseline required for the specified text parameters.
-func GetFontMetrics(text string, fontSize float32, style fyne.TextStyle, source fyne.Resource) (size fyne.Size, base float32) {
+func GetFontMetrics(text string, fontSize float32, style fyne.TextStyle, source fyne.Resource, scope string) (size fyne.Size, base float32) {
 	name := ""
 	if source != nil {
 		name = source.Name()
+		scope = ""
 	}
-	ent := fontSizeEntry{text, fontSize, style, name}
+	ent := fontSizeEntry{text, fontSize, style, name, scope}
 	ret, ok := fontSizeCache.Load(ent)
 	if !ok {
 		return fyne.Size{Width: 0, Height: 0}, 0
@@ -46,12 +48,13 @@ func GetFontMetrics(text string, fontSize float32, style fyne.TextStyle, source 
 }
 
 // SetFontMetrics stores a calculated font size and baseline for parameters that were missing from the cache.
-func SetFontMetrics(text string, fontSize float32, style fyne.TextStyle, source fyne.Resource, size fyne.Size, base float32) {
+func SetFontMetrics(text string, fontSize float32, style fyne.TextStyle, source fyne.Resource, scope string, size fyne.Size, base float32) {
 	name := ""
 	if source != nil {
 		name = source.Name()
+		scope = ""
 	}
-	ent := fontSizeEntry{text, fontSize, style, name}
+	ent := fontSizeEntry{text, fontSize, style, name, scope}
 	metric := &fontMetric{size: size, baseLine: base}
 	metric.setAlive()
 	fontSizeCache.Store(ent, metric)
