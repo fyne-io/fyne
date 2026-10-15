@@ -125,6 +125,26 @@ func TestTextTextureWindow(t *testing.T) {
 	assert.False(t, cached.covers(7200, 400, 40, 1))
 }
 
+func TestShaderFrameSize(t *testing.T) {
+	frame := fyne.NewSize(400, 300)
+
+	p := &painter{pixScale: 1.0}
+	// without a known drawable size, fall back to the canvas height
+	w, h := p.shaderFrameSize(frame)
+	assert.Equal(t, float32(400), w)
+	assert.Equal(t, float32(300), h)
+
+	// the height follows the drawable, which may differ from the canvas while
+	// a resize is catching up
+	p.fbHeight = 500
+	_, h = p.shaderFrameSize(frame)
+	assert.Equal(t, float32(500), h)
+
+	p.fbHeight = 200
+	_, h = p.shaderFrameSize(frame)
+	assert.Equal(t, float32(200), h)
+}
+
 func TestVecRectCoordsWithPad_Shadow(t *testing.T) {
 	p := &painter{pixScale: 1.0}
 	rect := &canvas.Rectangle{}
