@@ -364,3 +364,19 @@ func TestDocTabs_Tapped(t *testing.T) {
 	test.TapCanvas(c, fyne.NewPos(286, 10))
 	test.AssertRendersToMarkup(t, "doctabs/desktop/tapped_all_tabs.xml", c)
 }
+
+func TestDocTabs_TappedAllTabsWithIcons(t *testing.T) {
+	test.NewTempApp(t)
+
+	item1 := container.NewTabItemWithIcon("", theme.SettingsIcon(), widget.NewLabel("Settings"))
+	item2 := container.NewTabItemWithIcon("Test2", theme.DocumentIcon(), widget.NewLabel("Text 2"))
+	tabs := container.NewDocTabs(item1, item2)
+	w := test.NewWindow(tabs)
+	defer w.Close()
+	w.SetPadded(false)
+	w.Resize(fyne.NewSize(300, 100))
+	c := w.Canvas()
+
+	test.TapCanvas(c, fyne.NewPos(286, 10))
+	test.AssertRendersToMarkup(t, "doctabs/desktop/tapped_all_tabs_icons.xml", c)
+}

@@ -702,3 +702,36 @@ func assertImageMatchesPlatform(t *testing.T, file string, i image.Image) {
 	path := fmt.Sprintf(file, platform)
 	test.AssertImageMatches(t, path, i)
 }
+
+// paddedTheme is the default theme with padding and inner padding set
+// independently, as an app theme may, so the two cannot be assumed to be in
+// their default ratio.
+type paddedTheme struct {
+	fyne.Theme
+	padding, innerPadding float32
+}
+
+func (p *paddedTheme) Size(n fyne.ThemeSizeName) float32 {
+	switch n {
+	case theme.SizeNamePadding:
+		return p.padding
+	case theme.SizeNameInnerPadding:
+		return p.innerPadding
+	}
+	return p.Theme.Size(n)
+}
+
+func TestSelect_MinSize_MatchesEntryUnderAnyPadding(t *testing.T) {
+	app := test.NewTempApp(t)
+	for _, tt := range []struct{ padding, innerPadding float32 }{
+		{4, 8}, {8, 6}, {2, 12}, {10, 10},
+	} {
+		app.Settings().SetTheme(&paddedTheme{theme.DefaultTheme(), tt.padding, tt.innerPadding})
+		sel := widget.NewSelect([]string{"Option"}, nil)
+		entry := widget.NewEntry()
+		if got, want := sel.MinSize().Height, entry.MinSize().Height; got != want {
+			t.Errorf("padding %v, innerPadding %v: select height %v, want %v to match an entry",
+				tt.padding, tt.innerPadding, got, want)
+		}
+	}
+}

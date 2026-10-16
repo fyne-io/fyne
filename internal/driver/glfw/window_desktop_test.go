@@ -103,6 +103,45 @@ func TestConvertASCII(t *testing.T) {
 	assert.Equal(t, fyne.KeyUnknown, invalid)
 }
 
+func TestDesktopModifierCorrected(t *testing.T) {
+	for _, tt := range []struct {
+		name     string
+		key      glfw.Key
+		modifier glfw.ModifierKey
+		want     fyne.KeyModifier
+	}{
+		{"left control", glfw.KeyLeftControl, glfw.ModControl, fyne.KeyModifierControl},
+		{"right control", glfw.KeyRightControl, glfw.ModControl, fyne.KeyModifierControl},
+		{"left shift", glfw.KeyLeftShift, glfw.ModShift, fyne.KeyModifierShift},
+		{"right shift", glfw.KeyRightShift, glfw.ModShift, fyne.KeyModifierShift},
+		{"left alt", glfw.KeyLeftAlt, glfw.ModAlt, fyne.KeyModifierAlt},
+		{"right alt", glfw.KeyRightAlt, glfw.ModAlt, fyne.KeyModifierAlt},
+		{"left super", glfw.KeyLeftSuper, glfw.ModSuper, fyne.KeyModifierSuper},
+		{"right super", glfw.KeyRightSuper, glfw.ModSuper, fyne.KeyModifierSuper},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.want, desktopModifierCorrected(0, tt.key, glfw.Press))
+			assert.Equal(t, tt.want, desktopModifierCorrected(tt.modifier, tt.key, glfw.Press))
+			assert.Equal(t, tt.want, desktopModifierCorrected(tt.modifier, tt.key, glfw.Repeat))
+			assert.Equal(t, fyne.KeyModifier(0), desktopModifierCorrected(0, tt.key, glfw.Release))
+			assert.Equal(t, fyne.KeyModifier(0), desktopModifierCorrected(tt.modifier, tt.key, glfw.Release))
+
+			allModifiers := glfw.ModControl | glfw.ModShift | glfw.ModAlt | glfw.ModSuper
+			allWant := fyne.KeyModifierControl | fyne.KeyModifierShift | fyne.KeyModifierAlt | fyne.KeyModifierSuper
+			assert.Equal(t, allWant, desktopModifierCorrected(allModifiers&^tt.modifier, tt.key, glfw.Press))
+			assert.Equal(t, allWant, desktopModifierCorrected(allModifiers, tt.key, glfw.Repeat))
+			assert.Equal(t, allWant&^tt.want, desktopModifierCorrected(allModifiers, tt.key, glfw.Release))
+		})
+	}
+}
+
+func TestDesktopModifierCorrected_NonModifierKey(t *testing.T) {
+	for _, action := range []glfw.Action{glfw.Press, glfw.Repeat, glfw.Release} {
+		assert.Equal(t, fyne.KeyModifierControl|fyne.KeyModifierShift,
+			desktopModifierCorrected(glfw.ModControl|glfw.ModShift, glfw.KeySpace, action))
+	}
+}
+
 var keyNameMapSpecialCharacters = map[string]fyne.KeyName{
 	"'": fyne.KeyApostrophe,
 	",": fyne.KeyComma,
