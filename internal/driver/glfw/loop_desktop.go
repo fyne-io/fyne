@@ -16,7 +16,7 @@ const (
 	platformWayland = "wayland"
 )
 
-func (*gLDriver) initGLFW() {
+func (*gLDriver) initGLFW() error {
 	switch forcePlatform() {
 	case platformX11:
 		glfw.InitHint(glfw.PlatformHint, int(glfw.PlatformX11))
@@ -26,16 +26,20 @@ func (*gLDriver) initGLFW() {
 	err := glfw.Init()
 	if err != nil {
 		fyne.LogError("failed to initialise GLFW", err)
-		return
+		return err
 	}
 
 	initCursors()
 	if glfw.GetPlatform() == glfw.PlatformWayland {
 		build.IsWayland = true
 	}
+	return nil
 }
 
-func (*gLDriver) pollEvents() {
+func (d *gLDriver) pollEvents() {
+	if d.skipPollForDRM() {
+		return
+	}
 	glfw.PollEvents() // This call blocks while window is being resized, which prevents freeDirtyTextures from being called
 }
 
