@@ -64,6 +64,7 @@ type Button struct {
 
 	OnTapped func() `json:"-"`
 
+	cornerRadius     float32
 	hovered, focused bool
 	tapAnim          *fyne.Animation
 	isAnimating      bool
@@ -88,6 +89,19 @@ func NewButtonWithIcon(label string, icon fyne.Resource, tapped func()) *Button 
 		OnTapped: tapped,
 	}
 
+	button.ExtendBaseWidget(button)
+	return button
+}
+
+// NewCircularButton creates a new button widget with the themed icon and tap handler.
+// The button will have a maximal corner radius which results in a circular button for square icons.
+// Since: 2.9
+func NewCircularButton(icon fyne.Resource, tapped func()) *Button {
+	button := &Button{
+		cornerRadius: canvas.RadiusMaximum,
+		Icon:         icon,
+		OnTapped:     tapped,
+	}
 	button.ExtendBaseWidget(button)
 	return button
 }
@@ -122,7 +136,6 @@ func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 	text.inset = fyne.NewSquareSize(th.Size(theme.SizeNameInnerPadding))
 
 	background := canvas.NewRectangle(th.Color(theme.ColorNameButton, v))
-	background.CornerRadius = th.Size(theme.SizeNameButtonRadius)
 	tapBG := canvas.NewRectangle(color.Transparent)
 	b.tapAnim = newButtonTapAnimation(tapBG, b, th)
 	b.tapAnim.Curve = fyne.AnimationEaseOut
@@ -348,7 +361,13 @@ func (r *buttonRenderer) applyTheme() {
 			bgColor = blendColor(bgColor, th.Color(bgBlendName, v))
 		}
 		bg.FillColor = bgColor
-		bg.CornerRadius = th.Size(theme.SizeNameButtonRadius)
+		var cornerRadius float32
+		if r.button.cornerRadius != 0 {
+			cornerRadius = r.button.cornerRadius
+		} else {
+			cornerRadius = th.Size(theme.SizeNameButtonRadius)
+		}
+		r.background.CornerRadius = cornerRadius
 		bg.Refresh()
 	}
 
