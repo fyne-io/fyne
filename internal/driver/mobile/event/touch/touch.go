@@ -29,6 +29,11 @@ type Event struct {
 
 	// Type is the touch type.
 	Type Type
+
+	// Precise is true when the contact reports an exact point, such as a
+	// stylus, eraser, mouse, or pencil. The zero value is false, so finger
+	// and unknown input keep the existing finger compensation.
+	Precise bool
 }
 
 // Sequence identifies a sequence of touch events.
