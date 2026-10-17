@@ -55,9 +55,10 @@ type painter struct {
 	clippedTextTextures map[*canvas.Text]clippedTextTexture
 	contextProvider     driver.WithContext
 	ctx                 context
-	fbHeight            int       // current framebuffer height in pixels
-	glyphPending        []float32 // queued batch vertices, glyphVertexFloats each
-	linePending         []float32 // queued line vertices, lineVertexFloats each
+	fbHeight            int                           // current framebuffer height in pixels
+	glyphPending        []float32                     // queued batch vertices, glyphVertexFloats each
+	imageSizes          map[*canvas.Image]image.Point // pixel size each image texture was uploaded at
+	linePending         []float32                     // queued line vertices, lineVertexFloats each
 	maxTextureSize      int
 	pixScale            float32 // pre-calculate scale*texScale for each draw
 	programs            *programs
@@ -65,6 +66,7 @@ type painter struct {
 	shaderPrograms      map[string]*shaderState // lazily compiled programs for user shaders, keyed by Shader.Name
 	stats               drawStats               // FYNE_GL_DEBUG counters
 	texScale            float32
+	pixels              []uint8   // updateImageTexture's upload buffer, reused
 	vertices            []float32 // updateBuffer's upload buffer, reused
 }
 
