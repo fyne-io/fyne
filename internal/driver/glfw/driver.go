@@ -10,6 +10,7 @@ import (
 	"image/png"
 	"os"
 	"runtime"
+	"sync/atomic"
 
 	"github.com/fyne-io/image/ico"
 
@@ -40,6 +41,10 @@ type gLDriver struct {
 	windows     []fyne.Window
 	initialized bool
 	done        chan struct{}
+
+	// quitBeforeRun records a Quit that came before the event loop started,
+	// so that Run returns instead of starting a loop that nothing would stop.
+	quitBeforeRun atomic.Bool
 
 	animation animation.Runner
 
@@ -105,7 +110,14 @@ func (d *gLDriver) Quit() {
 	// Only call close once to avoid panic.
 	if running.CompareAndSwap(true, false) {
 		close(d.done)
+		return
 	}
+
+	// The loop has not started yet, so there is nothing to close. Remember
+	// the request so that Run returns at once: initFailed quits this way when
+	// a window cannot be created before Run, and the loop would otherwise run
+	// forever with no window.
+	d.quitBeforeRun.Store(true)
 }
 
 func (*gLDriver) RenderedTextSize(text string, textSize float32, style fyne.TextStyle, source fyne.Resource) (size fyne.Size, baseline float32) {
@@ -118,7 +130,11 @@ func (d *gLDriver) Run() {
 	}
 
 	go d.catchTerm()
-	d.runGL()
+	if d.runGL() {
+		// Quit came before Run: no loop ran, and none will process the
+		// lifecycle's events, so there is nothing to wait for.
+		return
+	}
 
 	// Ensure lifecycle events run to completion before the app exits
 	l, _ := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle)
