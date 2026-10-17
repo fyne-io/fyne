@@ -324,6 +324,7 @@ func (c *canvas) tapMove(pos fyne.Position, tapID int,
 	ev := &fyne.DragEvent{}
 	draggedObjDelta := c.dragStart.Subtract(c.dragging.(fyne.CanvasObject).Position())
 	ev.Position = pos.Subtract(c.dragOffset).Add(draggedObjDelta)
+	ev.AbsolutePosition = pos
 	ev.Dragged = offset
 
 	dragCallback(c.dragging, ev)
