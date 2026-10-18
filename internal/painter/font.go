@@ -640,13 +640,21 @@ func (c cjkFontMap) ResolveFace(r rune) *font.Face {
 	return c.dynamicFontMap.ResolveFace(r)
 }
 
+const (
+	hangulJamoStart   = 0x1100 // the first CJK block, Hangul Jamo
+	cjkSymbolsStart   = 0x3000
+	cjkSymbolsEnd     = 0x303f
+	fullwidthFormsLow = 0xff00
+	fullwidthFormsHi  = 0xffef
+)
+
 // isCJK reports whether r is a Han, Hiragana, Katakana or Hangul letter, or CJK punctuation.
 func isCJK(r rune) bool {
-	if r < 0x1100 { // before Hangul Jamo, the first of them
+	if r < hangulJamoStart {
 		return false
 	}
 	return unicode.In(r, unicode.Han, unicode.Hiragana, unicode.Katakana, unicode.Hangul) ||
-		r >= 0x3000 && r <= 0x303f || r >= 0xff00 && r <= 0xffef
+		r >= cjkSymbolsStart && r <= cjkSymbolsEnd || r >= fullwidthFormsLow && r <= fullwidthFormsHi
 }
 
 type FontCacheItem struct {
