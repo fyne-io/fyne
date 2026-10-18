@@ -125,7 +125,7 @@ func (t *TextGrid) CursorLocationForPosition(p fyne.Position) (row, col int) {
 //
 // Since: 2.7
 func (t *TextGrid) ScrollToTop() {
-	if t.scroller.Offset == (fyne.Position{}) {
+	if t.scroller.Offset.IsZero() {
 		return
 	}
 
