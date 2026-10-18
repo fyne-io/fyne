@@ -140,6 +140,20 @@ func TestTextGrid_ScrollToBottom(t *testing.T) {
 	test.AssertObjectRendersToMarkup(t, "textgrid/scroll.xml", scrolling)
 }
 
+func TestTextGrid_ScrollToBottom_AfterAppend(t *testing.T) {
+	grid := NewTextGridFromString("Something\nElse")
+	grid.Scroll = widget.ScrollVerticalOnly
+	grid.Resize(fyne.NewSize(50, 20))
+	grid.Refresh()
+
+	grid.Append("More\nAnd more\nAnd even more")
+	rowHeight := grid.content.cellSize.Height
+	assert.Equal(t, rowHeight*5, grid.scroller.Content.Size().Height, "appended rows should be measured by the scroller")
+
+	grid.ScrollToBottom()
+	assert.Equal(t, rowHeight*5-20, grid.scroller.Offset.Y, "should scroll to the newly appended bottom")
+}
+
 func TestTextGrid_CreateRendererRows(t *testing.T) {
 	grid := NewTextGrid()
 	grid.Resize(fyne.NewSize(52, 22))
