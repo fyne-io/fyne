@@ -163,7 +163,7 @@ func (p *painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyn
 	// Vertex: END
 
 	// Fragment: BEG
-	frameWidthScaled, frameHeightScaled := p.scaleFrameSize(frame)
+	frameWidthScaled, frameHeightScaled := p.shaderFrameSize(frame)
 	p.SetUniform2f(program, "frame", frameWidthScaled, frameHeightScaled)
 
 	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(bounds[0], bounds[2], bounds[1], bounds[3])
@@ -261,7 +261,7 @@ func (p *painter) drawBezierCurve(bezierCurve *canvas.BezierCurve, pos fyne.Posi
 	// Vertex: END
 
 	// Fragment: BEG
-	frameWidthScaled, frameHeightScaled := p.scaleFrameSize(frame)
+	frameWidthScaled, frameHeightScaled := p.shaderFrameSize(frame)
 	p.SetUniform2f(program, "frame", frameWidthScaled, frameHeightScaled)
 
 	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(bounds[0], bounds[2], bounds[1], bounds[3])
@@ -326,7 +326,7 @@ func (p *painter) drawArbitraryPolygon(polygon *canvas.ArbitraryPolygon, pos fyn
 	// Vertex: END
 
 	// Fragment: BEG
-	frameWidthScaled, frameHeightScaled := p.scaleFrameSize(frame)
+	frameWidthScaled, frameHeightScaled := p.shaderFrameSize(frame)
 	p.SetUniform2f(program, "frame", frameWidthScaled, frameHeightScaled)
 
 	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(bounds[0], bounds[2], bounds[1], bounds[3])
@@ -479,7 +479,7 @@ func (p *painter) drawShader(shader *canvas.Shader, pos fyne.Position, frame fyn
 	// Vertex: END
 
 	// Fragment: BEG - the standard uniform contract shared with the built in vector shaders
-	frameWidthScaled, frameHeightScaled := p.scaleFrameSize(frame)
+	frameWidthScaled, frameHeightScaled := p.shaderFrameSize(frame)
 	p.SetUniform2f(program, "frame", frameWidthScaled, frameHeightScaled)
 
 	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(bounds[0], bounds[2], bounds[1], bounds[3])
@@ -567,7 +567,7 @@ func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, st
 	// Vertex: END
 
 	// Fragment: BEG
-	frameWidthScaled, frameHeightScaled := p.scaleFrameSize(frame)
+	frameWidthScaled, frameHeightScaled := p.shaderFrameSize(frame)
 	p.SetUniform2f(program, "frame", frameWidthScaled, frameHeightScaled)
 
 	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(bounds[0], bounds[2], bounds[1], bounds[3])
@@ -655,7 +655,7 @@ func (p *painter) drawPolygon(polygon *canvas.RegularPolygon, pos fyne.Position,
 	// Vertex: END
 
 	// Fragment: BEG
-	frameWidthScaled, frameHeightScaled := p.scaleFrameSize(frame)
+	frameWidthScaled, frameHeightScaled := p.shaderFrameSize(frame)
 	p.SetUniform2f(program, "frame", frameWidthScaled, frameHeightScaled)
 
 	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(bounds[0], bounds[2], bounds[1], bounds[3])
@@ -713,7 +713,7 @@ func (p *painter) drawArc(arc *canvas.Arc, pos fyne.Position, frame fyne.Size) {
 	// Vertex: END
 
 	// Fragment: BEG
-	frameWidthScaled, frameHeightScaled := p.scaleFrameSize(frame)
+	frameWidthScaled, frameHeightScaled := p.shaderFrameSize(frame)
 	p.SetUniform2f(program, "frame", frameWidthScaled, frameHeightScaled)
 
 	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(bounds[0], bounds[2], bounds[1], bounds[3])
@@ -788,7 +788,7 @@ func (p *painter) drawEllipse(ellipse *canvas.Ellipse, pos fyne.Position, frame 
 	// Vertex: END
 
 	// Fragment: BEG
-	frameWidthScaled, frameHeightScaled := p.scaleFrameSize(frame)
+	frameWidthScaled, frameHeightScaled := p.shaderFrameSize(frame)
 	p.SetUniform2f(program, "frame", frameWidthScaled, frameHeightScaled)
 
 	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(bounds[0], bounds[2], bounds[1], bounds[3])
@@ -1197,6 +1197,18 @@ func (p *painter) scaleFrameSize(frame fyne.Size) (float32, float32) {
 	frameWidthScaled := roundToPixel(frame.Width*p.pixScale, 1.0)
 	frameHeightScaled := roundToPixel(frame.Height*p.pixScale, 1.0)
 	return frameWidthScaled, frameHeightScaled
+}
+
+// shaderFrameSize returns the frame size passed to the shapes' fragment
+// shaders. They position fragments from gl_FragCoord, which is relative to the
+// drawable, so the height has to be the drawable height - the canvas height
+// only matches when the viewport fills the drawable.
+func (p *painter) shaderFrameSize(frame fyne.Size) (width, height float32) {
+	width = roundToPixel(frame.Width*p.pixScale, 1.0)
+	if p.fbHeight > 0 {
+		return width, float32(p.fbHeight)
+	}
+	return width, roundToPixel(frame.Height*p.pixScale, 1.0)
 }
 
 // Returns scaled RectCoords(x1,x2,y1,y2) in same order
