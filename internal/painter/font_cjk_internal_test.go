@@ -17,7 +17,9 @@ import (
 // han_partial.ttf has some Han runes and lacks others that han_full.ttf has,
 // the way a Japanese font lacks some simplified Chinese runes. Both were made
 // with fontTools, one box glyph for every rune of a format 13 cmap.
-func useHanFonts(t *testing.T) {
+// han_other.ttf has only the three that han_partial.ttf lacks and han_full.ttf
+// has, so no font of the pair han_partial.ttf and han_other.ttf has them all.
+func useHanFonts(t *testing.T, names ...string) {
 	t.Helper()
 
 	fontScanLock.Lock()
@@ -30,7 +32,10 @@ func useHanFonts(t *testing.T) {
 		fontScanLock.Unlock()
 	})
 
-	for _, name := range []string{"han_partial.ttf", "han_full.ttf"} {
+	if len(names) == 0 {
+		names = []string{"han_partial.ttf", "han_full.ttf"}
+	}
+	for _, name := range names {
 		f, err := os.Open("testdata/font/" + name)
 		require.NoError(t, err)
 		require.NoError(t, fm.AddFont(f, name, ""))
@@ -78,4 +83,14 @@ func TestShapeString_CJKFontOfTheMapIsKept(t *testing.T) {
 	// the font set up with the map draws 首, so the string is not moved to han_full.ttf
 	families := shapedFamilies(t, "首页基础", partial)
 	assert.Equal(t, "Han Partial", families[0])
+}
+
+func TestShapeString_CJKNoFontHasAll(t *testing.T) {
+	useHanFonts(t, "han_partial.ttf", "han_other.ttf")
+
+	// 首 and 基 are only in han_partial.ttf, 页 and 础 only in han_other.ttf, so
+	// each rune keeps the font it is found in
+	assert.Equal(t, []string{"Han Partial", "Han Other", "Han Partial", "Han Other"}, shapedFamilies(t, "首页基础"))
+	// a string that one of them has all of is still drawn by it
+	assert.Equal(t, []string{"Han Other"}, shapedFamilies(t, "页础镜"))
 }
