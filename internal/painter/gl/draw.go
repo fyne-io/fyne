@@ -274,6 +274,9 @@ func (p *painter) drawGradient(o fyne.CanvasObject, texCreator func(fyne.CanvasO
 }
 
 func (p *painter) drawImage(img *canvas.Image, pos fyne.Position, frame fyne.Size) {
+	if dirty := cache.TakeTextureDirty(img); !dirty.Empty() && !p.updateImageTexture(img, dirty) {
+		p.freeTexture(img) // so that all of its pixels are uploaded again
+	}
 	p.drawTextureWithDetails(img, p.newGlImageTexture, pos, img.Size(), frame, img.FillMode, float32(img.Alpha()), 0)
 }
 
