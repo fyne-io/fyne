@@ -694,11 +694,14 @@ func (d *dynamicFontMap) ResolveFace(r rune) *font.Face {
 	return d.faces[0]
 }
 
-// pinCJK returns the font map to shape text with. Fallback fonts are found one
-// rune at a time, so a font with only some of the CJK runes can take some of a
-// string and another font the rest. If that happens this pins all of them to
-// the first font used that has every one. Text a font set up with the map draws
-// is left to it, as is text no font covers.
+// pinCJK returns the font map to shape text with. The CJK runes of text are
+// resolved to a font each. If that gives more than one font, the map returned
+// draws all of them with the first of those fonts that has every one of them,
+// so a string is not split between fonts of different regional forms.
+//
+// d itself is returned, and each rune keeps the font it resolves to, if the
+// runes come from one font, if one of them is drawn by a font set up with the
+// map, or if no single font has them all. Runes that no font has are ignored.
 func (d *dynamicFontMap) pinCJK(text []rune) shaping.Fontmap {
 	var used []*font.Face
 	var cjk []rune
