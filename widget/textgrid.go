@@ -125,16 +125,23 @@ func (t *TextGrid) CursorLocationForPosition(p fyne.Position) (row, col int) {
 //
 // Since: 2.7
 func (t *TextGrid) ScrollToTop() {
+	if t.scroller.Offset == (fyne.Position{}) {
+		return
+	}
+
 	t.scroller.ScrollToTop()
-	t.Refresh()
+	// setting the offset directly does not notify the scroller's listener, so update the rows ourselves
+	if f := t.scroller.OnScrolled; f != nil {
+		f(t.scroller.Offset)
+	}
 }
 
 // ScrollToBottom will scroll content to container bottom - to show latest info which end user just added
 //
 // Since: 2.7
 func (t *TextGrid) ScrollToBottom() {
+	t.Refresh() // make sure any new rows have been measured before we look for the bottom
 	t.scroller.ScrollToBottom()
-	t.Refresh()
 }
 
 // PositionForCursorLocation returns the relative position in this TextGrid for the cell at position row, col.
@@ -490,7 +497,13 @@ func (t *textGridRenderer) Refresh() {
 	}
 
 	canvas.Refresh(t.text.text.super())
-	t.text.Refresh()
+	if t.text.text.Scroll == widget.ScrollNone {
+		t.text.Refresh()
+		return
+	}
+
+	// the scroller will resize our content if the rows have changed, then refresh it
+	t.scroll.Refresh()
 }
 
 type textGridContent struct {
