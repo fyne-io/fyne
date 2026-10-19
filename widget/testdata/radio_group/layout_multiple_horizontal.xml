@@ -1,18 +1,22 @@
-<canvas padded size="162x200">
+<canvas padded size="194x200">
 	<content>
-		<container pos="4,4" size="154x192">
-			<widget pos="-4,78" size="162x35" type="*widget.RadioGroup">
-				<widget size="81x35" type="*widget.radioItem">
-					<circle pos="2,3" size="28x28"/>
-					<image pos="6,7" rsc="radioButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
-					<image pos="6,7" rsc="radioButtonIcon" size="iconInlineSize" themed="inputBorder"/>
-					<text pos="32,0" size="81x35">Foo</text>
+		<container pos="4,4" size="186x192">
+			<widget pos="-4,70" size="194x51" type="*widget.RadioGroup">
+				<widget size="97x51" type="*widget.radioItem">
+					<circle pos="2,11" size="28x28"/>
+					<image pos="6,15" rsc="radioButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+					<image pos="6,15" rsc="radioButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+					<widget pos="32,0" size="77x31" type="*widget.RichText">
+						<text pos="8,8" size="24x19">Foo</text>
+					</widget>
 				</widget>
-				<widget pos="81,0" size="81x35" type="*widget.radioItem">
-					<circle pos="2,3" size="28x28"/>
-					<image pos="6,7" rsc="radioButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
-					<image pos="6,7" rsc="radioButtonIcon" size="iconInlineSize" themed="inputBorder"/>
-					<text pos="32,0" size="81x35">Barley</text>
+				<widget pos="97,0" size="97x51" type="*widget.radioItem">
+					<circle pos="2,11" size="28x28"/>
+					<image pos="6,15" rsc="radioButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+					<image pos="6,15" rsc="radioButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+					<widget pos="32,0" size="77x31" type="*widget.RichText">
+						<text pos="8,8" size="41x19">Barley</text>
+					</widget>
 				</widget>
 			</widget>
 		</container>
