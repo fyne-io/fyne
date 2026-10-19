@@ -8,6 +8,7 @@ import (
 	"slices"
 	"strings"
 	"sync"
+	"unicode"
 
 	"github.com/go-text/render"
 	"github.com/go-text/typesetting/di"
@@ -114,6 +115,7 @@ func lookupFaces(t, fallback fyne.Resource, additional []fyne.Resource, family s
 	if local != nil {
 		faces.addFace(local)
 	}
+	faces.fixed = len(faces.faces)
 
 	return faces
 }
@@ -127,7 +129,7 @@ func CachedFontFace(style fyne.TextStyle, source fyne.Resource, o fyne.CanvasObj
 			if face == nil {
 				face = loadMeasureFont(theme.TextFont())
 			}
-			faces := &dynamicFontMap{family: source.Name(), faces: []*font.Face{face}}
+			faces := &dynamicFontMap{family: source.Name(), faces: []*font.Face{face}, fixed: 1}
 
 			val = &FontCacheItem{Fonts: faces}
 			fontCustomCache.Store(source, val)
@@ -171,10 +173,10 @@ func CachedFontFace(style fyne.TextStyle, source fyne.Resource, o fyne.CanvasObj
 			f1 := loadMeasureFont(th)
 
 			if th == fallback {
-				faces = &dynamicFontMap{family: fontscan.SansSerif, faces: []*font.Face{f1}}
+				faces = &dynamicFontMap{family: fontscan.SansSerif, faces: []*font.Face{f1}, fixed: 1}
 			} else {
 				f2 := loadMeasureFont(fallback)
-				faces = &dynamicFontMap{family: fontscan.SansSerif, faces: []*font.Face{f1, f2}}
+				faces = &dynamicFontMap{family: fontscan.SansSerif, faces: []*font.Face{f1, f2}, fixed: 2}
 			}
 		default:
 			faces = lookupFaces(font1, theme.DefaultTextFont(), fallbacks, fontscan.SansSerif, style)
@@ -435,6 +437,11 @@ func shapeString(faces shaping.Fontmap, s string, textSize fixed.Int26_6) *shape
 		}
 	}
 
+	runes := []rune(s)
+	if key.faces != nil {
+		faces = key.faces.pinCJK(runes)
+	}
+
 	in := shaping.Input{
 		Text:      []rune{' '},
 		RunStart:  0,
@@ -445,7 +452,6 @@ func shapeString(faces shaping.Fontmap, s string, textSize fixed.Int26_6) *shape
 	}
 	shaped := &shapedString{space: shaper.Shape(in)}
 
-	runes := []rune(s)
 	in.Text = runes
 	in.RunStart = 0
 	in.RunEnd = len(runes)
@@ -621,6 +627,36 @@ func (f fixedFontMap) ResolveFace(rune) *font.Face {
 	return f.face
 }
 
+// cjkFontMap is a [shaping.Fontmap] that draws CJK runes in one face.
+type cjkFontMap struct {
+	*dynamicFontMap
+	cjk *font.Face
+}
+
+func (c cjkFontMap) ResolveFace(r rune) *font.Face {
+	if isCJK(r) {
+		return c.cjk
+	}
+	return c.dynamicFontMap.ResolveFace(r)
+}
+
+const (
+	hangulJamoStart   = 0x1100 // the first CJK block, Hangul Jamo
+	cjkSymbolsStart   = 0x3000
+	cjkSymbolsEnd     = 0x303f
+	fullwidthFormsLow = 0xff00
+	fullwidthFormsHi  = 0xffef
+)
+
+// isCJK reports whether r is a Han, Hiragana, Katakana or Hangul letter, or CJK punctuation.
+func isCJK(r rune) bool {
+	if r < hangulJamoStart {
+		return false
+	}
+	return unicode.In(r, unicode.Han, unicode.Hiragana, unicode.Katakana, unicode.Hangul) ||
+		r >= cjkSymbolsStart && r <= cjkSymbolsEnd || r >= fullwidthFormsLow && r <= fullwidthFormsHi
+}
+
 type FontCacheItem struct {
 	Fonts shaping.Fontmap
 }
@@ -647,6 +683,7 @@ func (noopLogger) Printf(string, ...any) {}
 type dynamicFontMap struct {
 	faces  []*font.Face
 	family string
+	fixed  int // how many of faces were set up with the map, before lookups added any
 }
 
 func (d *dynamicFontMap) ResolveFace(r rune) *font.Face {
@@ -663,6 +700,46 @@ func (d *dynamicFontMap) ResolveFace(r rune) *font.Face {
 	}
 
 	return d.faces[0]
+}
+
+// pinCJK returns the font map to shape text with. The CJK runes of text are
+// resolved to a font each. If that gives more than one font, the map returned
+// draws all of them with the first of those fonts that has every one of them,
+// so a string is not split between fonts of different regional forms.
+//
+// d itself is returned, and each rune keeps the font it resolves to, if the
+// runes come from one font, if one of them is drawn by a font set up with the
+// map, or if no single font has them all. Runes that no font has are ignored.
+func (d *dynamicFontMap) pinCJK(text []rune) shaping.Fontmap {
+	var used []*font.Face
+	var cjk []rune
+	for _, r := range text {
+		if !isCJK(r) {
+			continue
+		}
+
+		face := d.ResolveFace(r)
+		if _, ok := face.NominalGlyph(r); !ok {
+			continue // no font draws it
+		}
+		if slices.Index(d.faces, face) < d.fixed {
+			return d
+		}
+		if !slices.Contains(used, face) {
+			used = append(used, face)
+		}
+		cjk = append(cjk, r)
+	}
+	if len(used) < 2 {
+		return d
+	}
+
+	for _, face := range d.faces {
+		if slices.Contains(used, face) && coversSequence(face, cjk) {
+			return cjkFontMap{dynamicFontMap: d, cjk: face}
+		}
+	}
+	return d
 }
 
 func (d *dynamicFontMap) addFace(f *font.Face) {
