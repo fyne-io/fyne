@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/test"
@@ -172,10 +173,11 @@ func TestButton_Layout(t *testing.T) {
 	test.NewTempApp(t)
 
 	for name, tt := range map[string]struct {
-		text      string
-		icon      fyne.Resource
-		alignment widget.ButtonAlign
-		placement widget.ButtonIconPlacement
+		alignment    widget.ButtonAlign
+		cornerRadius float32
+		icon         fyne.Resource
+		placement    widget.ButtonIconPlacement
+		text         string
 	}{
 		"text_only_center_leading": {
 			text:      "Test",
@@ -277,11 +279,28 @@ func TestButton_Layout(t *testing.T) {
 			alignment: widget.ButtonAlignTrailing,
 			placement: widget.ButtonIconTrailingText,
 		},
+		"override corner radius (RadiusNone)": {
+			cornerRadius: canvas.RadiusNone,
+			icon:         theme.CancelIcon(),
+		},
+		"override corner radius (negative)": {
+			cornerRadius: -10,
+			icon:         theme.CancelIcon(),
+		},
+		"override corner radius (positive)": {
+			cornerRadius: 10,
+			icon:         theme.CancelIcon(),
+		},
+		"override corner radius (RadiusMaximum)": {
+			cornerRadius: canvas.RadiusMaximum,
+			icon:         theme.CancelIcon(),
+		},
 	} {
 		t.Run(name, func(t *testing.T) {
 			button := &widget.Button{
 				Text:          tt.text,
 				Icon:          tt.icon,
+				CornerRadius:  tt.cornerRadius,
 				Alignment:     tt.alignment,
 				IconPlacement: tt.placement,
 			}

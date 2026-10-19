@@ -62,6 +62,10 @@ type Button struct {
 	Alignment     ButtonAlign
 	IconPlacement ButtonIconPlacement
 
+	// Override the theme corner radius (if >0). Use canvas.RadiusMaximum for circular buttons and
+	// canvas.RadiusNone to remove the radius completely.
+	CornerRadius float32
+
 	OnTapped func() `json:"-"`
 
 	hovered, focused bool
@@ -122,7 +126,6 @@ func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 	text.inset = fyne.NewSquareSize(th.Size(theme.SizeNameInnerPadding))
 
 	background := canvas.NewRectangle(th.Color(theme.ColorNameButton, v))
-	background.CornerRadius = th.Size(theme.SizeNameButtonRadius)
 	tapBG := canvas.NewRectangle(color.Transparent)
 	b.tapAnim = newButtonTapAnimation(tapBG, b, th)
 	b.tapAnim.Curve = fyne.AnimationEaseOut
@@ -348,7 +351,13 @@ func (r *buttonRenderer) applyTheme() {
 			bgColor = blendColor(bgColor, th.Color(bgBlendName, v))
 		}
 		bg.FillColor = bgColor
-		bg.CornerRadius = th.Size(theme.SizeNameButtonRadius)
+		var cornerRadius float32
+		if r.button.CornerRadius <= 0 {
+			cornerRadius = th.Size(theme.SizeNameButtonRadius)
+		} else {
+			cornerRadius = float32(r.button.CornerRadius)
+		}
+		r.background.CornerRadius = cornerRadius
 		bg.Refresh()
 	}
 
