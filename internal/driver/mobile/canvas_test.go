@@ -752,7 +752,7 @@ func newRecordingTouch(text string) *recordingTouch {
 	return r
 }
 
-func (r *recordingTouch) Tapped(*fyne.PointEvent) {
+func (*recordingTouch) Tapped(*fyne.PointEvent) {
 }
 
 func (r *recordingTouch) TouchDown(ev *mobile.TouchEvent) {
