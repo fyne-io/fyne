@@ -19,6 +19,15 @@ import (
 
 var _ fyne.Canvas = (*canvas)(nil)
 
+// tapCapture is the gesture target recorded at press time, before callbacks can relayout.
+type tapCapture struct {
+	obj      fyne.CanvasObject
+	localPos fyne.Position
+	downPos  fyne.Position
+	touchPos fyne.Position
+	moved    bool
+}
+
 type canvas struct {
 	common.Canvas
 	content        fyne.CanvasObject
@@ -27,6 +36,7 @@ type canvas struct {
 	lastTapDown    map[int]time.Time
 	lastTapDownPos map[int]fyne.Position
 	lastTapDelta   map[int]fyne.Delta
+	tapCaptured    map[int]tapCapture
 	menu           fyne.CanvasObject
 	padded         bool
 	scale          float32
@@ -60,6 +70,7 @@ func newCanvas(dev fyne.Device) fyne.Canvas {
 		lastTapDown:    make(map[int]time.Time),
 		lastTapDownPos: make(map[int]fyne.Position),
 		lastTapDelta:   make(map[int]fyne.Delta),
+		tapCaptured:    make(map[int]tapCapture),
 		padded:         true,
 		scale:          dev.SystemScaleForWindow(nil), // we don't need a window parameter on mobile,
 		touched:        make(map[int]mobile.Touchable),
@@ -223,11 +234,25 @@ func (c *canvas) sizeContent(size fyne.Size) {
 	}
 }
 
+func matchesTapTarget(object fyne.CanvasObject) bool {
+	switch object.(type) {
+	case fyne.Tappable, fyne.SecondaryTappable, mobile.Touchable, fyne.DoubleTappable:
+		return true
+	}
+
+	return false
+}
+
 func (c *canvas) tapDown(pos fyne.Position, tapID int) {
 	c.lastTapDown[tapID] = time.Now()
 	c.lastTapDownPos[tapID] = pos
 	c.dragging = nil
 	c.draggingOuter = nil
+	delete(c.touched, tapID)
+
+	// Record the release target before TouchDown or Unfocus can resize the canvas.
+	tapObj, tapPos, _ := c.findObjectAtPositionMatching(pos, matchesTapTarget)
+	c.tapCaptured[tapID] = tapCapture{obj: tapObj, localPos: tapPos, downPos: pos}
 
 	co, objPos, layer := c.findObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {
 		switch object.(type) {
@@ -239,6 +264,10 @@ func (c *canvas) tapDown(pos fyne.Position, tapID int) {
 	})
 
 	if wid, ok := co.(mobile.Touchable); ok {
+		captured := c.tapCaptured[tapID]
+		captured.touchPos = objPos
+		c.tapCaptured[tapID] = captured
+
 		touchEv := &mobile.TouchEvent{}
 		touchEv.ID = tapID
 		touchEv.Position = objPos
@@ -263,6 +292,10 @@ func (c *canvas) tapMove(pos fyne.Position, tapID int,
 
 	if c.dragging == nil && (math.Abs(float64(deltaX)) < tapMoveThreshold && math.Abs(float64(deltaY)) < tapMoveThreshold) {
 		return
+	}
+	if captured, found := c.tapCaptured[tapID]; found {
+		captured.moved = true
+		c.tapCaptured[tapID] = captured
 	}
 	c.lastTapDownPos[tapID] = pos
 	offset := fyne.Delta{DX: deltaX, DY: deltaY}
@@ -363,45 +396,68 @@ func (c *canvas) tapUp(pos fyne.Position, tapID int,
 		c.dragging = nil
 		c.draggingOuter = nil
 		c.otherDirection = container.ScrollBoth
+		c.clearCapturedTap(tapID)
 		return
 	}
-
-	duration := time.Since(c.lastTapDown[tapID])
 
 	if c.menu != nil && c.Overlays().Top() == nil && pos.X > c.menu.Size().Width {
 		c.menu.Hide()
 		c.menu.Refresh()
 		c.setMenu(nil)
+		c.clearCapturedTap(tapID)
 		return
 	}
 
-	co, objPos, _ := c.findObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {
-		if _, ok := object.(fyne.Tappable); ok {
-			return true
-		} else if _, ok := object.(fyne.SecondaryTappable); ok {
-			return true
-		} else if _, ok := object.(mobile.Touchable); ok {
-			return true
-		} else if _, ok := object.(fyne.DoubleTappable); ok {
-			return true
+	captured, ok := c.tapCaptured[tapID]
+	downTime, downOK := c.lastTapDown[tapID]
+	if !ok || !downOK {
+		c.clearCapturedTap(tapID)
+		return
+	}
+
+	if !captured.moved {
+		dx := pos.X - captured.downPos.X
+		dy := pos.Y - captured.downPos.Y
+		if math.Abs(float64(dx)) >= tapMoveThreshold || math.Abs(float64(dy)) >= tapMoveThreshold {
+			captured.moved = true
 		}
+	}
 
-		return false
-	})
+	// Stationary taps stay on the widget pressed, even if relayout moved
+	// another widget under the finger. A moved finger uses the release hit.
+	var co fyne.CanvasObject
+	var objPos fyne.Position
+	if captured.moved {
+		co, objPos, _ = c.findObjectAtPositionMatching(pos, matchesTapTarget)
+	} else if c.tapTargetActive(captured.obj) {
+		co = captured.obj
+		objPos = captured.localPos
+	}
 
-	if wid, ok := co.(mobile.Touchable); ok {
-		touchEv := &mobile.TouchEvent{}
-		touchEv.ID = tapID
-		touchEv.Position = objPos
-		touchEv.AbsolutePosition = pos
-		wid.TouchUp(touchEv)
-		c.touched[tapID] = nil
+	if captured.moved {
+		if wid, isTouch := co.(mobile.Touchable); isTouch {
+			touchEv := &mobile.TouchEvent{}
+			touchEv.ID = tapID
+			touchEv.Position = objPos
+			touchEv.AbsolutePosition = pos
+			wid.TouchUp(touchEv)
+		}
+	} else if wid := c.touched[tapID]; wid != nil {
+		if target, isObj := wid.(fyne.CanvasObject); isObj && c.tapTargetActive(target) {
+			touchEv := &mobile.TouchEvent{}
+			touchEv.ID = tapID
+			touchEv.Position = captured.touchPos
+			touchEv.AbsolutePosition = pos
+			wid.TouchUp(touchEv)
+		}
 	}
 
 	ev := &fyne.PointEvent{
 		Position:         objPos,
 		AbsolutePosition: pos,
 	}
+	duration := time.Since(downTime)
+	c.clearCapturedTap(tapID)
 
 	if duration < tapSecondaryDelay {
 		_, doubleTap := co.(fyne.DoubleTappable)
@@ -440,6 +496,43 @@ func (c *canvas) tapUp(pos fyne.Position, tapID int,
 			}
 		}
 	}
+}
+
+func (c *canvas) clearCapturedTap(tapID int) {
+	delete(c.tapCaptured, tapID)
+	delete(c.lastTapDown, tapID)
+	delete(c.lastTapDownPos, tapID)
+	delete(c.lastTapDelta, tapID)
+	delete(c.touched, tapID)
+}
+
+func canvasObjectInTree(obj, root fyne.CanvasObject) bool {
+	if obj == nil || root == nil || !obj.Visible() {
+		return false
+	}
+
+	return intdriver.WalkVisibleObjectTree(root, func(o fyne.CanvasObject, _, _ fyne.Position, _ fyne.Size) bool {
+		return o == obj
+	}, nil)
+}
+
+// tapTargetActive reports whether obj can still receive the gesture.
+// Removed, hidden, and covered widgets cannot; a widget only shifted within the same overlay can.
+func (c *canvas) tapTargetActive(obj fyne.CanvasObject) bool {
+	if obj == nil || !obj.Visible() {
+		return false
+	}
+	if top := c.Overlays().Top(); top != nil {
+		return canvasObjectInTree(obj, top)
+	}
+	if c.menu != nil {
+		return canvasObjectInTree(obj, c.menu)
+	}
+	// windowHead is a concrete pointer; a nil pointer must not be boxed as a CanvasObject.
+	if c.windowHead != nil && canvasObjectInTree(obj, c.windowHead) {
+		return true
+	}
+	return c.content != nil && canvasObjectInTree(obj, c.content)
 }
 
 func (c *canvas) waitForDoubleTap(co fyne.CanvasObject, ev *fyne.PointEvent, tapCallback func(fyne.Tappable, *fyne.PointEvent), doubleTapCallback func(fyne.DoubleTappable, *fyne.PointEvent)) {
