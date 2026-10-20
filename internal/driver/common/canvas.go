@@ -90,6 +90,11 @@ func (c *Canvas) EnsureMinSize() bool {
 	}
 	windowNeedsMinSizeUpdate := false
 	csize := c.impl.Size()
+	// Widgets keep the min size they compute for the rest of the pass: the
+	// walk below asks each of them, and the layouts of the containers above
+	// ask them again at every level.
+	cache.BeginMinSizePass()
+	defer cache.EndMinSizePass()
 	minSize := c.impl.MinSize()
 
 	var parentNeedingUpdate *RenderCacheNode
