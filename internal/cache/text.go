@@ -71,6 +71,7 @@ func ClearFontMetrics() {
 	fontSizeLock.Lock()
 	fontSizeCache = map[fontSizeEntry]*fontMetric{}
 	fontSizeLock.Unlock()
+	fontMetricsGen.Add(1)
 }
 
 // destroyExpiredFontMetrics destroys expired fontSizeCache entries

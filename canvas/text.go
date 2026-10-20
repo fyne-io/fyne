@@ -4,6 +4,7 @@ import (
 	"image/color"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -28,6 +29,20 @@ type Text struct {
 	//
 	// Since: 2.5
 	FontSource fyne.Resource
+
+	// measured is what MinSize last measured, kept while the fields it was
+	// measured from and the fonts stay the same.
+	measured textMeasure
+}
+
+// textMeasure is a measured size with what it was measured for.
+type textMeasure struct {
+	valid  bool
+	gen    uint64 // of the font metrics, see cache.FontMetricsGeneration
+	text   string
+	size   float32
+	style  fyne.TextStyle
+	result fyne.Size
 }
 
 // Hide will set this text to not be visible
@@ -40,7 +55,19 @@ func (t *Text) Hide() {
 // MinSize returns the minimum size of this text object based on its font size and content.
 // This is normally determined by the render implementation.
 func (t *Text) MinSize() fyne.Size {
+	// Every repaint asks, from the layouts above and from the painter, and
+	// measuring is a cache lookup that hashes the string, while a Text mostly
+	// keeps its string. A font source is left to the cache: not every
+	// resource is comparable.
+	m := &t.measured
+	gen := cache.FontMetricsGeneration()
+	if t.FontSource == nil && m.valid && m.gen == gen && m.text == t.Text && m.size == t.TextSize && m.style == t.TextStyle {
+		return m.result
+	}
 	s, _ := fyne.CurrentApp().Driver().RenderedTextSize(t.Text, t.TextSize, t.TextStyle, t.FontSource)
+	if t.FontSource == nil {
+		*m = textMeasure{valid: true, gen: gen, text: t.Text, size: t.TextSize, style: t.TextStyle, result: s}
+	}
 	return s
 }
 
