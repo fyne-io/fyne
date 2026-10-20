@@ -109,7 +109,7 @@ func (c *Canvas) EnsureMinSize() bool {
 	}
 	ensureMinSize := func(node *RenderCacheNode, _ fyne.Position) {
 		obj := node.obj
-		cache.SetCanvasForObject(obj, c.impl, func() {
+		cache.SetCanvasForObjectRef(&node.canvas, obj, c.impl, func() {
 			if img, ok := obj.(*canvas.Image); ok {
 				img.Refresh() // this may now have a different texScale
 			}
@@ -434,7 +434,11 @@ func (*Canvas) walkTree(
 	var node, parent, prev *RenderCacheNode
 	node = tree.root
 
-	bc := func(obj fyne.CanvasObject, pos fyne.Position, _ fyne.Position, _ fyne.Size) bool {
+	// match makes node the one of obj, the object the walk is at, making it
+	// if the tree had another there. The walk asks for a widget's renderer
+	// just before it visits the widget, so a node is matched for that first
+	// and found matched when the widget is visited.
+	match := func(obj fyne.CanvasObject) *RenderCacheNode {
 		if node != nil && node.obj != obj {
 			if parent.firstChild == node {
 				parent.firstChild = nil
@@ -449,6 +453,13 @@ func (*Canvas) walkTree(
 				prev.nextSibling = node
 			}
 		}
+		return node
+	}
+	rendererOf := func(wid fyne.Widget) fyne.WidgetRenderer {
+		return cache.RendererFor(&match(wid).renderer, wid)
+	}
+	bc := func(obj fyne.CanvasObject, pos fyne.Position, _ fyne.Position, _ fyne.Size) bool {
+		match(obj)
 		if prev != nil && prev.parent != parent {
 			prev = nil
 		}
@@ -475,7 +486,7 @@ func (*Canvas) walkTree(
 		prev = node
 		node = node.nextSibling
 	}
-	driver.WalkVisibleObjectTree(tree.root.obj, bc, ac)
+	driver.WalkVisibleObjectTreeRenderers(tree.root.obj, bc, ac, rendererOf)
 }
 
 type activatableMenu interface {

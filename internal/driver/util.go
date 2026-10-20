@@ -95,7 +95,7 @@ func ReverseWalkVisibleObjectTree(
 	afterChildren func(fyne.CanvasObject, fyne.Position, fyne.CanvasObject),
 ) bool {
 	clipSize := fyne.NewSize(math.MaxInt32, math.MaxInt32)
-	return walkObjectTree(obj, true, nil, fyne.NewPos(0, 0), fyne.NewPos(0, 0), clipSize, beforeChildren, afterChildren, true)
+	return walkObjectTree(obj, true, nil, fyne.NewPos(0, 0), fyne.NewPos(0, 0), clipSize, beforeChildren, afterChildren, true, cache.Renderer)
 }
 
 // WalkCompleteObjectTree will walk an object tree for all objects (ignoring visible state) executing the passed
@@ -113,7 +113,7 @@ func WalkCompleteObjectTree(
 	afterChildren func(fyne.CanvasObject, fyne.Position, fyne.CanvasObject),
 ) bool {
 	clipSize := fyne.NewSize(math.MaxInt32, math.MaxInt32)
-	return walkObjectTree(obj, false, nil, fyne.NewPos(0, 0), fyne.NewPos(0, 0), clipSize, beforeChildren, afterChildren, false)
+	return walkObjectTree(obj, false, nil, fyne.NewPos(0, 0), fyne.NewPos(0, 0), clipSize, beforeChildren, afterChildren, false, cache.Renderer)
 }
 
 // WalkVisibleObjectTree will walk an object tree for all visible objects executing the passed functions following
@@ -130,8 +130,21 @@ func WalkVisibleObjectTree(
 	beforeChildren func(fyne.CanvasObject, fyne.Position, fyne.Position, fyne.Size) bool,
 	afterChildren func(fyne.CanvasObject, fyne.Position, fyne.CanvasObject),
 ) bool {
+	return WalkVisibleObjectTreeRenderers(obj, beforeChildren, afterChildren, cache.Renderer)
+}
+
+// WalkVisibleObjectTreeRenderers is WalkVisibleObjectTree asking renderer for
+// each widget's renderer instead of the cache, for a walker that keeps the
+// renderers of the tree it walks: it is asked for a widget just before
+// beforeChildren is called for it.
+func WalkVisibleObjectTreeRenderers(
+	obj fyne.CanvasObject,
+	beforeChildren func(fyne.CanvasObject, fyne.Position, fyne.Position, fyne.Size) bool,
+	afterChildren func(fyne.CanvasObject, fyne.Position, fyne.CanvasObject),
+	renderer func(fyne.Widget) fyne.WidgetRenderer,
+) bool {
 	clipSize := fyne.NewSize(math.MaxInt32, math.MaxInt32)
-	return walkObjectTree(obj, false, nil, fyne.NewPos(0, 0), fyne.NewPos(0, 0), clipSize, beforeChildren, afterChildren, true)
+	return walkObjectTree(obj, false, nil, fyne.NewPos(0, 0), fyne.NewPos(0, 0), clipSize, beforeChildren, afterChildren, true, renderer)
 }
 
 func walkObjectTree(
@@ -143,6 +156,7 @@ func walkObjectTree(
 	beforeChildren func(fyne.CanvasObject, fyne.Position, fyne.Position, fyne.Size) bool,
 	afterChildren func(fyne.CanvasObject, fyne.Position, fyne.CanvasObject),
 	requireVisible bool,
+	rendererOf func(fyne.Widget) fyne.WidgetRenderer,
 ) bool {
 	if obj == nil {
 		return false
@@ -162,7 +176,7 @@ func walkObjectTree(
 		children = co.Objects
 	case fyne.Widget:
 		if requireVisible || cache.IsRendered(co) {
-			renderer = cache.Renderer(co)
+			renderer = rendererOf(co)
 			children = renderer.Objects()
 		}
 	}
@@ -180,7 +194,7 @@ func walkObjectTree(
 
 	cancelled := false
 	followChild := func(child fyne.CanvasObject) bool {
-		if walkObjectTree(child, reverse, obj, pos, clipPos, clipSize, beforeChildren, afterChildren, requireVisible) {
+		if walkObjectTree(child, reverse, obj, pos, clipPos, clipSize, beforeChildren, afterChildren, requireVisible, rendererOf) {
 			cancelled = true
 			return true
 		}

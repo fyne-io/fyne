@@ -34,6 +34,39 @@ func TestSetCanvasForObject(t *testing.T) {
 	assert.Equal(t, 2, called)
 }
 
+func TestSetCanvasForObjectRef(t *testing.T) {
+	c1, c2 := &dummyCanvas{}, &dummyCanvas{}
+	obj := &dummyWidget{}
+	var ref CanvasRef
+	calls := 0
+	setup := func() { calls++ }
+
+	SetCanvasForObjectRef(&ref, obj, c1, setup)
+	assert.Equal(t, 1, calls)
+	assert.Equal(t, c1, canvasForObject(obj))
+	first := ref.info
+	SetCanvasForObjectRef(&ref, obj, c1, setup)
+	assert.Equal(t, 1, calls, "the registration kept is used again")
+	assert.Same(t, first, ref.info)
+
+	// Registered with another canvas, as a move there does: the kept
+	// registration is stale, so it registers here anew.
+	SetCanvasForObject(obj, c2, nil)
+	assert.Equal(t, c2, canvasForObject(obj))
+	SetCanvasForObjectRef(&ref, obj, c1, setup)
+	assert.Equal(t, 2, calls)
+	assert.Equal(t, c1, canvasForObject(obj))
+	assert.NotSame(t, first, ref.info)
+
+	// Expired and cleaned out: registered anew.
+	ref.info.expires.Store(0)
+	destroyExpiredCanvases(time.Now())
+	assert.Nil(t, GetCanvasForObject(obj))
+	SetCanvasForObjectRef(&ref, obj, c1, setup)
+	assert.Equal(t, 3, calls)
+	assert.Equal(t, c1, canvasForObject(obj))
+}
+
 func TestSetCanvasForObject_keepsAlive(t *testing.T) {
 	testClearAll()
 	defer testClearAll()
