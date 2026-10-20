@@ -35,5 +35,6 @@ func (w *window) doApplyFullScreen(monitor *monitor, full bool) {
 			w.width, w.height = w.screenSize(s)
 		}
 		w.viewport.SetMonitor(nil, w.xpos, w.ypos, w.width, w.height, 0)
+		w.processResized(w.width, w.height) // GLFW on Wayland sends no size event for a size it sets
 	}
 }
