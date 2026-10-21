@@ -14,6 +14,7 @@ import (
 	"unsafe"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/scale"
 )
 
@@ -69,10 +70,8 @@ func (w *window) collectAccessibleElements(obj fyne.CanvasObject, pos fyne.Posit
 	}
 
 	// Recurse into container children
-	if cont, ok := obj.(*fyne.Container); ok {
-		for _, child := range cont.Objects {
-			w.collectAccessibleElements(child, objPos)
-		}
+	for _, child := range driver.AccessibilityChildren(obj) {
+		w.collectAccessibleElements(child, objPos)
 	}
 }
 

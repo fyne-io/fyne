@@ -16,6 +16,7 @@ import (
 	"unsafe"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/scale"
 )
 
@@ -91,7 +92,11 @@ func (w *window) collectAccessibilityElements(
 	// Check if this object is accessible
 	accessible, ok := obj.(fyne.Accessible)
 	if !ok {
-		return nil
+		// Not an element itself, but it may hold accessible descendants (e.g. widget.Card)
+		for _, child := range driver.AccessibilityChildren(obj) {
+			result = append(result, w.collectAccessibilityElements(child, objPos, parent, depth+1)...)
+		}
+		return result
 	}
 
 	label := accessible.AccessibilityLabel()
@@ -130,13 +135,11 @@ func (w *window) collectAccessibilityElements(
 		childParent = currentElement
 	}
 
-	if cont, ok := obj.(*fyne.Container); ok {
-		for _, child := range cont.Objects {
-			childResults := w.collectAccessibilityElements(child, objPos, childParent, depth+1)
-			if parent == nil && currentElement == nil {
-				// We're at root level and didn't create an element, return children as roots
-				result = append(result, childResults...)
-			}
+	for _, child := range driver.AccessibilityChildren(obj) {
+		childResults := w.collectAccessibilityElements(child, objPos, childParent, depth+1)
+		if parent == nil && currentElement == nil {
+			// We're at root level and didn't create an element, return children as roots
+			result = append(result, childResults...)
 		}
 	}
 
