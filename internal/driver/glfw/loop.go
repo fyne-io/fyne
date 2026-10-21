@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/async"
+	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/driver/common"
 	"fyne.io/fyne/v2/internal/goos"
@@ -183,6 +184,9 @@ func (d *gLDriver) runGL() {
 
 					if shouldExpand && runtime.GOOS != goos.JavaScript {
 						view.SetSize(w.shouldWidth, w.shouldHeight)
+						if build.IsWayland { // GLFW on Wayland sends no size event for a size it sets
+							w.processResized(w.shouldWidth, w.shouldHeight)
+						}
 					}
 				}
 			}
