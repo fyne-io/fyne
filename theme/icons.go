@@ -1,7 +1,12 @@
 package theme
 
 import (
+	"bytes"
+	"image"
 	"image/color"
+	_ "image/jpeg" // register JPEG decoder so DisabledResource can desaturate JPEG icons
+	"image/png"
+	"math"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/svg"
@@ -838,9 +843,57 @@ func (res *DisabledResource) Name() string {
 	return "disabled_" + unwrapResource(res.source).Name()
 }
 
-// Content returns the disabled style content of the correct resource for the current theme
+// ITU-R BT.601 luma coefficients, scaled by 1000 for integer math.
+const (
+	lumaWeightR = 299
+	lumaWeightG = 587
+	lumaWeightB = 114
+	lumaScale   = 1000
+)
+
+// Content returns the disabled style content of the correct resource for the current theme.
+// SVG resources are recolored with the theme's disabled color; bitmap resources (PNG, JPEG, ...)
+// are desaturated to greyscale.
 func (res *DisabledResource) Content() []byte {
-	return colorizeLogError(unwrapResource(res.source).Content(), Color(ColorNameDisabled))
+	src := unwrapResource(res.source)
+	content := src.Content()
+	if svg.IsResourceSVG(src) {
+		return colorizeLogError(content, Color(ColorNameDisabled))
+	}
+	out, err := desaturate(content)
+	if err != nil {
+		fyne.LogError("Failed to desaturate bitmap for disabled state", err)
+		return content
+	}
+	return out
+}
+
+// desaturate returns a PNG-encoded greyscale copy of the given image bytes,
+// preserving the alpha channel.
+func desaturate(src []byte) ([]byte, error) {
+	img, _, err := image.Decode(bytes.NewReader(src))
+	if err != nil {
+		return src, err
+	}
+	bounds := img.Bounds()
+	gray := image.NewNRGBA(bounds)
+	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
+		for x := bounds.Min.X; x < bounds.Max.X; x++ {
+			// Convert via NRGBA so the luminance is computed on unpremultiplied
+			// channels — otherwise partially-transparent pixels go too dark.
+			n := color.NRGBAModel.Convert(img.At(x, y)).(color.NRGBA)
+			lum := (lumaWeightR*uint32(n.R) + lumaWeightG*uint32(n.G) + lumaWeightB*uint32(n.B)) / lumaScale
+			if lum > math.MaxUint8 {
+				lum = math.MaxUint8
+			}
+			gray.SetNRGBA(x, y, color.NRGBA{R: uint8(lum), G: uint8(lum), B: uint8(lum), A: n.A})
+		}
+	}
+	var buf bytes.Buffer
+	if err := png.Encode(&buf, gray); err != nil {
+		return src, err
+	}
+	return buf.Bytes(), nil
 }
 
 // ThemeColorName returns the fyne.ThemeColorName that is used as foreground color.
