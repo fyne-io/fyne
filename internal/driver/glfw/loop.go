@@ -184,9 +184,9 @@ func (d *gLDriver) runGL() {
 
 					if shouldExpand && runtime.GOOS != goos.JavaScript {
 						view.SetSize(w.shouldWidth, w.shouldHeight)
-						if build.IsWayland { // GLFW on Wayland sends no size event for a size it sets
-							w.processResized(w.shouldWidth, w.shouldHeight)
-						}
+					}
+					if shouldExpand && build.IsWayland { // GLFW on Wayland sends no size event for a size it sets
+						w.processResized(w.shouldWidth, w.shouldHeight)
 					}
 				}
 			}
