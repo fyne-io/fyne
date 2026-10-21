@@ -20,6 +20,8 @@ type preferences struct {
 
 	app                 *fyneApp
 	needsSaveBeforeExit bool
+	watcher             any // platform-specific file watcher, set by watch()
+	watcherPath         string
 }
 
 // Declare conformity with Preferences interface

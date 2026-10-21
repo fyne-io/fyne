@@ -21,3 +21,7 @@ func (a *fyneApp) storageRoot() string {
 func (p *preferences) watch() {
 	// no-op as we are in mobile simulation mode
 }
+
+func (p *preferences) ensureWatching() {
+	// no-op as we are in mobile simulation mode
+}
