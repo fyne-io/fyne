@@ -31,6 +31,26 @@ func TestDRMLostOutput(t *testing.T) {
 	}
 }
 
+func TestShowOnRestoreSkipsHiddenWindow(t *testing.T) {
+	shown := &window{visible: true}
+	hidden := &window{}
+	closing := &window{visible: true, closing: true}
+
+	shown.noteVisibilityForRestore()
+	hidden.noteVisibilityForRestore()
+	closing.noteVisibilityForRestore()
+
+	if !shown.showOnRestore {
+		t.Fatal("a visible window must be mapped again")
+	}
+	if hidden.showOnRestore {
+		t.Fatal("a hidden window must stay unmapped")
+	}
+	if closing.showOnRestore {
+		t.Fatal("a closing window must not be mapped again")
+	}
+}
+
 func TestDRMStillMissing(t *testing.T) {
 	lost := map[string]drmConn{
 		"card1-HDMI-A-1": {Status: "connected", Enabled: "enabled"},

@@ -22,7 +22,8 @@ import (
 //
 // On loss we Terminate without polling. The socket still holds global_remove,
 // and reading it later crashes even if the window is hidden. When the output
-// is back we Init and Show the same windows again.
+// is back we Init and show the windows that were on screen. Hidden windows
+// are created again without mapping, so the systray sentinel stays invisible.
 func (d *gLDriver) skipPollForDRM() bool {
 	cur := drmSnapshot()
 	if !drmDown && drmLostOutput(drmPrev, cur) {
@@ -48,6 +49,9 @@ func (d *gLDriver) dropDisplay() {
 		if !ok {
 			continue
 		}
+		// Snapshot before visible is cleared. restoreDisplay uses this so a
+		// window that was never mapped is not shown after the rebind.
+		w.noteVisibilityForRestore()
 		w.visible = false
 		// Display is still connected. Free the frame callback now; after
 		// Terminate it would point at a dead wl_display.
@@ -76,7 +80,17 @@ func (d *gLDriver) restoreDisplay() bool {
 		if !ok || w.closing {
 			continue
 		}
-		w.Show()
+		if w.showOnRestore {
+			w.Show()
+			continue
+		}
+		// Recreate the GLFW object. create() leaves the window unmapped.
+		// Show() would give it an xdg_toplevel, which is the blank window
+		// that stays up after sleep.
+		if !w.created {
+			w.created = true
+			w.create()
+		}
 	}
 	d.rebindPaint = true
 	return true
@@ -115,6 +129,13 @@ func drmRead(p string) string {
 		return "?"
 	}
 	return strings.TrimSpace(string(b))
+}
+
+// noteVisibilityForRestore records whether this window was on screen.
+// dropDisplay clears visible immediately after, and a later rebind must
+// not map a window that was hidden (the systray sentinel).
+func (w *window) noteVisibilityForRestore() {
+	w.showOnRestore = w.visible && !w.closing
 }
 
 func drmLostOutput(prev, cur map[string]drmConn) bool {

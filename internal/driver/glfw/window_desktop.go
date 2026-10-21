@@ -88,6 +88,10 @@ type window struct {
 	master                          bool
 	fullScreen, fullScreenSecondary bool
 	centered, visible, onTop        bool
+	// showOnRestore records visibility at the moment the display drops.
+	// A hidden window, such as the systray sentinel, must stay unmapped
+	// when the output comes back.
+	showOnRestore bool
 
 	mousePosUpdateProcessed    bool
 	newMousePosX, newMousePosY float64
