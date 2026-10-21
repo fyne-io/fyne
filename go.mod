@@ -60,3 +60,5 @@ require (
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace github.com/go-gl/glfw/v3.4/glfw => github.com/roffe/glfw/v3.4/glfw v0.1.0-pre.2.0.20261021211529-a7e7690b3fbc
