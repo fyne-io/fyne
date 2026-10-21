@@ -26,7 +26,7 @@ func BenchmarkRadioCreateRenderer(b *testing.B) {
 }
 
 func TestRadioItem_FocusIndicator_Centered_Vertically(t *testing.T) {
-	item := newRadioItem("Hello", nil)
+	item := newRadioItem("Hello", fyne.TextWrapOff, nil)
 	render := test.TempWidgetRenderer(t, item).(*radioItemRenderer)
 	render.Layout(fyne.NewSize(200, 100))
 
