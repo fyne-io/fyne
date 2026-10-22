@@ -197,6 +197,8 @@ func ClearFontCache() {
 
 	runBufferMut.Lock()
 	clear(shapeCache)
+	// the shaper keeps a plan, and with it the font, for every face it has shaped
+	shaper = &shaping.HarfbuzzShaper{}
 	runBufferMut.Unlock()
 }
 
