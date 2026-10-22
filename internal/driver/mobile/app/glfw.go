@@ -17,6 +17,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/key"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/lifecycle"
+	"fyne.io/fyne/v2/internal/driver/mobile/event/mouse"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/paint"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/size"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/touch"
@@ -219,6 +220,7 @@ func createGLFWWindow() (*glfw.Window, error) {
 	window.SetFramebufferSizeCallback(onResize)
 	window.SetCursorPosCallback(mouseMoved)
 	window.SetMouseButtonCallback(mouseClicked)
+	window.SetScrollCallback(mouseScrolled)
 	window.SetKeyCallback(keyPressed)
 	window.SetCharCallback(charInput)
 	window.SetCloseCallback(closed)
@@ -252,11 +254,27 @@ func sendTouch(t touch.Type, x, y float32) {
 	}
 }
 
+func sendScroll(x, y, dy float32) {
+	theApp.events.In() <- mouse.ScrollEvent{
+		X:       x,
+		Y:       y,
+		ScrollY: dy,
+	}
+}
+
 // mouseDown tracks whether a button is held, so that moving the pointer without
 // pressing does not start a drag.
 var mouseDown bool
 
-func mouseClicked(w *glfw.Window, _ glfw.MouseButton, action glfw.Action, _ glfw.ModifierKey) {
+func glfwButtonIsTouch(button glfw.MouseButton) bool {
+	return button == glfw.MouseButtonLeft || button == glfw.MouseButtonRight
+}
+
+func mouseClicked(w *glfw.Window, button glfw.MouseButton, action glfw.Action, _ glfw.ModifierKey) {
+	if !glfwButtonIsTouch(button) {
+		return
+	}
+
 	x, y := w.GetCursorPos()
 
 	switch action {
@@ -267,6 +285,15 @@ func mouseClicked(w *glfw.Window, _ glfw.MouseButton, action glfw.Action, _ glfw
 		mouseDown = false
 		sendTouch(touch.TypeEnd, float32(x), float32(y))
 	}
+}
+
+func mouseScrolled(w *glfw.Window, _ float64, yoff float64) {
+	if yoff == 0 {
+		return
+	}
+
+	x, y := w.GetCursorPos()
+	sendScroll(float32(x), float32(y), float32(yoff))
 }
 
 func mouseMoved(_ *glfw.Window, x, y float64) {
