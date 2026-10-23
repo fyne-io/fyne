@@ -5,6 +5,8 @@ import (
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/build"
+	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/internal/driver"
 )
 
 type deduplicatedObjectQueue struct {
@@ -56,12 +58,23 @@ type RenderCacheNode struct {
 	obj         fyne.CanvasObject
 	parent      *RenderCacheNode
 	// cache data
-	minSize fyne.Size
+	minSize         fyne.Size
+	canvas          cache.CanvasRef
+	renderer        cache.RendererRef
+	clip, clipKnown bool
 }
 
 // Obj returns the node object.
 func (r *RenderCacheNode) Obj() fyne.CanvasObject {
 	return r.obj
+}
+
+// IsClip reports whether the node's object clips its children.
+func (r *RenderCacheNode) IsClip() bool {
+	if !r.clipKnown {
+		r.clip, r.clipKnown = driver.IsClip(r.obj), true
+	}
+	return r.clip
 }
 
 type overlayStack struct {
