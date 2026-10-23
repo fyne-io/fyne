@@ -21,16 +21,13 @@ func Renderer(wid fyne.Widget) fyne.WidgetRenderer {
 	return r
 }
 
-// RendererRef is a widget's renderer as the cache holds it, kept by a render
-// cache node so that a walk of the tree reaches it without looking the widget
-// up again. The zero value holds none.
+// RendererRef holds a widget's cached renderer between walks.
 type RendererRef struct {
 	info *rendererInfo
 }
 
-// RendererFor is Renderer for a caller that keeps ref for wid between walks:
-// while ref holds the entry the cache has, that is just kept alive; once the
-// renderer was destroyed, wid is looked up, or given a renderer, anew.
+// RendererFor returns the renderer for wid, skipping the cache lookup while
+// ref holds one that is not destroyed.
 func RendererFor(ref *RendererRef, wid fyne.Widget) fyne.WidgetRenderer {
 	if info := ref.info; info != nil && !info.destroyed.Load() {
 		info.setAlive()
@@ -41,7 +38,6 @@ func RendererFor(ref *RendererRef, wid fyne.Widget) fyne.WidgetRenderer {
 	return r
 }
 
-// rendererEntry is Renderer returning the cache entry as well.
 func rendererEntry(wid fyne.Widget) (fyne.WidgetRenderer, *rendererInfo) {
 	if rinfo := cachedRendererInfo(wid); rinfo != nil {
 		return rinfo.renderer, rinfo
@@ -65,7 +61,6 @@ func CachedRenderer(wid fyne.Widget) (fyne.WidgetRenderer, bool) {
 	return rinfo.renderer, true
 }
 
-// cachedRendererInfo is the cache entry of wid's renderer, kept alive, or nil.
 func cachedRendererInfo(wid fyne.Widget) *rendererInfo {
 	if wid == nil {
 		return nil
@@ -109,8 +104,6 @@ func IsRendered(wid fyne.Widget) bool {
 
 type rendererInfo struct {
 	expiringCache
-	renderer fyne.WidgetRenderer
-	// destroyed is set once the renderer is gone from the cache, so a
-	// RendererRef still holding the entry looks the widget up anew.
+	renderer  fyne.WidgetRenderer
 	destroyed atomic.Bool
 }

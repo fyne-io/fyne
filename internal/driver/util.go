@@ -133,10 +133,8 @@ func WalkVisibleObjectTree(
 	return WalkVisibleObjectTreeRenderers(obj, beforeChildren, afterChildren, cache.Renderer)
 }
 
-// WalkVisibleObjectTreeRenderers is WalkVisibleObjectTree asking renderer for
-// each widget's renderer instead of the cache, for a walker that keeps the
-// renderers of the tree it walks: it is asked for a widget just before
-// beforeChildren is called for it.
+// WalkVisibleObjectTreeRenderers walks like WalkVisibleObjectTree, looking up
+// each widget's renderer with renderer just before beforeChildren is called.
 func WalkVisibleObjectTreeRenderers(
 	obj fyne.CanvasObject,
 	beforeChildren func(fyne.CanvasObject, fyne.Position, fyne.Position, fyne.Size) bool,

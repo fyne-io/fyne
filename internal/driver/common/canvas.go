@@ -90,9 +90,6 @@ func (c *Canvas) EnsureMinSize() bool {
 	}
 	windowNeedsMinSizeUpdate := false
 	csize := c.impl.Size()
-	// Widgets keep the min size they compute for the rest of the pass: the
-	// walk below asks each of them, and the layouts of the containers above
-	// ask them again at every level.
 	cache.BeginMinSizePass()
 	defer cache.EndMinSizePass()
 	minSize := c.impl.MinSize()
@@ -434,10 +431,7 @@ func (*Canvas) walkTree(
 	var node, parent, prev *RenderCacheNode
 	node = tree.root
 
-	// match makes node the one of obj, the object the walk is at, making it
-	// if the tree had another there. The walk asks for a widget's renderer
-	// just before it visits the widget, so a node is matched for that first
-	// and found matched when the widget is visited.
+	// a widget's renderer is asked for just before bc, so both match the same node
 	match := func(obj fyne.CanvasObject) *RenderCacheNode {
 		if node != nil && node.obj != obj {
 			if parent.firstChild == node {

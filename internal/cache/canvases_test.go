@@ -49,8 +49,6 @@ func TestSetCanvasForObjectRef(t *testing.T) {
 	assert.Equal(t, 1, calls, "the registration kept is used again")
 	assert.Same(t, first, ref.info)
 
-	// Registered with another canvas, as a move there does: the kept
-	// registration is stale, so it registers here anew.
 	SetCanvasForObject(obj, c2, nil)
 	assert.Equal(t, c2, canvasForObject(obj))
 	SetCanvasForObjectRef(&ref, obj, c1, setup)
@@ -58,7 +56,6 @@ func TestSetCanvasForObjectRef(t *testing.T) {
 	assert.Equal(t, c1, canvasForObject(obj))
 	assert.NotSame(t, first, ref.info)
 
-	// Expired and cleaned out: registered anew.
 	ref.info.expires.Store(0)
 	destroyExpiredCanvases(time.Now())
 	assert.Nil(t, GetCanvasForObject(obj))

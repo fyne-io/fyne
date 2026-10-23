@@ -19,9 +19,6 @@ type BaseWidget struct {
 
 	impl       fyne.Widget
 	themeCache fyne.Theme
-
-	// minSize is the renderer's MinSize as computed in the canvas's min size
-	// pass minSizeGen, see cache.MinSizeGeneration; zero means none.
 	minSize    fyne.Size
 	minSizeGen uint64
 }
@@ -48,7 +45,7 @@ func (w *BaseWidget) Resize(size fyne.Size) {
 	}
 
 	w.size = size
-	w.minSizeGen = 0 // a renderer's min size can follow its size, wrapped text does
+	w.minSizeGen = 0 // min size can depend on size, like wrapped text
 
 	impl := w.super()
 	if impl == nil {
@@ -75,9 +72,6 @@ func (w *BaseWidget) Move(pos fyne.Position) {
 
 // MinSize for the widget - it should never be resized below this value.
 func (w *BaseWidget) MinSize() fyne.Size {
-	// In the canvas's min size pass the renderer is asked once: the pass
-	// visits this widget, and the layout of every container above it asks
-	// again.
 	gen := cache.MinSizeGeneration()
 	if gen != 0 && w.minSizeGen == gen {
 		return w.minSize

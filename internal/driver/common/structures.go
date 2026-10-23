@@ -58,16 +58,9 @@ type RenderCacheNode struct {
 	obj         fyne.CanvasObject
 	parent      *RenderCacheNode
 	// cache data
-	minSize fyne.Size
-	// canvas is obj's registration with the canvas, kept so that a repaint
-	// keeps it alive without looking obj up, see cache.SetCanvasForObjectRef.
-	canvas cache.CanvasRef
-	// renderer is the renderer of obj, a widget, as the cache holds it, so
-	// that a walk reaches it without looking obj up, see cache.RendererFor.
-	renderer cache.RendererRef
-	// clip is driver.IsClip's answer for obj, asked once (clipKnown): the
-	// painters ask before and after every node, every frame, and the answer
-	// is the renderer's type's, which stays.
+	minSize         fyne.Size
+	canvas          cache.CanvasRef
+	renderer        cache.RendererRef
 	clip, clipKnown bool
 }
 
@@ -76,8 +69,7 @@ func (r *RenderCacheNode) Obj() fyne.CanvasObject {
 	return r.obj
 }
 
-// IsClip reports whether the node's object clips what it holds, as
-// driver.IsClip does, remembered from the first time it is asked.
+// IsClip reports whether the node's object clips its children.
 func (r *RenderCacheNode) IsClip() bool {
 	if !r.clipKnown {
 		r.clip, r.clipKnown = driver.IsClip(r.obj), true

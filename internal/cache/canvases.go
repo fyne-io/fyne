@@ -25,18 +25,13 @@ func SetCanvasForObject(obj fyne.CanvasObject, c fyne.Canvas, setup func()) {
 	canvasEntry(obj, c, setup)
 }
 
-// CanvasRef is an object's registration with a canvas, kept by whoever
-// registers the object on every repaint - a render cache node - so that
-// SetCanvasForObjectRef skips the lookup while it is the registration the
-// cache holds. The zero value holds none.
+// CanvasRef holds an object's canvas registration between repaints.
 type CanvasRef struct {
 	info *canvasInfo
 }
 
-// SetCanvasForObjectRef is SetCanvasForObject for a caller that keeps ref for
-// obj between repaints: while ref holds the entry the cache has for obj, for
-// this canvas, the entry is just kept alive; once it was replaced, by the
-// object registering with another canvas, or cleaned, obj registers anew.
+// SetCanvasForObjectRef sets the canvas for obj, skipping the cache lookup
+// while ref still holds the current registration.
 func SetCanvasForObjectRef(ref *CanvasRef, obj fyne.CanvasObject, c fyne.Canvas, setup func()) {
 	if info := ref.info; info != nil && info.canvas == c && !info.replaced.Load() {
 		info.setAlive()
@@ -45,7 +40,6 @@ func SetCanvasForObjectRef(ref *CanvasRef, obj fyne.CanvasObject, c fyne.Canvas,
 	ref.info = canvasEntry(obj, c, setup)
 }
 
-// canvasEntry is SetCanvasForObject returning the entry obj has after.
 func canvasEntry(obj fyne.CanvasObject, c fyne.Canvas, setup func()) *canvasInfo {
 	// this runs for every visible object on every repaint, so avoid allocating
 	// a canvasInfo we would only throw away - and keep the entry alive so a
@@ -73,8 +67,6 @@ func canvasEntry(obj fyne.CanvasObject, c fyne.Canvas, setup func()) *canvasInfo
 
 type canvasInfo struct {
 	expiringCache
-	canvas fyne.Canvas
-	// replaced is set once the entry is no longer the one the cache holds
-	// for its object, so a CanvasRef still holding it registers anew.
+	canvas   fyne.Canvas
 	replaced atomic.Bool
 }
