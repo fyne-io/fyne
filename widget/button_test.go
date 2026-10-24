@@ -15,14 +15,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNewCircularButton(t *testing.T) {
-	button := widget.NewCircularButton(theme.CancelIcon(), func() {})
+func TestNewIconButton(t *testing.T) {
+	button := widget.NewIconButton(theme.CancelIcon(), func() {})
 	window := test.NewWindow(container.NewWithoutLayout(button))
 	defer window.Close()
 	button.Resize(button.MinSize())
 	window.Resize(fyne.NewSize(150, 200))
 
-	test.AssertRendersToMarkup(t, "button/layout_circular.xml", window.Canvas())
+	test.AssertRendersToMarkup(t, "button/layout_icon_circular.xml", window.Canvas())
 }
 
 func TestButton_MinSize(t *testing.T) {

@@ -93,10 +93,11 @@ func NewButtonWithIcon(label string, icon fyne.Resource, tapped func()) *Button 
 	return button
 }
 
-// NewCircularButton creates a new button widget with the themed icon and tap handler.
+// NewIconButton creates a new button widget with the themed icon and tap handler.
 // The button will have a maximal corner radius which results in a circular button for square icons.
+//
 // Since: 2.9
-func NewCircularButton(icon fyne.Resource, tapped func()) *Button {
+func NewIconButton(icon fyne.Resource, tapped func()) *Button {
 	button := &Button{
 		cornerRadius: canvas.RadiusMaximum,
 		Icon:         icon,
