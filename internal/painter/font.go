@@ -216,9 +216,14 @@ func DrawStringOffset(dst draw.Image, s string, c color.Color, f shaping.Fontmap
 	s = strings.ReplaceAll(s, "\n", string([]rune{replacementChar}))
 
 	advance := float32(0)
+	runes := []rune(strings.ReplaceAll(s, "\r", "")) // as walkString shapes them
 	walkString(f, s, float32ToFixed266(fontSize), style, &advance, scale, func(run shaping.Output, x, y float32) {
 		yPix := int(math.Ceil(float64(y)))
-		if len(run.Glyphs) == 1 && run.Glyphs[0].GlyphID == 0 {
+		if len(run.Glyphs) > 0 && run.Glyphs[0].GlyphID == 0 {
+			if from, to := missingText(run.Glyphs); drawMissing != nil && to <= len(runes) {
+				drawMissing(dst, string(runes[from:to]), c, fontSize, scale, int(x)-offset, yPix)
+				return
+			}
 			r.DrawStringAt(string([]rune{replacementChar}), dst, int(x)-offset, yPix, f.ResolveFace(replacementChar))
 			return
 		}
@@ -473,7 +478,7 @@ func shapeString(faces shaping.Fontmap, s string, textSize fixed.Int26_6) *shape
 			if r == '\t' {
 				if pending {
 					in.RunEnd = i
-					shaped.steps = append(shaped.steps, shapeStep{out: shaper.Shape(in)})
+					shaped.steps = append(shaped.steps, shapeStep{out: shapeMissing(in)})
 				}
 				shaped.steps = append(shaped.steps, shapeStep{tab: true})
 
@@ -485,7 +490,7 @@ func shapeString(faces shaping.Fontmap, s string, textSize fixed.Int26_6) *shape
 			}
 		}
 
-		shaped.steps = append(shaped.steps, shapeStep{out: shaper.Shape(in)})
+		shaped.steps = append(shaped.steps, shapeStep{out: shapeMissing(in)})
 	}
 
 	if key.faces != nil {
@@ -497,6 +502,66 @@ func shapeString(faces shaping.Fontmap, s string, textSize fixed.Int26_6) *shape
 	return shaped
 }
 
+// missingAdvance and drawMissing, when set, measure and draw text no font
+// has glyphs for: in the browser, which has no system fonts to fall back
+// on, the browser draws it with its own (font_js.go).
+var (
+	missingAdvance func(text string, size fixed.Int26_6) fixed.Int26_6
+	drawMissing    func(dst draw.Image, text string, c color.Color, size, scale float32, x, baseline int)
+)
+
+// shapeMissing shapes in, giving the glyphs no font has the width they take
+// where missingAdvance draws them.
+func shapeMissing(in shaping.Input) shaping.Output {
+	out := shaper.Shape(in)
+	if missingAdvance == nil {
+		return out
+	}
+	// each stretch of them is drawn whole (Arabic letters join, right to
+	// left text keeps its order): its first glyph takes its width
+	for i := 0; i < len(out.Glyphs); {
+		j := missingSpan(out.Glyphs, i)
+		if j == i {
+			i++
+			continue
+		}
+		from, to := missingText(out.Glyphs[i:j])
+		if to <= len(in.Text) {
+			if adv := missingAdvance(string(in.Text[from:to]), in.Size); adv > 0 {
+				for k := i; k < j; k++ {
+					out.Advance -= out.Glyphs[k].Advance
+					out.Glyphs[k].Advance, out.Glyphs[k].XAdvance = 0, 0
+				}
+				out.Advance += adv
+				out.Glyphs[i].Advance, out.Glyphs[i].XAdvance = adv, adv
+			}
+		}
+		i = j
+	}
+	return out
+}
+
+// missingSpan is the end of the glyphs no font has from i (i if glyph i
+// is not one).
+func missingSpan(glyphs []shaping.Glyph, i int) int {
+	j := i
+	for j < len(glyphs) && glyphs[j].GlyphID == 0 {
+		j++
+	}
+	return j
+}
+
+// missingText is where the text of glyphs is, as rune indexes (a right to
+// left run lists its glyphs last to first).
+func missingText(glyphs []shaping.Glyph) (from, to int) {
+	from = glyphs[0].ClusterIndex
+	for _, g := range glyphs {
+		from = min(from, g.ClusterIndex)
+		to = max(to, g.ClusterIndex+g.RuneCount)
+	}
+	return from, to
+}
+
 // layoutRun places one shaped run with its pen at x, splitting out glyphs the
 // font did not have so each can be drawn on its own, and returns the pen
 // position after it.
@@ -504,7 +569,8 @@ func layoutRun(out shaping.Output, x, scale float32, cb func(shaping.Output, flo
 	glyphs := out.Glyphs
 	start := 0
 	adv := fixed.I(0)
-	for i, g := range out.Glyphs {
+	for i := 0; i < len(glyphs); i++ {
+		g := glyphs[i]
 		if g.GlyphID == 0 {
 			if start < i {
 				out.Glyphs = glyphs[start:i]
@@ -512,12 +578,19 @@ func layoutRun(out shaping.Output, x, scale float32, cb func(shaping.Output, flo
 				x += fixed266ToFloat32(adv) * scale
 			}
 
-			out.Glyphs = glyphs[i : i+1]
+			end := i + 1
+			if drawMissing != nil { // the browser draws the stretch whole
+				end = missingSpan(glyphs, i)
+			}
+			out.Glyphs = glyphs[i:end]
 			cb(out, x)
-			x += fixed266ToFloat32(glyphs[i].Advance) * scale
+			for _, m := range glyphs[i:end] {
+				x += fixed266ToFloat32(m.Advance) * scale
+			}
 
 			adv = 0
-			start = i + 1
+			start = end
+			i = end - 1
 			continue
 		}
 		adv += g.Advance
