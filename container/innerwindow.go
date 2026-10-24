@@ -56,6 +56,7 @@ type InnerWindow struct {
 	Content *fyne.Container
 
 	maximized, inactive bool
+	tappedBarOwner      *MultipleWindows
 }
 
 // NewInnerWindow creates a new window border around the given `content`, displaying the `title` along the top.

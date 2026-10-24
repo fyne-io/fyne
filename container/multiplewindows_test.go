@@ -58,3 +58,52 @@ func TestMultipleWindows_Top(t *testing.T) {
 	m.Add(w1)
 	assert.Equal(t, w1, m.Top())
 }
+
+func TestMultipleWindows_OnTappedBarPreserved(t *testing.T) {
+	w1 := NewInnerWindow("1", widget.NewLabel("Content"))
+	called := 0
+	w1.OnTappedBar = func() { called++ }
+
+	w2 := NewInnerWindow("2", widget.NewLabel("Content"))
+	m := NewMultipleWindows(w1, w2)
+	_ = test.TempWidgetRenderer(t, m) // triggers the first refreshChildren/setupChild
+
+	assert.Equal(t, w2, m.Top())
+
+	w1.OnTappedBar()
+	assert.Equal(t, 1, called, "user's OnTappedBar set before adding the window should still be called")
+	assert.Equal(t, w1, m.Top(), "the built-in raise-to-top behaviour must still run")
+}
+
+func TestMultipleWindows_OnTappedBarNotDoubled(t *testing.T) {
+	w1 := NewInnerWindow("1", widget.NewLabel("Content"))
+	called := 0
+	w1.OnTappedBar = func() { called++ }
+
+	m := NewMultipleWindows(w1)
+	_ = test.TempWidgetRenderer(t, m)
+
+	m.Refresh()
+	m.Refresh()
+	m.Add(NewInnerWindow("2", widget.NewLabel("Content")))
+
+	w1.OnTappedBar()
+	assert.Equal(t, 1, called, "repeated Refresh()/Add() calls must not wrap the callback more than once")
+}
+
+func TestMultipleWindows_OnTappedBarRebindsToNewOwner(t *testing.T) {
+	moved := NewInnerWindow("moved", widget.NewLabel("Content"))
+	m1 := NewMultipleWindows(moved)
+	_ = test.TempWidgetRenderer(t, m1) // wraps moved.OnTappedBar, owner becomes m1
+
+	other := NewInnerWindow("other", widget.NewLabel("Content"))
+	m2 := NewMultipleWindows(other, moved) // moved is now also managed by a second container
+	_ = test.TempWidgetRenderer(t, m2)
+
+	m2.RaiseToTop(other)
+	assert.Equal(t, other, m2.Top())
+
+	moved.OnTappedBar()
+
+	assert.Equal(t, moved, m2.Top(), "tapping the bar must raise the window in its current owner, not the one that first wrapped it")
+}
