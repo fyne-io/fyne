@@ -40,6 +40,7 @@ extern void exceptionCallback(const char*);
 @end
 
 // forward declaration … we want methods to be ordered alphabetically
+void handleException(const char*, id);
 NSMenu* nativeMainMenu();
 
 void assignDarwinSubmenu(const void* i, const void* m) {
@@ -67,6 +68,30 @@ const void* createDarwinMenu(const char* label) {
 
 const void* darwinAppMenu() {
     return [[nativeMainMenu() itemAtIndex:0] submenu];
+}
+
+const void* darwinMainMenu() {
+    return nativeMainMenu();
+}
+
+const void* getNSMenuItemAtIndex(const void* m, NSInteger i) {
+    NSMenu* menu = (NSMenu*)m;
+    @try {
+        return [menu itemAtIndex: i];
+    } @catch(NSException* e) {
+        handleException("getNSMenuItemAtIndex", e);
+        return NULL;
+    }
+}
+
+const void* getNSMenuItemSubmenu(const void* i) {
+    NSMenuItem* item = (NSMenuItem*)i;
+    return [item submenu];
+}
+
+NSInteger getNSMenuNumberOfItems(const void* m) {
+    NSMenu* menu = (NSMenu*)m;
+    return [menu numberOfItems];
 }
 
 void getTextColorRGBA(int* r, int* g, int* b, int* a) {
@@ -164,23 +189,18 @@ void resetDarwinMenu() {
     }
 }
 
+void setNSMenuItemTitle(const void* i, const char* s) {
+    NSMenuItem* item = (NSMenuItem*)i;
+    [item setTitle: [NSString stringWithUTF8String: s]];
+}
+
+void setNSMenuTitle(const void* m, const char* s) {
+    NSMenu* menu = (NSMenu*)m;
+    [menu setTitle: [NSString stringWithUTF8String: s]];
+}
+
 const void* test_darwinMainMenu() {
     return nativeMainMenu();
-}
-
-const void* test_NSMenu_itemAtIndex(const void* m, NSInteger i) {
-    NSMenu* menu = (NSMenu*)m;
-    @try {
-        return [menu itemAtIndex: i];
-    } @catch(NSException* e) {
-        handleException("test_NSMenu_itemAtIndex", e);
-        return NULL;
-    }
-}
-
-NSInteger test_NSMenu_numberOfItems(const void* m) {
-    NSMenu* menu = (NSMenu*)m;
-    return [menu numberOfItems];
 }
 
 void test_NSMenu_performActionForItemAtIndex(const void* m, NSInteger i) {
@@ -223,11 +243,6 @@ const char* test_NSMenuItem_keyEquivalent(const void *i) {
 unsigned long test_NSMenuItem_keyEquivalentModifierMask(const void *i) {
     NSMenuItem* item = (NSMenuItem*)i;
     return [item keyEquivalentModifierMask];
-}
-
-const void* test_NSMenuItem_submenu(const void* i) {
-    NSMenuItem* item = (NSMenuItem*)i;
-    return [item submenu];
 }
 
 const char* test_NSMenuItem_title(const void* i) {
