@@ -3,7 +3,7 @@ package gl
 import (
 	"image/color"
 	"math"
-	"sort"
+	"slices"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -567,7 +567,7 @@ func (p *painter) bindShaderTextures(state *shaderState, shader *canvas.Shader) 
 			state.textures[name] = &shaderTexture{tex: p.imgToTexture(img, canvas.ImageScaleSmooth), src: img}
 		}
 	}
-	sort.Strings(names)
+	slices.Sort(names)
 
 	for i, name := range names {
 		p.ctx.ActiveTexture(texture0 + uint32(i))
