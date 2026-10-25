@@ -137,8 +137,6 @@ func TestModifiersCorrected(t *testing.T) {
 }
 
 func TestGLFWButtonIsTouch(t *testing.T) {
-	// only the left and the right button are a tap, the others are ignored so
-	// that they cannot be mistaken for a touch
 	assert.True(t, glfwButtonIsTouch(glfw.MouseButtonLeft))
 	assert.True(t, glfwButtonIsTouch(glfw.MouseButtonRight))
 	assert.False(t, glfwButtonIsTouch(glfw.MouseButtonMiddle))

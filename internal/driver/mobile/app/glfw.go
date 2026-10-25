@@ -25,8 +25,6 @@ import (
 	"github.com/go-gl/glfw/v3.4/glfw"
 )
 
-// The simulated device is a tall, narrow screen so that layouts are checked in
-// the orientation that they are most likely to be broken in.
 const (
 	windowWidth  = 500
 	windowHeight = 1000
@@ -106,8 +104,7 @@ var glfwKeyCode = map[glfw.Key]key.Code{
 	glfw.KeyF12: key.CodeF12,
 }
 
-// glfwKeyToCode returns the USB HID code of a key, or key.CodeUnknown if the key
-// package has no equivalent for it.
+// glfwKeyToCode returns the USB HID code of a key
 func glfwKeyToCode(k glfw.Key) key.Code {
 	if code, ok := glfwKeyCode[k]; ok {
 		return code
@@ -188,9 +185,6 @@ func Main(f func(App)) {
 	}
 }
 
-// createGLFWWindow opens the window that the simulated device is displayed in.
-// It must be called on the main thread with GLFW already initialised, the
-// returned window holds the OpenGL context that the app will draw into.
 func createGLFWWindow() (*glfw.Window, error) {
 	// The mobile driver draws with OpenGL ES, so an OpenGL ES context is
 	// required here too, a desktop GL context would not have the entry points
@@ -262,8 +256,6 @@ func sendScroll(x, y, dy float32) {
 	}
 }
 
-// mouseDown tracks whether a button is held, so that moving the pointer without
-// pressing does not start a drag.
 var mouseDown bool
 
 func glfwButtonIsTouch(button glfw.MouseButton) bool {
@@ -303,9 +295,6 @@ func mouseMoved(_ *glfw.Window, x, y float64) {
 	sendTouch(touch.TypeMove, float32(x), float32(y))
 }
 
-// currentModifiers is the modifier state reported to the last key event, it is
-// used for the characters that follow it because GLFW deprecated the callback
-// that reports the modifiers of a character input.
 var currentModifiers key.Modifiers
 
 func keyPressed(_ *glfw.Window, k glfw.Key, _ int, action glfw.Action, mods glfw.ModifierKey) {
@@ -331,8 +320,6 @@ func keyPressed(_ *glfw.Window, k glfw.Key, _ int, action glfw.Action, mods glfw
 	}
 }
 
-// charInput is called when a key produces a Unicode character, the modifiers of
-// the key press that started it are used as GLFW no longer reports them here.
 func charInput(_ *glfw.Window, char rune) {
 	if stopped {
 		return
