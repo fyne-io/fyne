@@ -619,6 +619,29 @@ func TestWindow_DragIntoNewObjectKeepingFocus(t *testing.T) {
 	})
 }
 
+func TestWindow_NoDragAfterPressOutsideObject(t *testing.T) {
+	w := createWindow("Test")
+	r := canvas.NewRectangle(color.Black)
+	r.SetMinSize(fyne.NewSize(20, 20))
+	d := &draggableObject{Rectangle: canvas.NewRectangle(color.White)}
+	d.SetMinSize(fyne.NewSize(20, 20))
+	w.SetContent(container.NewHBox(r, d))
+
+	repaintWindow(w)
+	runOnMain(func() {
+		require.Equal(t, fyne.NewPos(24, 0), d.Position())
+
+		w.moveMouse(10, 10)
+		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+		w.moveMouse(32, 10)
+		w.moveMouse(34, 10)
+		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+
+		assert.Nil(t, d.popDragEvent())
+		assert.Nil(t, d.popDragEndEvent())
+	})
+}
+
 func TestWindow_NoDragEndWithoutDraggedEvent(t *testing.T) {
 	w := createWindow("Test")
 	do := &draggableMouseableObject{Rectangle: canvas.NewRectangle(color.White)}
