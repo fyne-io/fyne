@@ -101,6 +101,10 @@ func (m *MultipleWindows) refreshChildren() {
 
 func (m *MultipleWindows) setupChild(w *InnerWindow) {
 	w.OnDragged = func(ev *fyne.DragEvent) {
+		if m.Top() != w {
+			m.RaiseToTop(w)
+		}
+
 		abs := fyne.CurrentApp().Driver().AbsolutePositionForObject(m)
 		rel := ev.AbsolutePosition.Subtract(abs)
 		if rel.X < 0 || rel.Y < 0 || rel.X > m.Size().Width || rel.Y > m.Size().Height {
