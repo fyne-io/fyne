@@ -92,11 +92,7 @@ func (w *window) collectAccessibilityElements(
 	// Check if this object is accessible
 	accessible, ok := obj.(fyne.Accessible)
 	if !ok {
-		// Not an element itself, but it may hold accessible descendants (e.g. widget.Card)
-		for _, child := range driver.AccessibilityChildren(obj) {
-			result = append(result, w.collectAccessibilityElements(child, objPos, parent, depth+1)...)
-		}
-		return result
+		return nil
 	}
 
 	label := accessible.AccessibilityLabel()
