@@ -1,0 +1,11 @@
+<canvas padded size="150x200">
+	<content>
+		<container pos="4,4" size="142x192">
+			<widget size="36x36" type="*widget.Button">
+				<rectangle fillColor="button" radius="maximum" size="36x36"/>
+				<rectangle size="36x36"/>
+				<image fillMode="contain" pos="8,8" rsc="cancelIcon" size="iconInlineSize" themed="foreground"/>
+			</widget>
+		</container>
+	</content>
+</canvas>

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/test"
@@ -13,6 +14,16 @@ import (
 
 	"github.com/stretchr/testify/assert"
 )
+
+func TestNewIconButton(t *testing.T) {
+	button := widget.NewIconButton(theme.CancelIcon(), func() {})
+	window := test.NewWindow(container.NewWithoutLayout(button))
+	defer window.Close()
+	button.Resize(button.MinSize())
+	window.Resize(fyne.NewSize(150, 200))
+
+	test.AssertRendersToMarkup(t, "button/layout_icon_circular.xml", window.Canvas())
+}
 
 func TestButton_MinSize(t *testing.T) {
 	button := widget.NewButton("Hi", nil)
