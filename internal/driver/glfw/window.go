@@ -374,7 +374,6 @@ func (w *window) findObjectAtPositionMatching(canvas *glCanvas, mouse fyne.Posit
 }
 
 func (w *window) processMouseMoved(xpos float64, ypos float64) {
-	previousPos := w.mousePos
 	w.mousePos = fyne.NewPos(scale.ToFyneCoordinate(w.canvas, int(xpos)), scale.ToFyneCoordinate(w.canvas, int(ypos)))
 	mousePos := w.mousePos
 	mouseButton := w.mouseButton
@@ -409,7 +408,7 @@ func (w *window) processMouseMoved(xpos float64, ypos float64) {
 	}
 
 	if w.mouseButton != 0 && w.mouseButton != desktop.MouseButtonSecondary && !w.mouseDragStarted {
-		obj, pos, _ := w.findObjectAtPositionMatching(w.canvas, previousPos, func(object fyne.CanvasObject) bool {
+		obj, pos, _ := w.findObjectAtPositionMatching(w.canvas, mouseDragPos, func(object fyne.CanvasObject) bool {
 			_, ok := object.(fyne.Draggable)
 			return ok
 		})
@@ -420,7 +419,7 @@ func (w *window) processMouseMoved(xpos float64, ypos float64) {
 
 		if wid, ok := obj.(fyne.Draggable); ok && overThreshold {
 			w.mouseDragged = wid
-			w.mouseDraggedOffset = previousPos.Subtract(pos)
+			w.mouseDraggedOffset = mouseDragPos.Subtract(pos)
 			w.mouseDraggedObjStart = obj.Position()
 			w.mouseDragStarted = true
 		}
@@ -500,7 +499,6 @@ func (w *window) mouseOut() {
 func (w *window) processMouseClicked(button desktop.MouseButton, action action, modifiers fyne.KeyModifier) {
 	w.ensurePositionProcessed()
 
-	w.mouseDragPos = w.mousePos
 	mousePos := w.mousePos
 	mouseDragStarted := w.mouseDragStarted
 	if mousePos.IsZero() { // window may not be focused (darwin mostly) and so position callbacks not happening
@@ -508,6 +506,7 @@ func (w *window) processMouseClicked(button desktop.MouseButton, action action, 
 		w.mousePos = fyne.NewPos(scale.ToFyneCoordinate(w.canvas, int(xpos)), scale.ToFyneCoordinate(w.canvas, int(ypos)))
 		mousePos = w.mousePos
 	}
+	w.mouseDragPos = mousePos
 
 	co, pos, _ := w.findObjectAtPositionMatching(w.canvas, mousePos, func(object fyne.CanvasObject) bool {
 		switch object.(type) {
