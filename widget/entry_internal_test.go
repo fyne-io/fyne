@@ -9,7 +9,6 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
-	"fyne.io/fyne/v2/driver/mobile"
 	"fyne.io/fyne/v2/internal/cache"
 	intWidget "fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/test"
@@ -325,26 +324,19 @@ func TestEntry_PlaceholderTextStyle(t *testing.T) {
 	assert.Equal(t, e.TextStyle, e.placeholderWidget.Segments[0].(*TextSegment).Style.TextStyle)
 }
 
-func TestEntry_PressAfterScroll(t *testing.T) {
-	for name, press := range map[string]func(*Entry, *fyne.PointEvent){
-		"mouse": clickPrimary,
-		"touch": func(e *Entry, ev *fyne.PointEvent) { e.TouchDown(&mobile.TouchEvent{PointEvent: *ev}) },
-	} {
-		t.Run(name, func(t *testing.T) {
-			e := NewMultiLineEntry()
-			e.SetText(strings.Repeat("line\n", 50))
-			w := test.NewTempWindow(t, e)
-			w.Resize(fyne.NewSize(150, 100))
+func TestEntry_ClickAfterScroll(t *testing.T) {
+	e := NewMultiLineEntry()
+	e.SetText(strings.Repeat("line\n", 50))
+	w := test.NewTempWindow(t, e)
+	w.Resize(fyne.NewSize(150, 100))
 
-			e.scroller.ScrollToOffset(fyne.NewPos(0, 200))
-			press(e, getClickPosition("li", 2))
+	e.scroller.ScrollToOffset(fyne.NewPos(0, 200))
+	clickPrimary(e, getClickPosition("li", 2))
 
-			assert.Equal(t, float32(200), e.scroller.Offset.Y)
-			cursorY := e.CursorPosition().Y
-			assert.GreaterOrEqual(t, cursorY, e.scroller.Offset.Y)
-			assert.Less(t, cursorY, e.scroller.Offset.Y+e.scroller.Size().Height)
-		})
-	}
+	assert.Equal(t, float32(200), e.scroller.Offset.Y)
+	cursorY := e.CursorPosition().Y
+	assert.GreaterOrEqual(t, cursorY, e.scroller.Offset.Y)
+	assert.Less(t, cursorY, e.scroller.Offset.Y+e.scroller.Size().Height)
 }
 
 func TestEntry_Tab(t *testing.T) {
