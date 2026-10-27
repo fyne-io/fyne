@@ -140,12 +140,6 @@ func Test_gLDriver_AbsolutePositionForObject(t *testing.T) {
 
 const quitBeforeRunEnv = "FYNE_TEST_QUIT_BEFORE_RUN"
 
-// Quit called before Run makes Run return, rather than start an event loop
-// that nothing stops. initFailed relies on it when a window cannot be created
-// before Run; until then such an app logged the error and hung with no window.
-//
-// The loop of this test binary is already running, so the case runs in a child
-// process whose TestMain calls Quit and then Run.
 func TestGLDriver_QuitBeforeRun(t *testing.T) {
 	cmd := exec.Command(os.Args[0], "-test.run=^$")
 	cmd.Env = append(os.Environ(), quitBeforeRunEnv+"=1")

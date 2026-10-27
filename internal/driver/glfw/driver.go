@@ -42,8 +42,6 @@ type gLDriver struct {
 	initialized bool
 	done        chan struct{}
 
-	// quitBeforeRun records a Quit that came before the event loop started,
-	// so that Run returns instead of starting a loop that nothing would stop.
 	quitBeforeRun atomic.Bool
 
 	animation animation.Runner
@@ -112,11 +110,6 @@ func (d *gLDriver) Quit() {
 		close(d.done)
 		return
 	}
-
-	// The loop has not started yet, so there is nothing to close. Remember
-	// the request so that Run returns at once: initFailed quits this way when
-	// a window cannot be created before Run, and the loop would otherwise run
-	// forever with no window.
 	d.quitBeforeRun.Store(true)
 }
 
@@ -130,9 +123,7 @@ func (d *gLDriver) Run() {
 	}
 
 	go d.catchTerm()
-	if d.runGL() {
-		// Quit came before Run: no loop ran, and none will process the
-		// lifecycle's events, so there is nothing to wait for.
+	if quitEarly := d.runGL(); quitEarly {
 		return
 	}
 

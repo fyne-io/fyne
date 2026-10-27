@@ -102,11 +102,9 @@ func (*gLDriver) applyThemeToWindow(w fyne.Window) {
 	}
 }
 
-// runGL runs the event loop until Quit. It reports whether it returned without
-// running at all, because Quit was called before it started.
 func (d *gLDriver) runGL() (quitEarly bool) {
 	if !running.CompareAndSwap(false, true) {
-		return false // Run was called twice.
+		return false
 	}
 	if d.quitBeforeRun.Load() {
 		running.Store(false)
