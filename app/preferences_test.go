@@ -3,6 +3,7 @@ package app
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -84,6 +85,26 @@ func TestPreferences_Save_OverwriteFast(t *testing.T) {
 	p2 := loadPreferences("dummy")
 	p2.loadFromFile(path)
 	assert.Equal(t, "value2", p2.String("key2"))
+}
+
+func TestPreferences_Save_MarkedBeforeWrite(t *testing.T) {
+	p := loadPreferences("dummy")
+	path := p.storagePath()
+	defer os.Remove(path)
+	assert.NoError(t, os.WriteFile(path, []byte(`{"key":"value"}`), 0o644))
+
+	p.prefLock.RLock()
+	saved := make(chan error)
+	go func() {
+		saved <- p.save()
+	}()
+	for p.prefLock.TryRLock() {
+		p.prefLock.RUnlock()
+		runtime.Gosched()
+	}
+	assert.NoError(t, p.loadFromFile(path))
+	p.prefLock.RUnlock()
+	assert.NoError(t, <-saved)
 }
 
 func TestPreferences_Load(t *testing.T) {
