@@ -10,6 +10,7 @@ import (
 	"image/png"
 	"os"
 	"runtime"
+	"sync/atomic"
 
 	"github.com/fyne-io/image/ico"
 
@@ -40,6 +41,8 @@ type gLDriver struct {
 	windows     []fyne.Window
 	initialized bool
 	done        chan struct{}
+
+	quitBeforeRun atomic.Bool
 
 	animation animation.Runner
 
@@ -105,7 +108,9 @@ func (d *gLDriver) Quit() {
 	// Only call close once to avoid panic.
 	if running.CompareAndSwap(true, false) {
 		close(d.done)
+		return
 	}
+	d.quitBeforeRun.Store(true)
 }
 
 func (*gLDriver) RenderedTextSize(text string, textSize float32, style fyne.TextStyle, source fyne.Resource) (size fyne.Size, baseline float32) {
@@ -118,7 +123,9 @@ func (d *gLDriver) Run() {
 	}
 
 	go d.catchTerm()
-	d.runGL()
+	if quitEarly := d.runGL(); quitEarly {
+		return
+	}
 
 	// Ensure lifecycle events run to completion before the app exits
 	l, _ := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle)

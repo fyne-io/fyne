@@ -3,7 +3,11 @@
 package glfw
 
 import (
+	"bytes"
+	"os"
+	"os/exec"
 	"testing"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -11,6 +15,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_gLDriver_AbsolutePositionForObject(t *testing.T) {
@@ -130,5 +135,25 @@ func Test_gLDriver_AbsolutePositionForObject(t *testing.T) {
 				assert.Equal(t, tt.wantY, int(pos.Y))
 			})
 		})
+	}
+}
+
+const quitBeforeRunEnv = "FYNE_TEST_QUIT_BEFORE_RUN"
+
+func TestGLDriver_QuitBeforeRun(t *testing.T) {
+	cmd := exec.Command(os.Args[0], "-test.run=^$")
+	cmd.Env = append(os.Environ(), quitBeforeRunEnv+"=1")
+	out := &bytes.Buffer{}
+	cmd.Stdout, cmd.Stderr = out, out
+	require.NoError(t, cmd.Start())
+
+	done := make(chan error, 1)
+	go func() { done <- cmd.Wait() }()
+	select {
+	case err := <-done:
+		assert.NoError(t, err, out.String())
+	case <-time.After(10 * time.Second):
+		_ = cmd.Process.Kill()
+		t.Fatal("Run did not return after an earlier Quit")
 	}
 }
