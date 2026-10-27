@@ -1767,6 +1767,8 @@ func (r *entryRenderer) Refresh() {
 	if wrapping == fyne.TextWrapOff && scroll == widget.ScrollNone && r.scroll.Content != nil {
 		r.scroll.Hide()
 		r.scroll.Content = nil
+		// The content is moved back to the top, so a stale offset would map later taps onto the wrong line.
+		r.scroll.Offset = fyne.NewPos(0, 0)
 		content.Move(fyne.NewPos(0, inputBorder))
 		content.Resize(entrySize)
 
