@@ -98,6 +98,16 @@ func (*InnerWindow) MouseMoved(*desktop.MouseEvent) {
 func (*InnerWindow) MouseOut() {
 }
 
+// Tapped catches taps not handled by the window’s content and notifies the parent
+// so that the window can be raised.
+//
+// Since: 2.9
+func (w *InnerWindow) Tapped(*fyne.PointEvent) {
+	if f := w.OnTappedBar; f != nil {
+		f()
+	}
+}
+
 // CreateRenderer implements the [fyne.Widget] interface.
 func (w *InnerWindow) CreateRenderer() fyne.WidgetRenderer {
 	w.ExtendBaseWidget(w)

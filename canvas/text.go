@@ -36,6 +36,7 @@ type Text struct {
 type textMeasure struct {
 	valid   bool
 	fontGen uint64
+	scope   string
 	text    string
 	size    float32
 	style   fyne.TextStyle
@@ -49,18 +50,29 @@ func (t *Text) Hide() {
 	repaint(t)
 }
 
+type scopedTextMeasurer interface {
+	RenderedTextSizeFor(fyne.CanvasObject, string, float32, fyne.TextStyle, fyne.Resource) (fyne.Size, float32)
+}
+
 // MinSize returns the minimum size of this text object based on its font size and content.
 // This is normally determined by the render implementation.
 func (t *Text) MinSize() fyne.Size {
 	// not every resource is comparable, so text with a FontSource is not kept
 	m := &t.measured
 	gen := cache.FontMetricsGeneration()
-	if t.FontSource == nil && m.valid && m.fontGen == gen && m.text == t.Text && m.size == t.TextSize && m.style == t.TextStyle {
+	scope := cache.WidgetScopeID(t)
+	if t.FontSource == nil && m.valid && m.fontGen == gen && m.scope == scope && m.text == t.Text && m.size == t.TextSize && m.style == t.TextStyle {
 		return m.result
 	}
-	s, _ := fyne.CurrentApp().Driver().RenderedTextSize(t.Text, t.TextSize, t.TextStyle, t.FontSource)
+	var s fyne.Size
+	d := fyne.CurrentApp().Driver()
+	if scoped, ok := d.(scopedTextMeasurer); ok {
+		s, _ = scoped.RenderedTextSizeFor(t, t.Text, t.TextSize, t.TextStyle, t.FontSource)
+	} else {
+		s, _ = d.RenderedTextSize(t.Text, t.TextSize, t.TextStyle, t.FontSource)
+	}
 	if t.FontSource == nil {
-		*m = textMeasure{valid: true, fontGen: gen, text: t.Text, size: t.TextSize, style: t.TextStyle, result: s}
+		*m = textMeasure{valid: true, fontGen: gen, scope: scope, text: t.Text, size: t.TextSize, style: t.TextStyle, result: s}
 	}
 	return s
 }
