@@ -1307,6 +1307,11 @@ func (r *textRenderer) Refresh() {
 	}
 	objs = append(objs, r.obj.updateDecorations()...)
 	lead := len(objs)
+	// A wrapped segment is split across many rows that share the same segment.
+	// Converting its text to runes once and reusing it across those rows avoids
+	// re-allocating and decoding the whole string for every visible row.
+	var cachedSeg RichTextSegment
+	var cachedRunes []rune
 	for _, bound := range bounds {
 		for i, seg := range bound.segments {
 			_, isText := seg.(*TextSegment)
@@ -1325,7 +1330,11 @@ func (r *textRenderer) Refresh() {
 			obj := r.obj.cachedSegmentVisual(seg, reuse)
 			seg.Update(obj)
 			var txt string
-			runes := []rune(seg.Textual())
+			if seg != cachedSeg {
+				cachedSeg = seg
+				cachedRunes = []rune(seg.Textual())
+			}
+			runes := cachedRunes
 
 			if i == 0 {
 				if len(bound.segments) == 1 {
