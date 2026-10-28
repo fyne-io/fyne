@@ -301,31 +301,42 @@ func (c *canvas) tapMove(pos fyne.Position, tapID int,
 	offset := fyne.Delta{DX: deltaX, DY: deltaY}
 	c.lastTapDelta[tapID] = offset
 
-	co, objPos, _ := c.findObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {
-		if _, ok := object.(fyne.Draggable); ok {
-			return true
-		} else if _, ok := object.(mobile.Touchable); ok {
-			return true
-		}
-
-		return false
-	})
+	// While a drag is in flight its target is locked, so the visible tree only
+	// needs walking again if there is a touch target to cancel. Skipping the
+	// walk keeps the per-move cost off the scroll and text-entry hot path, where
+	// move events arrive at up to twice the display refresh rate.
+	var co fyne.CanvasObject
+	var objPos fyne.Position
 	var scrollOtherDirection fyne.CanvasObject
-	if scr, ok := co.(*container.Scroll); ok {
-		switch scr.Direction {
-		case container.ScrollHorizontalOnly:
-			c.otherDirection = container.ScrollVerticalOnly
-		case container.ScrollVerticalOnly:
-			c.otherDirection = container.ScrollHorizontalOnly
-		}
-		if c.otherDirection != container.ScrollBoth {
-			scrollOtherDirection, _, _ = c.findObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {
-				if scr, ok := object.(*container.Scroll); ok {
-					return scr.Direction == c.otherDirection || scr.Direction == container.ScrollBoth
-				}
+	if c.dragging == nil || c.touched[tapID] != nil {
+		co, objPos, _ = c.findObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {
+			if _, ok := object.(fyne.Draggable); ok {
+				return true
+			} else if _, ok := object.(mobile.Touchable); ok {
+				return true
+			}
 
-				return false
-			})
+			return false
+		})
+	}
+
+	if c.dragging == nil {
+		if scr, ok := co.(*container.Scroll); ok {
+			switch scr.Direction {
+			case container.ScrollHorizontalOnly:
+				c.otherDirection = container.ScrollVerticalOnly
+			case container.ScrollVerticalOnly:
+				c.otherDirection = container.ScrollHorizontalOnly
+			}
+			if c.otherDirection != container.ScrollBoth {
+				scrollOtherDirection, _, _ = c.findObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {
+					if scr, ok := object.(*container.Scroll); ok {
+						return scr.Direction == c.otherDirection || scr.Direction == container.ScrollBoth
+					}
+
+					return false
+				})
+			}
 		}
 	}
 
