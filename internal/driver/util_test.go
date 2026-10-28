@@ -550,3 +550,36 @@ func (s *scrollable) Size() fyne.Size {
 func (*scrollable) Visible() bool {
 	return true
 }
+
+func TestAccessibilityChildren(t *testing.T) {
+	label := widget.NewLabel("leaf")
+	assert.Empty(t, driver.AccessibilityChildren(label))
+
+	box := container.NewVBox(label)
+	assert.Equal(t, []fyne.CanvasObject{label}, driver.AccessibilityChildren(box))
+
+	content := widget.NewLabel("content")
+	card := widget.NewCard("Title", "Subtitle", content)
+	assert.Contains(t, driver.AccessibilityChildren(card), fyne.CanvasObject(content))
+
+	assert.Empty(t, driver.AccessibilityChildren(canvas.NewRectangle(color.Black)))
+}
+
+func TestAccessibilityChildren_NestedInCard(t *testing.T) {
+	inner := widget.NewLabel("nested")
+	card := widget.NewCard("", "", container.NewVBox(inner))
+
+	var found []string
+	var walk func(fyne.CanvasObject)
+	walk = func(o fyne.CanvasObject) {
+		if a, ok := o.(fyne.Accessible); ok && a.AccessibilityRole() != fyne.AccessibleRoleContainer {
+			found = append(found, a.AccessibilityLabel())
+		}
+		for _, child := range driver.AccessibilityChildren(o) {
+			walk(child)
+		}
+	}
+	walk(container.NewVBox(widget.NewLabel("sibling"), card))
+
+	assert.Equal(t, []string{"sibling", "nested"}, found)
+}
