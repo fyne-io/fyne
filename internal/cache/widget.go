@@ -1,6 +1,8 @@
 package cache
 
 import (
+	"sync/atomic"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/async"
 )
@@ -15,22 +17,53 @@ type isBaseWidget interface {
 // Renderer looks up the render implementation for a widget
 // If one does not exist, it creates and caches a renderer for the widget.
 func Renderer(wid fyne.Widget) fyne.WidgetRenderer {
-	renderer, ok := CachedRenderer(wid)
-	if !ok && wid != nil {
-		renderer = wid.CreateRenderer()
-		rinfo := &rendererInfo{renderer: renderer}
-		rinfo.setAlive()
-		renderers.Store(wid, rinfo)
-	}
+	r, _ := rendererEntry(wid)
+	return r
+}
 
-	return renderer
+// RendererRef holds a widget's cached renderer between walks.
+type RendererRef struct {
+	info *rendererInfo
+}
+
+// RendererFor returns the renderer for wid, skipping the cache lookup while
+// ref holds one that is not destroyed.
+func RendererFor(ref *RendererRef, wid fyne.Widget) fyne.WidgetRenderer {
+	if info := ref.info; info != nil && !info.destroyed.Load() {
+		info.setAlive()
+		return info.renderer
+	}
+	r, info := rendererEntry(wid)
+	ref.info = info
+	return r
+}
+
+func rendererEntry(wid fyne.Widget) (fyne.WidgetRenderer, *rendererInfo) {
+	if rinfo := cachedRendererInfo(wid); rinfo != nil {
+		return rinfo.renderer, rinfo
+	}
+	if wid == nil {
+		return nil, nil
+	}
+	rinfo := &rendererInfo{renderer: wid.CreateRenderer()}
+	rinfo.setAlive()
+	renderers.Store(wid, rinfo)
+	return rinfo.renderer, rinfo
 }
 
 // CachedRenderer looks up the cached render implementation for a widget
 // If a renderer does not exist in the cache, it returns nil, false.
 func CachedRenderer(wid fyne.Widget) (fyne.WidgetRenderer, bool) {
-	if wid == nil {
+	rinfo := cachedRendererInfo(wid)
+	if rinfo == nil {
 		return nil, false
+	}
+	return rinfo.renderer, true
+}
+
+func cachedRendererInfo(wid fyne.Widget) *rendererInfo {
+	if wid == nil {
+		return nil
 	}
 
 	if wd, ok := wid.(isBaseWidget); ok {
@@ -41,11 +74,11 @@ func CachedRenderer(wid fyne.Widget) (fyne.WidgetRenderer, bool) {
 
 	rinfo, ok := renderers.Load(wid)
 	if !ok {
-		return nil, false
+		return nil
 	}
 
 	rinfo.setAlive()
-	return rinfo.renderer, true
+	return rinfo
 }
 
 // DestroyRenderer frees a render implementation for a widget.
@@ -56,6 +89,7 @@ func DestroyRenderer(wid fyne.Widget) {
 		return
 	}
 	if rinfo != nil {
+		rinfo.destroyed.Store(true)
 		rinfo.renderer.Destroy()
 	}
 	overrides.Delete(wid)
@@ -70,5 +104,6 @@ func IsRendered(wid fyne.Widget) bool {
 
 type rendererInfo struct {
 	expiringCache
-	renderer fyne.WidgetRenderer
+	renderer  fyne.WidgetRenderer
+	destroyed atomic.Bool
 }
