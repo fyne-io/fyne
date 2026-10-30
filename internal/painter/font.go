@@ -5,6 +5,7 @@ import (
 	"image/color"
 	"image/draw"
 	"math"
+	"reflect"
 	"slices"
 	"strings"
 	"sync"
@@ -137,17 +138,22 @@ func CachedFontFace(style fyne.TextStyle, source fyne.Resource, o fyne.CanvasObj
 		return val
 	}
 
-	scope := ""
-	if o != nil { // for overridden themes get the cache key right
-		scope = cache.WidgetScopeID(o)
+	th := theme.CurrentForWidget(o)
+	font1 := th.Font(style)
+	// A scope's faces differ from the app's only by its theme's font, and every
+	// ThemeOverride makes a new scope on each Refresh. Key by that font so that
+	// scopes share an entry rather than each adding one that is never freed.
+	id := cacheID{style: style, font: font1}
+	if !hashable(font1) {
+		id = cacheID{style: style}
+		if o != nil { // for overridden themes get the cache key right
+			id.scope = cache.WidgetScopeID(o)
+		}
 	}
 
-	val, ok := fontCache.Load(cacheID{style: style, scope: scope})
+	val, ok := fontCache.Load(id)
 	if !ok {
 		var faces *dynamicFontMap
-
-		th := theme.CurrentForWidget(o)
-		font1 := th.Font(style)
 
 		// Skip any nil fallback fonts — they can be nil when built with
 		// -tags no_emoji, and the lookupFaces loop expects non-nil entries.
@@ -183,7 +189,7 @@ func CachedFontFace(style fyne.TextStyle, source fyne.Resource, o fyne.CanvasObj
 		}
 
 		val = &FontCacheItem{Fonts: faces}
-		fontCache.Store(cacheID{style: style, scope: scope}, val)
+		fontCache.Store(id, val)
 	}
 
 	return val
@@ -224,6 +230,11 @@ func DrawStringOffset(dst draw.Image, s string, color color.Color, f shaping.Fon
 
 		r.DrawShapedRunAt(run, dst, int(x)-offset, yPix)
 	})
+}
+
+// hashable reports whether res can be used as a map key.
+func hashable(res fyne.Resource) bool {
+	return res != nil && reflect.TypeOf(res).Comparable()
 }
 
 func loadMeasureFont(data fyne.Resource) *font.Face {
@@ -614,6 +625,7 @@ type FontCacheItem struct {
 
 type cacheID struct {
 	style fyne.TextStyle
+	font  fyne.Resource
 	scope string
 }
 
