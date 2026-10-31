@@ -68,6 +68,9 @@ type (
 
 var textureFilterToGL = [...]int32{gl.LINEAR, gl.NEAREST, gl.LINEAR}
 
+// glyphAtlasSupported enables batched atlas text; see atlas.go.
+const glyphAtlasSupported = true
+
 func (p *painter) Init() {
 	p.ctx = &esContext{}
 	err := gl.Init()
@@ -267,6 +270,20 @@ func (c *esContext) TexImage2D(target uint32, level, width, height int, colorFor
 		colorFormat,
 		typ,
 		ptr,
+	)
+}
+
+func (c *esContext) TexSubImage2D(target uint32, level, x, y, width, height int, colorFormat, typ uint32, data []uint8) {
+	gl.TexSubImage2D(
+		target,
+		int32(level),
+		int32(x),
+		int32(y),
+		int32(width),
+		int32(height),
+		colorFormat,
+		typ,
+		gl.Ptr(data),
 	)
 }
 

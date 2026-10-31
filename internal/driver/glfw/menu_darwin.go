@@ -126,7 +126,9 @@ func clearNativeMenu() {
 }
 
 func createNativeMenu(w *window, menu *fyne.Menu, nextItemID int) (unsafe.Pointer, int) {
-	nsMenu := C.createDarwinMenu(C.CString(menu.Label))
+	cLabel := C.CString(menu.Label)
+	nsMenu := C.createDarwinMenu(cLabel)
+	C.free(unsafe.Pointer(cLabel))
 	for _, item := range menu.Items {
 		nsMenuItem := insertNativeMenuItem(nsMenu, item, nextItemID, -1)
 		nextItemID = registerCallback(w, item, nextItemID)
@@ -160,10 +162,11 @@ func handleSpecialItems(w *window, menu *fyne.Menu, nextItemID int, addSeparator
 
 			insertNativeMenuItem(C.darwinAppMenu(), item, nextItemID, 1)
 			if addSeparator && item.Label != "About" {
+				cEmpty := C.CString("")
 				C.insertDarwinMenuItem(
 					C.darwinAppMenu(),
-					C.CString(""),
-					C.CString(""),
+					cEmpty,
+					cEmpty,
 					C.uint(0),
 					C.int(nextItemID),
 					C.int(1),
@@ -171,6 +174,7 @@ func handleSpecialItems(w *window, menu *fyne.Menu, nextItemID int, addSeparator
 					unsafe.Pointer(nil),
 					C.uint(0),
 				)
+				C.free(unsafe.Pointer(cEmpty))
 			}
 			nextItemID = registerCallback(w, item, nextItemID)
 		}
@@ -211,10 +215,14 @@ func insertNativeMenuItem(nsMenu unsafe.Pointer, item *fyne.MenuItem, nextItemID
 			imgDataLength = uint(len(item.Icon.Content()))
 		}
 	}
+	cLabel := C.CString(item.Label)
+	defer C.free(unsafe.Pointer(cLabel))
+	cKey := C.CString(keyEquivalent(item))
+	defer C.free(unsafe.Pointer(cKey))
 	return C.insertDarwinMenuItem(
 		nsMenu,
-		C.CString(item.Label),
-		C.CString(keyEquivalent(item)),
+		cLabel,
+		cKey,
 		C.uint(keyEquivalentModifierMask(item)),
 		C.int(nextItemID),
 		C.int(index),

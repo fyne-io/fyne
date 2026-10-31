@@ -11,7 +11,9 @@ import (
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 
+	"fyne.io/fyne/v2/internal/cache"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewTextGrid(t *testing.T) {
@@ -138,6 +140,20 @@ func TestTextGrid_ScrollToBottom(t *testing.T) {
 	scrolling.ScrollToBottom()
 	scrolling.scroller.ScrollToTop()
 	test.AssertObjectRendersToMarkup(t, "textgrid/scroll.xml", scrolling)
+}
+
+func TestTextGrid_ScrollToBottom_AfterAppend(t *testing.T) {
+	grid := NewTextGridFromString("Something\nElse")
+	grid.Scroll = widget.ScrollVerticalOnly
+	grid.Resize(fyne.NewSize(50, 20))
+	grid.Refresh()
+
+	grid.Append("More\nAnd more\nAnd even more")
+	rowHeight := grid.content.cellSize.Height
+	assert.Equal(t, rowHeight*5, grid.scroller.Content.Size().Height, "appended rows should be measured by the scroller")
+
+	grid.ScrollToBottom()
+	assert.Equal(t, rowHeight*5-20, grid.scroller.Offset.Y, "should scroll to the newly appended bottom")
 }
 
 func TestTextGrid_CreateRendererRows(t *testing.T) {
@@ -489,4 +505,25 @@ func assertGridStyle(t *testing.T, g *TextGrid, content string, expectedStyles m
 func rendererCell(r *textGridRowRenderer, col int) (*canvas.Rectangle, *canvas.Text) {
 	i := col * 2
 	return r.obj.objects[i].(*canvas.Rectangle), r.obj.objects[i+1].(*canvas.Text)
+}
+
+func TestTextGrid_NewCellsInTheOverrideScope(t *testing.T) {
+	test.NewTempApp(t)
+	grid := NewTextGridFromString("a")
+	cache.OverrideTheme(grid, test.Theme())
+	w := test.NewTempWindow(t, grid)
+	w.Resize(fyne.NewSize(400, 300))
+	grid.SetText(strings.Repeat("longer row of text\n", 8))
+	scope := cache.WidgetScopeID(grid)
+	require.NotEmpty(t, scope)
+	cells := 0
+	for _, r := range grid.content.visible {
+		for _, o := range r.(*textGridRow).objects {
+			if txt, ok := o.(*canvas.Text); ok {
+				cells++
+				assert.Equal(t, scope, cache.WidgetScopeID(txt), "cell %q", txt.Text)
+			}
+		}
+	}
+	assert.Greater(t, cells, 50)
 }

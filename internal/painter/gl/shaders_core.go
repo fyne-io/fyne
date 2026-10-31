@@ -19,6 +19,8 @@ var (
 	shaderFragBlur []byte
 	//go:embed shaders/ellipse.frag
 	shaderFragEllipse []byte
+	//go:embed shaders/glyph.frag
+	shaderFragGlyph []byte
 	//go:embed shaders/line.frag
 	shaderFragLine []byte
 	//go:embed shaders/regular_polygon.frag
@@ -30,6 +32,8 @@ var (
 	//go:embed shaders/simple.frag
 	shaderFragSimple []byte
 
+	//go:embed shaders/glyph.vert
+	shaderVertGlyph []byte
 	//go:embed shaders/line.vert
 	shaderVertLine []byte
 	//go:embed shaders/passthrough_2d.vert

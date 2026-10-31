@@ -3,6 +3,31 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
+## 2.8.2 - 12 Oct 2026
+
+### Changed
+
+* Select now uses a localized default placeholder
+* Window size is capped to the maximum the graphics driver can draw
+* Android requests persistent read permission for user-selected files and folders
+* The mobile simulator on X11 now supports keyboard input
+
+### Fixed
+
+* Editing text in an entry on android causes the press-and-hold behavior of backspace to stop working (#5467)
+* Label with very long text crashes on Wayland (#5950)
+* Raster that was created with NewRasterFromImage renders from Bounds.Min instead of from zero (#6461)
+* Child-menu does not scroll to items that does not fit in the current window (#6479)
+* File dialog nil pointer crash on MinSize()/Resize() (#6495)
+* Selection in Label with trailing alignment is not drawn correctly (#6519)
+* Fixed iOS apps feeling slower when typing
+* Window.SetOnDropped reported a stale drop position
+* Window was blank after minimizing on Windows when FixedSize was set
+* Various SVG rendering bug fixes from updated oksvg
+* Adjacent rectangles could gap or flicker by a pixel as edges were rounded separately
+* Many performance increases in Text handling and graphics operations
+
+
 ## 2.8.1 - 26 Aug 2026
 
 ### Changed

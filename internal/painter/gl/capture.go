@@ -47,10 +47,16 @@ func (p *painter) Capture(c fyne.Canvas) image.Image {
 	width, height := c.PixelCoordinateForPosition(pos)
 	pixels := make([]uint8, width*height*4)
 
+	// the viewport is anchored to the top of the drawable
+	y := p.viewportOffsetY
+	if y < 0 {
+		y = 0
+	}
+
 	p.contextProvider.RunWithContext(func() {
 		p.ctx.ReadBuffer(front)
 		p.logError()
-		p.ctx.ReadPixels(0, 0, width, height, colorFormatRGBA, unsignedByte, pixels)
+		p.ctx.ReadPixels(0, y, width, height, colorFormatRGBA, unsignedByte, pixels)
 		p.logError()
 		// Restore the default read buffer for future reads.
 		p.ctx.ReadBuffer(back)

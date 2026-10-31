@@ -15,7 +15,9 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/driver/mobile"
 	"fyne.io/fyne/v2/internal/async"
+	intdriver "fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/driver/common"
+	intwidget "fyne.io/fyne/v2/internal/widget"
 	_ "fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -98,6 +100,7 @@ func Test_canvas_DraggingOutOfWidget(t *testing.T) {
 	dragged = false
 	c.tapMove(fyne.NewPos(40, 120), 0, func(wid fyne.Draggable, ev *fyne.DragEvent) {
 		assert.Equal(t, slider, wid)
+		assert.Equal(t, fyne.NewPos(40, 120), ev.AbsolutePosition)
 		wid.Dragged(ev)
 		dragged = true
 	})
@@ -420,6 +423,431 @@ func Test_canvas_TappedSecondary(t *testing.T) {
 		assert.Equal(t, fyne.NewPos(6, 6), pointEvent.AbsolutePosition)
 		assert.Equal(t, fyne.NewPos(3, 3), pointEvent.Position)
 	}
+}
+
+func Test_canvas_TapSurvivesDialogRelayout(t *testing.T) {
+	t.Run("growth keeps the pressed button", func(t *testing.T) {
+		var topTaps, bottomTaps int
+		top := widget.NewButton("Top", func() { topTaps++ })
+		bottom := widget.NewButton("Bottom", func() { bottomTaps++ })
+		c, entry := newModalTapCanvas(top, bottom)
+		roots := overlayRoots(c)
+		tapPos := pressPos(bottom, roots)
+		local := tapPos.Subtract(objectOrigin(bottom, roots))
+		deltaY := objectOrigin(bottom, roots).Y - objectOrigin(top, roots).Y
+		if !assert.Greater(t, deltaY, float32(8)) || !assert.True(t, objectContains(bottom, roots, tapPos)) {
+			return
+		}
+		assert.False(t, objectContains(top, roots, tapPos))
+		assert.Equal(t, entry, c.Focused())
+		assertOverlayCentered(t, c)
+
+		pop := c.Overlays().Top().(*intwidget.OverlayContainer).Content
+		before := pop.Position()
+		resized := resizeOnUnfocus(c, fyne.NewSize(360, 640+deltaY*2))
+		c.tapDown(tapPos, 0)
+		assert.True(t, resized())
+		assert.Nil(t, c.Focused())
+		assert.True(t, objectContains(top, roots, tapPos), "button under the finger changed")
+		assert.False(t, objectContains(bottom, roots, tapPos))
+		assert.Greater(t, pop.Position().Y, before.Y)
+		assertOverlayCentered(t, c)
+
+		got, ev := dispatchTap(c, tapPos, 0)
+		assert.Equal(t, bottom, got)
+		assert.Equal(t, 1, bottomTaps)
+		assert.Zero(t, topTaps)
+		if assert.NotNil(t, ev) {
+			assert.Equal(t, local, ev.Position)
+			assert.Equal(t, tapPos, ev.AbsolutePosition)
+		}
+		assertNoTapState(t, c, 0)
+	})
+
+	t.Run("shrink keeps the pressed button", func(t *testing.T) {
+		var topTaps, bottomTaps int
+		top := widget.NewButton("Top", func() { topTaps++ })
+		bottom := widget.NewButton("Bottom", func() { bottomTaps++ })
+		c, _ := newModalTapCanvas(top, bottom)
+		roots := overlayRoots(c)
+		tapPos := pressPos(bottom, roots)
+		deltaY := objectOrigin(bottom, roots).Y - objectOrigin(top, roots).Y
+		shrunkH := float32(640) - deltaY*2
+		if !assert.Greater(t, deltaY, float32(8)) || !assert.Greater(t, shrunkH, float32(200)) {
+			return
+		}
+
+		resized := resizeOnUnfocus(c, fyne.NewSize(360, shrunkH))
+		c.tapDown(tapPos, 0)
+		assert.True(t, resized())
+		assert.False(t, objectContains(bottom, roots, tapPos), "pressed button moved off the finger")
+		assert.False(t, objectContains(top, roots, tapPos))
+		assertOverlayCentered(t, c)
+
+		got, _ := dispatchTap(c, tapPos, 0)
+		assert.Equal(t, bottom, got)
+		assert.Equal(t, 1, bottomTaps)
+		assert.Zero(t, topTaps)
+	})
+
+	t.Run("touchable keeps down up pairing", func(t *testing.T) {
+		top := newRecordingTouch("Top")
+		bottom := newRecordingTouch("Bottom")
+		c, _ := newModalTapCanvas(top, bottom)
+		roots := overlayRoots(c)
+		tapPos := pressPos(bottom, roots)
+		local := tapPos.Subtract(objectOrigin(bottom, roots))
+		deltaY := objectOrigin(bottom, roots).Y - objectOrigin(top, roots).Y
+		if !assert.Greater(t, deltaY, float32(8)) || !assert.True(t, objectContains(bottom, roots, tapPos)) {
+			return
+		}
+
+		resized := resizeOnUnfocus(c, fyne.NewSize(360, 640+deltaY*2))
+		c.tapDown(tapPos, 3)
+		assert.True(t, resized())
+		assert.True(t, objectContains(top, roots, tapPos))
+		assert.False(t, objectContains(bottom, roots, tapPos))
+
+		got, ev := dispatchTap(c, tapPos, 3)
+		assert.Equal(t, bottom, got)
+		assert.Nil(t, top.down)
+		assert.Nil(t, top.up)
+		if assert.NotNil(t, bottom.down) && assert.NotNil(t, bottom.up) {
+			assert.Equal(t, 3, bottom.down.ID)
+			assert.Equal(t, local, bottom.down.Position)
+			assert.Equal(t, tapPos, bottom.down.AbsolutePosition)
+			assert.Equal(t, 3, bottom.up.ID)
+			assert.Equal(t, local, bottom.up.Position)
+			assert.Equal(t, tapPos, bottom.up.AbsolutePosition)
+		}
+		if assert.NotNil(t, ev) {
+			assert.Equal(t, local, ev.Position)
+			assert.Equal(t, tapPos, ev.AbsolutePosition)
+		}
+		assert.Zero(t, bottom.cancels)
+	})
+}
+
+func Test_canvas_TapCaptureDoesNotRetarget(t *testing.T) {
+	t.Run("move away then tap again", func(t *testing.T) {
+		var aTaps, bTaps int
+		a := widget.NewButton("A", func() { aTaps++ })
+		b := widget.NewButton("B", func() { bTaps++ })
+		a.Resize(fyne.NewSize(40, 40))
+		b.Resize(fyne.NewSize(40, 40))
+		a.Move(fyne.NewPos(10, 10))
+		b.Move(fyne.NewPos(100, 10))
+		c := newCanvas(fyne.CurrentDevice()).(*canvas)
+		c.SetContent(container.NewWithoutLayout(a, b))
+		c.Resize(fyne.NewSize(220, 120))
+		roots := []fyne.CanvasObject{c.content}
+		tapA := objectOrigin(a, roots).AddXY(20, 20)
+		tapB := objectOrigin(b, roots).AddXY(20, 20)
+
+		c.tapDown(tapA, 0)
+		c.tapMove(tapB, 0, func(wid fyne.Draggable, ev *fyne.DragEvent) {
+			wid.Dragged(ev)
+		})
+		got, _ := dispatchTap(c, tapB, 0)
+		assert.Equal(t, b, got)
+		assert.Zero(t, aTaps)
+		assert.Equal(t, 1, bTaps)
+
+		c.tapDown(tapA, 0)
+		got, _ = dispatchTap(c, tapA, 0)
+		assert.Equal(t, a, got)
+		assert.Equal(t, 1, aTaps)
+		assertNoTapState(t, c, 0)
+	})
+
+	t.Run("drag does not fire captured button", func(t *testing.T) {
+		taps := 0
+		button := widget.NewButton("A", func() { taps++ })
+		scroll := container.NewVScroll(container.NewVBox(button, widget.NewLabel("1\n2\n3\n4\n5\n6\n7\n8\n9\n10")))
+		c := newCanvas(fyne.CurrentDevice()).(*canvas)
+		c.SetContent(scroll)
+		c.Resize(fyne.NewSize(120, 80))
+		roots := []fyne.CanvasObject{c.content}
+		pos := pressPos(button, roots)
+
+		c.tapDown(pos, 0)
+		c.tapMove(pos.AddXY(0, 70), 0, func(wid fyne.Draggable, ev *fyne.DragEvent) {
+			wid.Dragged(ev)
+		})
+		dispatchTap(c, pos.AddXY(0, 70), 0)
+		assert.Zero(t, taps)
+		assertNoTapState(t, c, 0)
+
+		scroll.ScrollToTop()
+		pos = pressPos(button, roots)
+		c.tapDown(pos, 1)
+		got, _ := dispatchTap(c, pos, 1)
+		assert.Equal(t, button, got)
+		assert.Equal(t, 1, taps)
+	})
+
+	t.Run("hidden pressed widget", func(t *testing.T) {
+		var aTaps, bTaps int
+		a := widget.NewButton("A", func() { aTaps++ })
+		b := widget.NewButton("B", func() { bTaps++ })
+		c := newCanvas(fyne.CurrentDevice()).(*canvas)
+		c.SetContent(container.NewStack(b, a))
+		c.Resize(fyne.NewSize(120, 80))
+		roots := []fyne.CanvasObject{c.content}
+		pos := objectOrigin(a, roots).AddXY(a.Size().Width/2, a.Size().Height/2)
+
+		c.tapDown(pos, 0)
+		a.Hide()
+		dispatchTap(c, pos, 0)
+		assert.Zero(t, aTaps)
+		assert.Zero(t, bTaps)
+		assert.False(t, a.Visible())
+		assert.True(t, objectContains(b, roots, pos))
+
+		c.tapDown(pos, 0)
+		got, _ := dispatchTap(c, pos, 0)
+		assert.Equal(t, b, got)
+		assert.Equal(t, 1, bTaps)
+	})
+
+	t.Run("removed pressed widget", func(t *testing.T) {
+		var aTaps, bTaps int
+		a := widget.NewButton("A", func() { aTaps++ })
+		b := widget.NewButton("B", func() { bTaps++ })
+		stack := container.NewStack(b, a)
+		c := newCanvas(fyne.CurrentDevice()).(*canvas)
+		c.SetContent(stack)
+		c.Resize(fyne.NewSize(120, 80))
+		roots := []fyne.CanvasObject{c.content}
+		pos := objectOrigin(a, roots).AddXY(a.Size().Width/2, a.Size().Height/2)
+
+		c.tapDown(pos, 0)
+		stack.Remove(a)
+		dispatchTap(c, pos, 0)
+		assert.Zero(t, aTaps)
+		assert.Zero(t, bTaps)
+
+		c.tapDown(pos, 0)
+		got, _ := dispatchTap(c, pos, 0)
+		assert.Equal(t, b, got)
+		assert.Equal(t, 1, bTaps)
+	})
+
+	t.Run("replaced overlay", func(t *testing.T) {
+		var aTaps, underTaps int
+		under := widget.NewButton("Under", func() { underTaps++ })
+		a := widget.NewButton("A", func() { aTaps++ })
+		c := newCanvas(fyne.CurrentDevice()).(*canvas)
+		c.SetContent(under)
+		c.Resize(fyne.NewSize(300, 400))
+		popup := widget.NewModalPopUp(a, c)
+		popup.Show()
+		roots := overlayRoots(c)
+		pos := objectOrigin(a, roots).AddXY(a.Size().Width/2, a.Size().Height/2)
+		if !assert.True(t, objectContains(a, roots, pos)) {
+			return
+		}
+
+		c.tapDown(pos, 0)
+		popup.Hide()
+		dispatchTap(c, pos, 0)
+		assert.Zero(t, aTaps)
+		assert.Zero(t, underTaps)
+		assert.Nil(t, c.Overlays().Top())
+
+		c.tapDown(pos, 0)
+		got, _ := dispatchTap(c, pos, 0)
+		assert.Equal(t, under, got)
+		assert.Equal(t, 1, underTaps)
+	})
+
+	t.Run("content sliding under an empty press", func(t *testing.T) {
+		taps := 0
+		button := widget.NewButton("A", func() { taps++ })
+		button.Resize(fyne.NewSize(40, 40))
+		button.Move(fyne.NewPos(10, 10))
+		c := newCanvas(fyne.CurrentDevice()).(*canvas)
+		c.SetContent(container.NewWithoutLayout(button))
+		c.Resize(fyne.NewSize(200, 200))
+		roots := []fyne.CanvasObject{c.content}
+		pos := fyne.NewPos(150, 150)
+		assert.False(t, objectContains(button, roots, pos))
+
+		c.tapDown(pos, 0)
+		button.Move(pos.Subtract(objectOrigin(c.content, roots)))
+		assert.True(t, objectContains(button, roots, pos))
+		dispatchTap(c, pos, 0)
+		assert.Zero(t, taps)
+		assertNoTapState(t, c, 0)
+	})
+
+	t.Run("unmatched reuse and interleaved ids", func(t *testing.T) {
+		label := &tappableLabel{}
+		label.ExtendBaseWidget(label)
+		c := newCanvas(fyne.CurrentDevice()).(*canvas)
+		c.SetContent(label)
+		c.Resize(fyne.NewSize(80, 80))
+		pos := fyne.NewPos(20, 20)
+
+		dispatchTap(c, pos, 9)
+		assert.False(t, label.tap)
+		assert.False(t, label.altTap)
+
+		c.tapDown(pos, 4)
+		dispatchTap(c, pos, 4)
+		assert.True(t, label.tap)
+		assert.False(t, label.altTap)
+		label.tap = false
+		dispatchTap(c, pos, 4)
+		assert.False(t, label.tap)
+		assert.False(t, label.altTap)
+		assertNoTapState(t, c, 4)
+
+		c.tapDown(pos, 4)
+		dispatchTap(c, pos, 4)
+		assert.True(t, label.tap)
+		assertNoTapState(t, c, 4)
+
+		var aTaps, bTaps int
+		a := widget.NewButton("A", func() { aTaps++ })
+		b := widget.NewButton("B", func() { bTaps++ })
+		a.Resize(fyne.NewSize(40, 40))
+		b.Resize(fyne.NewSize(40, 40))
+		a.Move(fyne.NewPos(10, 10))
+		b.Move(fyne.NewPos(100, 10))
+		c = newCanvas(fyne.CurrentDevice()).(*canvas)
+		c.SetContent(container.NewWithoutLayout(a, b))
+		c.Resize(fyne.NewSize(220, 120))
+		roots := []fyne.CanvasObject{c.content}
+		tapA := objectOrigin(a, roots).AddXY(20, 20)
+		tapB := objectOrigin(b, roots).AddXY(20, 20)
+
+		c.tapDown(tapA, 0)
+		c.tapDown(tapB, 1)
+		got, _ := dispatchTap(c, tapB, 1)
+		assert.Equal(t, b, got)
+		got, _ = dispatchTap(c, tapA, 0)
+		assert.Equal(t, a, got)
+		assert.Equal(t, 1, aTaps)
+		assert.Equal(t, 1, bTaps)
+		dispatchTap(c, tapA, 2)
+		assert.Equal(t, 1, aTaps)
+		assert.Equal(t, 1, bTaps)
+		assertNoTapState(t, c, 0)
+		assertNoTapState(t, c, 1)
+		assert.Empty(t, c.tapCaptured)
+		assert.Empty(t, c.touched)
+	})
+}
+
+type recordingTouch struct {
+	*widget.Label
+	down, up *mobile.TouchEvent
+	cancels  int
+}
+
+func newRecordingTouch(text string) *recordingTouch {
+	r := &recordingTouch{Label: widget.NewLabel(text)}
+	r.ExtendBaseWidget(r)
+	return r
+}
+
+func (*recordingTouch) Tapped(*fyne.PointEvent) {
+}
+
+func (r *recordingTouch) TouchDown(ev *mobile.TouchEvent) {
+	cp := *ev
+	r.down = &cp
+}
+
+func (r *recordingTouch) TouchUp(ev *mobile.TouchEvent) {
+	cp := *ev
+	r.up = &cp
+}
+
+func (r *recordingTouch) TouchCancel(*mobile.TouchEvent) {
+	r.cancels++
+}
+
+func newModalTapCanvas(top, bottom fyne.CanvasObject) (*canvas, *widget.Entry) {
+	c := newCanvas(fyne.CurrentDevice()).(*canvas)
+	c.OnFocus = nil
+	c.SetContent(widget.NewLabel("content"))
+	c.Resize(fyne.NewSize(360, 640))
+
+	entry := widget.NewEntry()
+	widget.NewModalPopUp(container.NewVBox(entry, top, bottom), c).Show()
+	c.Focus(entry)
+	return c, entry
+}
+
+func resizeOnUnfocus(c *canvas, size fyne.Size) func() bool {
+	done := false
+	c.OnUnfocus = func() {
+		if done {
+			return
+		}
+		done = true
+		c.Resize(size)
+	}
+	return func() bool { return done }
+}
+
+func overlayRoots(c *canvas) []fyne.CanvasObject {
+	return []fyne.CanvasObject{c.Overlays().Top()}
+}
+
+func objectOrigin(obj fyne.CanvasObject, roots []fyne.CanvasObject) fyne.Position {
+	return intdriver.AbsolutePositionForObject(obj, roots)
+}
+
+func objectContains(obj fyne.CanvasObject, roots []fyne.CanvasObject, p fyne.Position) bool {
+	origin := objectOrigin(obj, roots)
+	size := obj.Size()
+	return p.X >= origin.X && p.Y >= origin.Y && p.X < origin.X+size.Width && p.Y < origin.Y+size.Height
+}
+
+func pressPos(obj fyne.CanvasObject, roots []fyne.CanvasObject) fyne.Position {
+	return objectOrigin(obj, roots).AddXY(obj.Size().Width/2, 2)
+}
+
+func assertOverlayCentered(t *testing.T, c *canvas) {
+	t.Helper()
+	ov, ok := c.Overlays().Top().(*intwidget.OverlayContainer)
+	if !assert.True(t, ok) {
+		return
+	}
+	pop := ov.Content
+	assert.InDelta(t, float64((ov.Size().Width-pop.Size().Width)/2), float64(pop.Position().X), 0.01)
+	assert.InDelta(t, float64((ov.Size().Height-pop.Size().Height)/2), float64(pop.Position().Y), 0.01)
+}
+
+func assertNoTapState(t *testing.T, c *canvas, id int) {
+	t.Helper()
+	_, ok := c.tapCaptured[id]
+	assert.False(t, ok)
+	_, ok = c.touched[id]
+	assert.False(t, ok)
+	_, ok = c.lastTapDown[id]
+	assert.False(t, ok)
+}
+
+func dispatchTap(c *canvas, pos fyne.Position, id int) (fyne.CanvasObject, *fyne.PointEvent) {
+	var obj fyne.CanvasObject
+	var ev *fyne.PointEvent
+	c.tapUp(pos, id, func(wid fyne.Tappable, e *fyne.PointEvent) {
+		obj, _ = wid.(fyne.CanvasObject)
+		cp := *e
+		ev = &cp
+		wid.Tapped(e)
+	}, func(wid fyne.SecondaryTappable, e *fyne.PointEvent) {
+		wid.TappedSecondary(e)
+	}, func(wid fyne.DoubleTappable, e *fyne.PointEvent) {
+		wid.DoubleTapped(e)
+	}, func(wid fyne.Draggable, _ *fyne.DragEvent) {
+		wid.DragEnd()
+	})
+	return obj, ev
 }
 
 type touchableLabel struct {

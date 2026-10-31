@@ -421,6 +421,11 @@ func (d *driver) paintWindow(window fyne.Window, s fyne.Size) {
 	}
 
 	c.WalkTrees(draw, afterDraw)
+	// The painter batches text and plain rectangles, so the tail of the tree can
+	// still be sitting in a queue when the walk ends.
+	if p, ok := c.Painter().(interface{ FlushGlyphs() }); ok {
+		p.FlushGlyphs()
+	}
 }
 
 func (d *driver) sendPaintEvent() {
@@ -840,4 +845,9 @@ func NewGoMobileDriver() fyne.Driver {
 
 	registerRepository(d)
 	return d
+}
+
+// RenderedTextSizeFor measures text in the fonts of the theme scope o is in.
+func (*driver) RenderedTextSizeFor(o fyne.CanvasObject, text string, textSize float32, style fyne.TextStyle, source fyne.Resource) (fyne.Size, float32) {
+	return painter.RenderedTextSizeFor(o, text, textSize, style, source)
 }

@@ -53,6 +53,9 @@ func textTextureWindow(visibleOffset, visibleWidth, fullWidth, maxWidth int) (of
 type Texture cache.TextureType
 
 func (p *painter) freeTexture(obj fyne.CanvasObject) {
+	if img, ok := obj.(*canvas.Image); ok {
+		delete(p.imageSizes, img)
+	}
 	texture, ok := cache.GetTexture(obj)
 	if !ok {
 		return
@@ -67,20 +70,26 @@ func (p *painter) freeTexture(obj fyne.CanvasObject) {
 
 func (p *painter) getTexture(object fyne.CanvasObject, creator func(canvasObject fyne.CanvasObject) Texture) (Texture, error) {
 	if t, ok := object.(*canvas.Text); ok {
-		custom := ""
+		custom, scope := "", ""
 		if t.FontSource != nil {
 			custom = t.FontSource.Name()
+		} else {
+			scope = cache.WidgetScopeID(t)
 		}
 		ent := cache.FontCacheEntry{Color: t.Color, Canvas: p.canvas}
 		ent.Text = t.Text
 		ent.Size = t.TextSize
 		ent.Style = t.TextStyle
 		ent.Source = custom
+		ent.Scope = scope
 
 		texture, ok := cache.GetTextTexture(ent)
 
 		if !ok {
 			tex := creator(object)
+			if glDebug {
+				count(&p.stats.textures, object, 1)
+			}
 			texture = cache.TextureType(tex)
 			cache.SetTextTexture(ent, texture, p.canvas, func() {
 				p.ctx.DeleteTexture(tex)
@@ -95,6 +104,9 @@ func (p *painter) getTexture(object fyne.CanvasObject, creator func(canvasObject
 
 	if !ok {
 		texture = cache.TextureType(creator(object))
+		if glDebug {
+			count(&p.stats.textures, object, 1)
+		}
 		cache.SetTexture(object, texture, p.canvas)
 	}
 	if !cache.IsValid(texture) {
@@ -156,7 +168,50 @@ func (p *painter) newGlImageTexture(obj fyne.CanvasObject) Texture {
 		return noTexture
 	}
 
+	if p.imageSizes == nil {
+		p.imageSizes = make(map[*canvas.Image]image.Point)
+	}
+	p.imageSizes[img] = tex.Bounds().Size()
 	return p.imgToTexture(tex, img.ScaleMode)
+}
+
+// updateImageTexture uploads the pixels in the region dirty of img into the
+// texture it already has. It returns false if that texture cannot be updated in
+// part, as it was not uploaded from pixels laid out like those of img.Image.
+func (p *painter) updateImageTexture(img *canvas.Image, dirty image.Rectangle) bool {
+	texture, _ := cache.GetTexture(img)
+	src := img.Image
+	if !cache.IsValid(texture) || src == nil {
+		return false
+	}
+	bounds := src.Bounds()
+	if _, uniform := src.(*image.Uniform); uniform || bounds.Size() != p.imageSizes[img] {
+		return false
+	}
+	dirty = dirty.Intersect(bounds)
+	if dirty.Empty() {
+		return true
+	}
+
+	var pix []uint8
+	if rgba, ok := src.(*image.RGBA); ok && dirty.Dx() == bounds.Dx() && rgba.Stride == 4*bounds.Dx() {
+		pix = rgba.Pix[rgba.PixOffset(dirty.Min.X, dirty.Min.Y):][:dirty.Dy()*rgba.Stride] // whole rows need no copy
+	} else {
+		part := &image.RGBA{Rect: dirty, Stride: 4 * dirty.Dx()}
+		if size := part.Stride * dirty.Dy(); cap(p.pixels) < size {
+			p.pixels = make([]uint8, size)
+		}
+		part.Pix = p.pixels[:part.Stride*dirty.Dy()]
+		draw.Draw(part, dirty, src, dirty.Min, draw.Src)
+		pix = part.Pix
+	}
+
+	p.ctx.ActiveTexture(texture0)
+	p.ctx.BindTexture(texture2D, Texture(texture))
+	p.ctx.TexSubImage2D(texture2D, 0, dirty.Min.X-bounds.Min.X, dirty.Min.Y-bounds.Min.Y, dirty.Dx(), dirty.Dy(),
+		colorFormatRGBA, unsignedByte, pix)
+	p.logError()
+	return true
 }
 
 func (p *painter) newGlLinearGradientTexture(obj fyne.CanvasObject) Texture {
