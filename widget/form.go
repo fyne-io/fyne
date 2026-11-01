@@ -455,6 +455,9 @@ func (f *Form) setValidationError(err error) {
 		for _, item := range f.Items {
 			if item.invalid {
 				err = item.validationError
+				if v, ok := item.Widget.(fyne.Validatable); ok && err == nil {
+					err = v.Validate()
+				}
 				break
 			}
 		}

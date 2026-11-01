@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/data/validation"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/widget"
 
@@ -59,6 +60,21 @@ func TestFormDialog_ValidCanSubmit(t *testing.T) {
 	} else {
 		assert.Fail(t, "First item's widget should be an Entry (check validatingFormDialog)")
 	}
+}
+
+func TestFormDialog_PartiallyValidCannotSubmit(t *testing.T) {
+	first, second := widget.NewEntry(), widget.NewEntry()
+	first.Validator = validation.NewRegexp(`^abc$`, "only accepts 'abc'")
+	second.Validator = first.Validator
+	items := []*widget.FormItem{{Widget: first}, {Widget: second}}
+	fd := NewForm("Validating Form Dialog", "Submit", "Cancel", items, func(bool) {}, test.NewTempWindow(t, nil))
+	fd.Show()
+
+	second.SetText("abc")
+	assert.True(t, fd.confirm.Disabled())
+
+	first.SetText("abc")
+	assert.False(t, fd.confirm.Disabled())
 }
 
 func TestFormDialog_CanCancelInvalid(t *testing.T) {
