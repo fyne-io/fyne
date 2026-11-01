@@ -141,7 +141,7 @@ func Test_gLDriver_AbsolutePositionForObject(t *testing.T) {
 const quitBeforeRunEnv = "FYNE_TEST_QUIT_BEFORE_RUN"
 
 func TestGLDriver_QuitBeforeRun(t *testing.T) {
-	cmd := exec.Command(os.Args[0], "-test.run=^$")
+	cmd := exec.Command(os.Args[0], "-test.run=^$") //nolint:gosec // re-runs this test binary
 	cmd.Env = append(os.Environ(), quitBeforeRunEnv+"=1")
 	out := &bytes.Buffer{}
 	cmd.Stdout, cmd.Stderr = out, out
