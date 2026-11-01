@@ -12,9 +12,10 @@ import (
 )
 
 var (
-	_ fyne.Accessible = (*Hyperlink)(nil)
-	_ fyne.Focusable  = (*Hyperlink)(nil)
-	_ fyne.Widget     = (*Hyperlink)(nil)
+	_ fyne.Accessible  = (*Hyperlink)(nil)
+	_ fyne.Disableable = (*Hyperlink)(nil)
+	_ fyne.Focusable   = (*Hyperlink)(nil)
+	_ fyne.Widget      = (*Hyperlink)(nil)
 )
 
 // Hyperlink widget is a text component with appropriate padding and layout.
@@ -44,6 +45,7 @@ type Hyperlink struct {
 
 	textSize         fyne.Size // updated in syncSegments
 	focused, hovered bool
+	disabled         bool
 	provider         RichText
 
 	siblings []*Hyperlink // other visual instances of the same HyperlinkSegment when wrapped in RichText
@@ -99,14 +101,60 @@ func (hl *Hyperlink) CreateRenderer() fyne.WidgetRenderer {
 
 // Cursor returns the cursor type of this widget
 func (hl *Hyperlink) Cursor() desktop.Cursor {
+	if hl.disabled {
+		return desktop.DefaultCursor
+	}
 	if hl.hovered {
 		return desktop.PointerCursor
 	}
 	return desktop.DefaultCursor
 }
 
+// Disable sets this hyperlink to be unresponsive and renders it in a greyed-out state.
+func (hl *Hyperlink) Disable() {
+	if hl.disabled {
+		return
+	}
+	hl.setDisabled(true)
+	for _, s := range hl.siblings {
+		s.setDisabled(true)
+	}
+}
+
+// Enable marks this hyperlink as active and clickable.
+func (hl *Hyperlink) Enable() {
+	if !hl.disabled {
+		return
+	}
+	hl.setDisabled(false)
+	for _, s := range hl.siblings {
+		s.setDisabled(false)
+	}
+}
+
+// Disabled returns true if this hyperlink is currently disabled.
+func (hl *Hyperlink) Disabled() bool {
+	return hl.disabled
+}
+
+// setDisabled updates the disabled state without propagating back to siblings, avoiding recursion.
+func (hl *Hyperlink) setDisabled(disabled bool) {
+	if hl.disabled == disabled {
+		return
+	}
+	hl.disabled = disabled
+	if disabled {
+		hl.hovered = false
+		hl.focused = false
+	}
+	hl.Refresh()
+}
+
 // FocusGained is a hook called by the focus handling logic after this object gained the focus.
 func (hl *Hyperlink) FocusGained() {
+	if hl.disabled {
+		return
+	}
 	hl.focused = true
 	hl.BaseWidget.Refresh()
 }
@@ -124,6 +172,9 @@ func (hl *Hyperlink) MouseIn(e *desktop.MouseEvent) {
 
 // MouseMoved is a hook that is called if the mouse pointer moved over the element.
 func (hl *Hyperlink) MouseMoved(e *desktop.MouseEvent) {
+	if hl.disabled {
+		return
+	}
 	oldHovered := hl.hovered
 	hl.hovered = hl.isPosOverText(e.Position)
 	if hl.hovered != oldHovered {
@@ -244,6 +295,9 @@ func (hl *Hyperlink) SetURLFromString(str string) error {
 
 // Tapped is called when a pointer tapped event is captured and triggers any change handler
 func (hl *Hyperlink) Tapped(e *fyne.PointEvent) {
+	if hl.disabled {
+		return
+	}
 	if len(hl.provider.Segments) != 0 && !hl.isPosOverText(e.Position) {
 		return // tapped outside text area
 	}
@@ -266,6 +320,9 @@ func (*Hyperlink) TypedRune(rune) {
 
 // TypedKey is a hook called by the input handling logic on key events if this object is focused.
 func (hl *Hyperlink) TypedKey(ev *fyne.KeyEvent) {
+	if hl.disabled {
+		return
+	}
 	if ev.Name == fyne.KeySpace {
 		hl.invokeAction()
 	}
@@ -288,13 +345,18 @@ func (hl *Hyperlink) syncSegments() {
 	hl.provider.Wrapping = hl.Wrapping
 	hl.provider.Truncation = hl.Truncation
 
+	colorName := theme.ColorNameHyperlink
+	if hl.disabled {
+		colorName = theme.ColorNameDisabled
+	}
+
 	if len(hl.provider.Segments) == 0 {
 		hl.provider.Scroll = widget.ScrollNone
 		hl.provider.Segments = []RichTextSegment{
 			&TextSegment{
 				Style: RichTextStyle{
 					Alignment: hl.Alignment,
-					ColorName: theme.ColorNameHyperlink,
+					ColorName: colorName,
 					Inline:    true,
 					TextStyle: hl.TextStyle,
 				},
@@ -305,6 +367,7 @@ func (hl *Hyperlink) syncSegments() {
 		segment, _ := hl.provider.Segments[0].(*TextSegment)
 		segment.Style.Alignment = hl.Alignment
 		segment.Style.TextStyle = hl.TextStyle
+		segment.Style.ColorName = colorName
 		segment.Text = hl.Text
 	}
 
@@ -362,7 +425,12 @@ func (r *hyperlinkRenderer) Refresh() {
 	r.focus.StrokeColor = th.Color(theme.ColorNameFocus, v)
 	r.focus.Hidden = !r.hl.focused
 	r.focus.Refresh()
-	r.under.FillColor = th.Color(theme.ColorNameHyperlink, v)
+
+	if r.hl.disabled {
+		r.under.FillColor = th.Color(theme.ColorNameDisabled, v)
+	} else {
+		r.under.FillColor = th.Color(theme.ColorNameHyperlink, v)
+	}
 	r.under.Hidden = !r.hl.hovered
 	r.under.Refresh()
 }
