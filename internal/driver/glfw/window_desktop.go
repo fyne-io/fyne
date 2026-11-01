@@ -352,6 +352,8 @@ func (w *window) getMonitorForWindow() *glfw.Monitor {
 
 			return monitor
 		}
+	} else if monitor := w.waylandMonitor(); monitor != nil {
+		return monitor
 	}
 
 	// try built-in function to detect monitor if above logic didn't succeed
