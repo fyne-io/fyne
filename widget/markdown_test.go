@@ -664,7 +664,7 @@ func TestRichTextMarkdown_UnderscoreInHyperlink(t *testing.T) {
 	r := NewRichTextFromMarkdown("[under_score](https://fyne.io/)")
 	assert.Equal(t, "under_score", r.String())
 
-	r.ParseMarkdown("[foo *bar* baz](https://fyne.io/)")
+	r.ParseMarkdown("[foo _bar_ baz](https://fyne.io/)")
 	assert.Equal(t, "foo bar baz", r.String())
 }
 
