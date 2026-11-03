@@ -13,7 +13,8 @@ func TestEntry_TouchUp_AccountsForScroll(t *testing.T) {
 	e := NewMultiLineEntry()
 	e.SetText("Line 1\nLine 2\nLine 3\nLine 4\nLine 5")
 
-	e.CreateRenderer()
+	w := test.NewTempWindow(t, e)
+	w.Resize(fyne.NewSize(150, 60))
 	e.scroller.Offset.Y = 50
 
 	touch := &mobile.TouchEvent{
@@ -23,6 +24,9 @@ func TestEntry_TouchUp_AccountsForScroll(t *testing.T) {
 	}
 
 	e.TouchDown(touch)
+	if e.scroller.Offset.Y != 50 {
+		t.Errorf("Expected focus to keep scroll offset 50, got %v", e.scroller.Offset.Y)
+	}
 	e.TouchUp(touch)
 
 	if e.CursorRow == 0 {

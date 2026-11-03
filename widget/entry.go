@@ -102,6 +102,9 @@ type Entry struct {
 	// tripleTapped records that the current touch selected a row, so the touch up must not move the cursor
 	tripleTapped bool
 
+	// keepScrollOffset stops a refresh caused by a focus change from scrolling to the cursor
+	keepScrollOffset bool
+
 	sel   *selectable
 	popUp *PopUpMenu
 	// TODO: Add OnSelectChanged
@@ -321,6 +324,8 @@ func (e *Entry) ExtendBaseWidget(wid fyne.Widget) {
 
 // FocusGained is called when the Entry has been given focus.
 func (e *Entry) FocusGained() {
+	e.keepScrollOffset = true
+	defer func() { e.keepScrollOffset = false }()
 	e.setFieldsAndRefresh(func() {
 		e.hasFocused = true
 		e.dirty = true
@@ -333,6 +338,8 @@ func (e *Entry) FocusGained() {
 
 // FocusLost is called when the Entry has had focus removed.
 func (e *Entry) FocusLost() {
+	e.keepScrollOffset = true
+	defer func() { e.keepScrollOffset = false }()
 	e.setFieldsAndRefresh(func() {
 		e.focused = false
 		e.selectKeyDown = false
@@ -1994,7 +2001,9 @@ func (r *entryContentRenderer) moveCursor() {
 	r.cursor.Move(r.content.entry.CursorPosition())
 
 	callback := r.content.entry.OnCursorChanged
-	r.ensureCursorVisible()
+	if !r.content.entry.keepScrollOffset {
+		r.ensureCursorVisible()
+	}
 
 	if callback != nil {
 		callback()

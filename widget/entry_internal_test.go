@@ -1,6 +1,7 @@
 package widget
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -175,6 +176,26 @@ func TestEntry_EraseSelection(t *testing.T) {
 	assert.Equal(t, -1, b)
 }
 
+func TestEntry_FocusKeepsScrollOffset(t *testing.T) {
+	e := NewMultiLineEntry()
+	e.Validator = func(string) error { return nil }
+	e.SetText(strings.Repeat("line\n", 50))
+	w := test.NewTempWindow(t, e)
+	w.Resize(fyne.NewSize(150, 100))
+
+	w.Canvas().Focus(e)
+	e.scroller.ScrollToOffset(fyne.NewPos(0, 200))
+	assert.Equal(t, float32(200), e.scroller.Offset.Y)
+
+	w.Canvas().Unfocus()
+	assert.Equal(t, float32(200), e.scroller.Offset.Y)
+	w.Canvas().Focus(e)
+	assert.Equal(t, float32(200), e.scroller.Offset.Y)
+
+	e.TypedRune('a')
+	assert.Zero(t, e.scroller.Offset.Y)
+}
+
 func TestEntry_CallbackLocking(t *testing.T) {
 	e := &Entry{}
 	called := 0
@@ -301,6 +322,21 @@ func TestEntry_PlaceholderTextStyle(t *testing.T) {
 
 	w.Canvas().Focus(e)
 	assert.Equal(t, e.TextStyle, e.placeholderWidget.Segments[0].(*TextSegment).Style.TextStyle)
+}
+
+func TestEntry_ClickAfterScroll(t *testing.T) {
+	e := NewMultiLineEntry()
+	e.SetText(strings.Repeat("line\n", 50))
+	w := test.NewTempWindow(t, e)
+	w.Resize(fyne.NewSize(150, 100))
+
+	e.scroller.ScrollToOffset(fyne.NewPos(0, 200))
+	clickPrimary(e, getClickPosition("li", 2))
+
+	assert.Equal(t, float32(200), e.scroller.Offset.Y)
+	cursorY := e.CursorPosition().Y
+	assert.GreaterOrEqual(t, cursorY, e.scroller.Offset.Y)
+	assert.Less(t, cursorY, e.scroller.Offset.Y+e.scroller.Size().Height)
 }
 
 func TestEntry_Tab(t *testing.T) {
