@@ -249,6 +249,18 @@ func sameHolder(a, b RichTextSegment) bool {
 // beginUndo prepares the undo history for an edit, returning the rune offset of
 // the cursor before it takes place to be passed to [RichTextEntry.commitUndo].
 func (e *RichTextEntry) beginUndo() int {
+	e.undoDepth++
+	if e.undoDepth > 1 {
+		// an edit made from OnChanged during another is recorded as part of it
+		return e.CursorTextOffset()
+	}
+
+	return e.syncUndo()
+}
+
+// syncUndo starts the undo history again if the content was replaced from
+// outside, returning the rune offset of the cursor for [RichTextEntry.recordUndo].
+func (e *RichTextEntry) syncUndo() int {
 	provider := e.richProvider()
 	if !sameSegments(e.undoState, provider.Segments) {
 		// the content was replaced from outside, so the history no longer leads to it
@@ -274,6 +286,16 @@ func (e *RichTextEntry) noteEdit(edit richTextEdit) {
 // The text changes that were recorded by the [Entry] are replaced by an action
 // that holds the segments, including any styling that happened along with them.
 func (e *RichTextEntry) commitUndo(cursor int) {
+	e.undoDepth--
+	if e.undoDepth > 0 {
+		return // the outermost edit records the change
+	}
+
+	e.recordUndo(cursor)
+}
+
+// recordUndo adds what changed since the history was last recorded.
+func (e *RichTextEntry) recordUndo(cursor int) {
 	stack := &e.undoStack
 	var typed *entryModifyAction
 	for stack.index > 0 {
@@ -349,7 +371,7 @@ func (e *RichTextEntry) nextUndoAction() *richTextUndoAction {
 //
 // Since: 2.9
 func (e *RichTextEntry) Undo() {
-	e.commitUndo(e.beginUndo())
+	e.recordUndo(e.syncUndo())
 
 	var last *richTextUndoAction
 	for action := e.lastUndoAction(); action != nil; action = e.lastUndoAction() {
@@ -372,7 +394,7 @@ func (e *RichTextEntry) Undo() {
 //
 // Since: 2.9
 func (e *RichTextEntry) Redo() {
-	e.commitUndo(e.beginUndo())
+	e.recordUndo(e.syncUndo())
 
 	var last *richTextUndoAction
 	visible := false

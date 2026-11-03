@@ -48,6 +48,8 @@ type RichTextEntry struct {
 	undoState []RichTextSegment
 	// undoEdit notes what an edit changed beyond the text that was recorded for it
 	undoEdit richTextEdit
+	// undoDepth counts the edits under way, as OnChanged may start one inside another
+	undoDepth int
 }
 
 // NewRichTextEntry creates a new rich text entry widget.
