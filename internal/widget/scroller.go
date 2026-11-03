@@ -646,14 +646,14 @@ func (s *Scroll) refreshBars() {
 }
 
 func (s *Scroll) scrollBy(dx, dy float32) {
-	minSize := s.Content.MinSize()
+	contentSize := s.Content.Size()
 	size := s.Size()
-	if size.Width < minSize.Width && size.Height >= minSize.Height && dx == 0 {
+	if size.Width < contentSize.Width && size.Height >= contentSize.Height && dx == 0 {
 		dx, dy = dy, dx
 	}
 
 	// a scroll delta moves against the finger, hence the negation
-	if s.scrollTo(minSize, -dx, -dy) {
+	if s.scrollTo(contentSize, -dx, -dy) {
 		s.offsetUpdated()
 	}
 }
