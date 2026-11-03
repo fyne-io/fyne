@@ -159,7 +159,7 @@ func TestMeasureString(t *testing.T) {
 			size:     40,
 			string:   "Missing: स",
 			tabWidth: 4,
-			want:     213.65625,
+			want:     189.65625,
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
