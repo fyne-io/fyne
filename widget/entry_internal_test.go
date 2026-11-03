@@ -72,9 +72,9 @@ func TestEntry_InitialWrappingAfterSetText(t *testing.T) {
 
 			assert.Equal(t, tt.wrap, entry.textProvider().Wrapping)
 			assert.Equal(t, tt.wrap, entry.placeholderProvider().Wrapping)
-			assert.Equal(t, intWidget.ScrollVerticalOnly, entry.scroller.Direction)
+			assert.Equal(t, intWidget.ScrollVerticalOnly, entry.scroll.Direction)
 			assert.Greater(t, provider.rows(), 2)
-			assert.LessOrEqual(t, entry.content.Size().Width, entry.scroller.Size().Width)
+			assert.LessOrEqual(t, entry.content.Size().Width, entry.scroll.Size().Width)
 		})
 	}
 }
@@ -84,10 +84,10 @@ func TestEntry_InitialWrappingScrollsVerticallyOnly(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			entry, _, _ := newInitialWrappingEntry(t, tt.wrap, tt.placeholder)
 
-			entry.scroller.Scrolled(&fyne.ScrollEvent{Scrolled: fyne.Delta{DX: -30}})
-			assert.Zero(t, entry.scroller.Offset.X)
-			entry.scroller.Scrolled(&fyne.ScrollEvent{Scrolled: fyne.Delta{DY: -30}})
-			assert.Greater(t, entry.scroller.Offset.Y, float32(0))
+			entry.scroll.Scrolled(&fyne.ScrollEvent{Scrolled: fyne.Delta{DX: -30}})
+			assert.Zero(t, entry.scroll.Offset.X)
+			entry.scroll.Scrolled(&fyne.ScrollEvent{Scrolled: fyne.Delta{DY: -30}})
+			assert.Greater(t, entry.scroll.Offset.Y, float32(0))
 		})
 	}
 }
@@ -102,8 +102,8 @@ func TestEntry_InitialWrappingUnchangedByFocus(t *testing.T) {
 
 			assert.Equal(t, tt.wrap, provider.Wrapping)
 			assert.Equal(t, rows, provider.rows())
-			assert.Equal(t, intWidget.ScrollVerticalOnly, entry.scroller.Direction)
-			assert.LessOrEqual(t, entry.content.Size().Width, entry.scroller.Size().Width)
+			assert.Equal(t, intWidget.ScrollVerticalOnly, entry.scroll.Direction)
+			assert.LessOrEqual(t, entry.content.Size().Width, entry.scroll.Size().Width)
 		})
 	}
 }
@@ -124,8 +124,8 @@ func TestEntry_InitialWrappingKeepsCursorOnResize(t *testing.T) {
 			assert.Equal(t, offset, entry.CursorTextOffset())
 			assert.Equal(t, selected, entry.SelectedText())
 			assert.Equal(t, tt.wrap, provider.Wrapping)
-			assert.Equal(t, intWidget.ScrollVerticalOnly, entry.scroller.Direction)
-			assert.LessOrEqual(t, entry.content.Size().Width, entry.scroller.Size().Width)
+			assert.Equal(t, intWidget.ScrollVerticalOnly, entry.scroll.Direction)
+			assert.LessOrEqual(t, entry.content.Size().Width, entry.scroll.Size().Width)
 		})
 	}
 }
@@ -496,4 +496,38 @@ func getClickPosition(str string, row int) *fyne.PointEvent {
 	// add a couple of pixels, this is currently a workaround for weird mouse to column logic on text with kerning
 	pos := fyne.NewPos(x+2, y)
 	return &fyne.PointEvent{Position: pos}
+}
+
+// A line that ends with a space at the word wrap boundary used to lose that space
+// from its rows, so the position after it resolved on to the row below and joining
+// the next line with Backspace left the cursor at the end of the line after it.
+func TestEntry_Backspace_TrailingSpaceAtWrapBoundary(t *testing.T) {
+	line1 := "aa bb "
+	text := line1 + "\n\nmore text here"
+	lineEnd := len([]rune(line1))
+
+	wrapped := 0
+	for width := float32(40); width <= 160; width += 4 {
+		e := NewMultiLineEntry()
+		e.Wrapping = fyne.TextWrapWord
+		w := test.NewTempWindow(t, e)
+		w.Resize(fyne.NewSize(width, 150))
+		e.SetText(text)
+
+		provider := e.textProvider()
+		for i := 0; i < provider.rows(); i++ {
+			if b := provider.rowBoundary(i); b.begin == lineEnd-1 && b.end == lineEnd {
+				wrapped++ // the trailing space wrapped on to a row of its own
+			}
+		}
+
+		// put the cursor at the start of the empty line and join it to the one above
+		e.CursorRow, e.CursorColumn = e.rowColFromTextPos(lineEnd + 1)
+		e.TypedKey(&fyne.KeyEvent{Name: fyne.KeyBackspace})
+
+		assert.Equal(t, line1+"\nmore text here", e.Text, "width %v", width)
+		assert.Equal(t, lineEnd, e.CursorTextOffset(), "width %v", width)
+	}
+
+	assert.NotZero(t, wrapped, "no width wrapped the trailing space, so the boundary was never reached")
 }
