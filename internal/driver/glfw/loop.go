@@ -102,9 +102,13 @@ func (*gLDriver) applyThemeToWindow(w fyne.Window) {
 	}
 }
 
-func (d *gLDriver) runGL() {
+func (d *gLDriver) runGL() (quitEarly bool) {
 	if !running.CompareAndSwap(false, true) {
-		return // Run was called twice.
+		return false
+	}
+	if d.quitBeforeRun.Load() {
+		running.Store(false)
+		return true
 	}
 
 	d.init()
@@ -150,7 +154,7 @@ func (d *gLDriver) runGL() {
 			}
 			drained.Store(true)
 			funcQueue.Close()
-			return
+			return false
 		case f := <-funcQueue.Out():
 			f.f()
 			if f.done != nil {
