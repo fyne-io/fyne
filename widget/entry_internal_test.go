@@ -29,6 +29,106 @@ func TestEntry_Cursor(t *testing.T) {
 	assert.Equal(t, desktop.TextCursor, entry.Cursor())
 }
 
+var initialWrappingCases = map[string]struct {
+	wrap        fyne.TextWrap
+	placeholder bool
+}{
+	"word":        {wrap: fyne.TextWrapWord},
+	"break":       {wrap: fyne.TextWrapBreak},
+	"placeholder": {wrap: fyne.TextWrapWord, placeholder: true},
+}
+
+// newInitialWrappingEntry sets the text (or placeholder) before the wrapping
+// mode, shows the entry in a narrow window and returns the provider under test.
+func newInitialWrappingEntry(t *testing.T, wrap fyne.TextWrap, placeholder bool) (*Entry, fyne.Window, *RichText) {
+	t.Helper()
+	entry := NewMultiLineEntry()
+	text := "one two three four five six seven eight nine ten\none two three four five six seven eight nine ten"
+	if placeholder {
+		entry.SetPlaceHolder(text)
+		entry.SetText("")
+	} else {
+		entry.SetText(text)
+	}
+	entry.Wrapping = wrap
+
+	window := test.NewWindow(entry)
+	t.Cleanup(window.Close)
+	window.SetPadded(false)
+	window.Resize(fyne.NewSize(120, 80))
+
+	provider := entry.textProvider()
+	if placeholder {
+		provider = entry.placeholderProvider()
+	}
+	return entry, window, provider
+}
+
+func TestEntry_InitialWrappingAfterSetText(t *testing.T) {
+	for name, tt := range initialWrappingCases {
+		t.Run(name, func(t *testing.T) {
+			entry, _, provider := newInitialWrappingEntry(t, tt.wrap, tt.placeholder)
+
+			assert.Equal(t, tt.wrap, entry.textProvider().Wrapping)
+			assert.Equal(t, tt.wrap, entry.placeholderProvider().Wrapping)
+			assert.Equal(t, intWidget.ScrollVerticalOnly, entry.scroller.Direction)
+			assert.Greater(t, provider.rows(), 2)
+			assert.LessOrEqual(t, entry.content.Size().Width, entry.scroller.Size().Width)
+		})
+	}
+}
+
+func TestEntry_InitialWrappingScrollsVerticallyOnly(t *testing.T) {
+	for name, tt := range initialWrappingCases {
+		t.Run(name, func(t *testing.T) {
+			entry, _, _ := newInitialWrappingEntry(t, tt.wrap, tt.placeholder)
+
+			entry.scroller.Scrolled(&fyne.ScrollEvent{Scrolled: fyne.Delta{DX: -30}})
+			assert.Zero(t, entry.scroller.Offset.X)
+			entry.scroller.Scrolled(&fyne.ScrollEvent{Scrolled: fyne.Delta{DY: -30}})
+			assert.Greater(t, entry.scroller.Offset.Y, float32(0))
+		})
+	}
+}
+
+func TestEntry_InitialWrappingUnchangedByFocus(t *testing.T) {
+	for name, tt := range initialWrappingCases {
+		t.Run(name, func(t *testing.T) {
+			entry, window, provider := newInitialWrappingEntry(t, tt.wrap, tt.placeholder)
+			rows := provider.rows()
+
+			window.Canvas().Focus(entry)
+
+			assert.Equal(t, tt.wrap, provider.Wrapping)
+			assert.Equal(t, rows, provider.rows())
+			assert.Equal(t, intWidget.ScrollVerticalOnly, entry.scroller.Direction)
+			assert.LessOrEqual(t, entry.content.Size().Width, entry.scroller.Size().Width)
+		})
+	}
+}
+
+func TestEntry_InitialWrappingKeepsCursorOnResize(t *testing.T) {
+	for name, tt := range initialWrappingCases {
+		t.Run(name, func(t *testing.T) {
+			entry, window, provider := newInitialWrappingEntry(t, tt.wrap, tt.placeholder)
+			window.Canvas().Focus(entry)
+			if !tt.placeholder {
+				entry.selectAll()
+			}
+			offset := entry.CursorTextOffset()
+			selected := entry.SelectedText()
+
+			window.Resize(fyne.NewSize(160, 80))
+
+			assert.Equal(t, offset, entry.CursorTextOffset())
+			assert.Equal(t, selected, entry.SelectedText())
+			assert.Equal(t, tt.wrap, provider.Wrapping)
+			assert.Equal(t, intWidget.ScrollVerticalOnly, entry.scroller.Direction)
+			assert.LessOrEqual(t, entry.content.Size().Width, entry.scroller.Size().Width)
+		})
+	}
+}
+
 func TestEntry_DoubleTapped(t *testing.T) {
 	entry := NewEntry()
 	entry.Wrapping = fyne.TextWrapOff

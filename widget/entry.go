@@ -1677,6 +1677,18 @@ func (r *entryRenderer) Layout(size fyne.Size) {
 	prov := r.entry.textProvider()
 	textPos := textPosFromRowCol(r.entry.CursorRow, r.entry.CursorColumn, prov)
 	selectPos := textPosFromRowCol(r.entry.sel.selectRow, r.entry.sel.selectColumn, prov)
+	// Wrapping may have changed since SetText created the providers.
+	wrap := r.entry.textWrap()
+	for _, provider := range []*RichText{prov, r.entry.placeholderProvider()} {
+		if provider.Wrapping != wrap {
+			provider.Wrapping = wrap
+			provider.Refresh()
+		}
+	}
+	if rend := cache.Renderer(r.entry.content); rend != nil {
+		rend.(*entryContentRenderer).updateScrollDirections()
+	}
+
 	if r.entry.Wrapping == fyne.TextWrapOff && r.entry.Scroll == widget.ScrollNone {
 		r.entry.content.Resize(entrySize)
 		r.entry.content.Move(entryPos)
@@ -1689,7 +1701,7 @@ func (r *entryRenderer) Layout(size fyne.Size) {
 	if textPos != resizedTextPos {
 		r.entry.setFieldsAndRefresh(func() {
 			r.entry.CursorRow, r.entry.CursorColumn = r.entry.rowColFromTextPos(textPos)
-			r.entry.sel.cursorRow, r.entry.sel.cursorRow = r.entry.CursorRow, r.entry.CursorColumn
+			r.entry.sel.cursorRow, r.entry.sel.cursorColumn = r.entry.CursorRow, r.entry.CursorColumn
 
 			if r.entry.sel.selecting {
 				r.entry.sel.selectRow, r.entry.sel.selectColumn = r.entry.rowColFromTextPos(selectPos)
