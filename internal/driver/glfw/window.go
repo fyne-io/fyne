@@ -375,32 +375,15 @@ func (w *window) processMouseMoved(xpos float64, ypos float64) {
 	mouseDragPos := w.mouseDragPos
 	mouseOver := w.mouseOver
 
-	cursor := desktop.Cursor(desktop.DefaultCursor)
-
+	var cursorable desktop.Cursorable
 	obj, pos, _ := w.findObjectAtPositionMatching(w.canvas, mousePos, func(object fyne.CanvasObject) bool {
-		if cursorable, ok := object.(desktop.Cursorable); ok {
-			cursor = cursorable.Cursor()
+		if c, ok := object.(desktop.Cursorable); ok {
+			cursorable = c
 		}
 
 		_, hover := object.(desktop.Hoverable)
 		return hover
 	})
-
-	if w.cursor != cursor {
-		// cursor has changed, store new cursor and apply change via glfw
-		rawCursor, isCustomCursor := fyneToNativeCursor(cursor)
-		w.cursor = cursor
-
-		if view := w.view(); view != nil { // not yet visible? linux weirdness
-			if rawCursor == nil {
-				view.SetInputMode(CursorMode, CursorHidden)
-			} else {
-				view.SetInputMode(CursorMode, CursorNormal)
-				w.SetCursor(rawCursor)
-			}
-		}
-		w.setCustomCursor(rawCursor, isCustomCursor)
-	}
 
 	if w.mouseButton != 0 && w.mouseButton != desktop.MouseButtonSecondary && !w.mouseDragStarted {
 		obj, pos, _ := w.findObjectAtPositionMatching(w.canvas, previousPos, func(object fyne.CanvasObject) bool {
@@ -465,6 +448,27 @@ func (w *window) processMouseMoved(xpos float64, ypos float64) {
 
 		w.mouseDragStarted = true
 		w.mouseDragPos = mousePos
+	}
+
+	// The cursor may depend on hover state updated by the mouse events above.
+	cursor := desktop.Cursor(desktop.DefaultCursor)
+	if cursorable != nil {
+		cursor = cursorable.Cursor()
+	}
+
+	if w.cursor != cursor {
+		rawCursor, isCustomCursor := fyneToNativeCursor(cursor)
+		w.cursor = cursor
+
+		if view := w.view(); view != nil { // not yet visible? linux weirdness
+			if rawCursor == nil {
+				view.SetInputMode(CursorMode, CursorHidden)
+			} else {
+				view.SetInputMode(CursorMode, CursorNormal)
+				w.SetCursor(rawCursor)
+			}
+		}
+		w.setCustomCursor(rawCursor, isCustomCursor)
 	}
 }
 

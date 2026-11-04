@@ -269,13 +269,11 @@ func TestWindow_Cursor(t *testing.T) {
 		assert.Equal(t, textCursor, w.cursor)
 	})
 
-	/*
-		// See fyne-io/fyne/issues/4513 - Hyperlink doesn't update its cursor type until
-		// mouse moves are processed in the event queue
-			w.mouseMoved(w.viewport, float64(h.Position().X+10), float64(h.Position().Y+10))
-			pointerCursor := desktop.PointerCursor
-			assert.Equal(t, pointerCursor, w.cursor)
-	*/
+	runOnMain(func() {
+		w.moveMouse(float64(h.Position().X+10), float64(h.Position().Y+10))
+		pointerCursor := desktop.PointerCursor
+		assert.Equal(t, pointerCursor, w.cursor)
+	})
 	runOnMain(func() {
 		w.moveMouse(10, float64(b.Position().Y+10))
 		defaultCursor := desktop.DefaultCursor
