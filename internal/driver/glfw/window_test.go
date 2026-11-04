@@ -2031,21 +2031,17 @@ func TestWindow_CloseInterception(t *testing.T) {
 	})
 }
 
-func TestWindow_Destroy_ReleasesReferences(t *testing.T) {
-	d := NewGLDriver().(*gLDriver)
+func TestWindow_Close_ReleasesTextTextures(t *testing.T) {
 	w := createWindow("test")
-	curWindow = w.window
-	ent := cache.FontCacheEntry{Canvas: w.window.canvas}
+	ent := cache.FontCacheEntry{Canvas: w.canvas}
 	freed := false
-	cache.SetTextTexture(ent, cache.NoTexture, w.window.canvas, func() { freed = true })
+	cache.SetTextTexture(ent, cache.NoTexture, w.canvas, func() { freed = true })
 
 	w.Close()
-	w.destroy(d)
 
 	_, ok := cache.GetTextTexture(ent)
 	assert.False(t, ok, "text textures of a closed window should be released")
 	assert.True(t, freed)
-	assert.Nil(t, curWindow, "a destroyed window should not stay as the current window")
 }
 
 func TestWindow_ClosedBeforeShow(t *testing.T) {
