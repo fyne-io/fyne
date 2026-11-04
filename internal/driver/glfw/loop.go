@@ -2,6 +2,7 @@ package glfw
 
 import (
 	"runtime"
+	"sync"
 	"sync/atomic"
 	"time"
 
@@ -20,10 +21,52 @@ type funcData struct {
 	done chan struct{} // Zero allocation signalling channel
 }
 
-// channel for queuing functions on the main thread
+// mainQueue holds the functions waiting to run on the main thread.
+type mainQueue struct {
+	queue *async.UnboundedChan[funcData]
+
+	// lock makes sure no function is added to the queue while it is being closed.
+	// Adding a function takes the read lock, closing takes the write lock.
+	lock    sync.RWMutex
+	drained bool
+}
+
+func newMainQueue() *mainQueue {
+	return &mainQueue{queue: async.NewUnboundedChan[funcData]()}
+}
+
+// add queues f for the main thread. It returns false, without queueing, once the queue has been closed.
+func (q *mainQueue) add(data funcData) bool {
+	q.lock.RLock()
+	defer q.lock.RUnlock()
+
+	if q.drained {
+		return false
+	}
+	q.queue.In() <- data
+	return true
+}
+
+// close releases everything that is still waiting in the queue and stops it.
+// Functions added after this are refused by add.
+func (q *mainQueue) close() {
+	q.lock.Lock()
+	q.drained = true
+	q.lock.Unlock()
+
+	// closing hands the leftovers to the Out channel, so it must not block on a full buffer.
+	go q.queue.Close()
+	for f := range q.queue.Out() {
+		if f.done != nil {
+			f.done <- struct{}{}
+		}
+	}
+}
+
+// queue for functions that must run on the main thread
 var (
-	funcQueue        = async.NewUnboundedChan[funcData]()
-	running, drained atomic.Bool
+	funcQueue = newMainQueue()
+	running   atomic.Bool
 )
 
 // Arrange that main.main runs on main thread.
@@ -40,20 +83,23 @@ func runOnMain(f func()) {
 // force a function f to run on the main thread and specify if we should wait for it to return
 func runOnMainWithWait(f func(), wait bool) {
 	// If we are on main before app run just execute - otherwise add it to the main queue and wait.
-	// We also need to run it as-is if the app is in the process of shutting down as the queue will be stopped.
-	if (!running.Load() && async.IsMainGoroutine()) || drained.Load() {
+	if !running.Load() && async.IsMainGoroutine() {
 		f()
 		return
 	}
 
+	// We also need to run it as-is if the app is in the process of shutting down as the queue will be stopped.
 	if wait {
 		done := common.DonePool.Get()
 		defer common.DonePool.Put(done)
 
-		funcQueue.In() <- funcData{f: f, done: done}
+		if !funcQueue.add(funcData{f: f, done: done}) {
+			f()
+			return
+		}
 		<-done
-	} else {
-		funcQueue.In() <- funcData{f: f}
+	} else if !funcQueue.add(funcData{f: f}) {
+		f()
 	}
 }
 
@@ -142,16 +188,9 @@ func (d *gLDriver) runGL() {
 			}
 
 			// as we are shutting down make sure we drain the pending funcQueue and close it out.
-			for len(funcQueue.Out()) > 0 {
-				f := <-funcQueue.Out()
-				if f.done != nil {
-					f.done <- struct{}{}
-				}
-			}
-			drained.Store(true)
-			funcQueue.Close()
+			funcQueue.close()
 			return
-		case f := <-funcQueue.Out():
+		case f := <-funcQueue.queue.Out():
 			f.f()
 			if f.done != nil {
 				f.done <- struct{}{}
