@@ -245,6 +245,7 @@ func (w *window) Close() {
 		w.viewport.SetShouldClose(true)
 
 		cache.RangeTexturesFor(w.canvas, w.canvas.Painter().Free)
+		cache.DeleteTextTexturesFor(w.canvas)
 		w.canvas.WalkTrees(nil, func(node *common.RenderCacheNode, _ fyne.Position) {
 			if wid, ok := node.Obj().(fyne.Widget); ok {
 				cache.DestroyRenderer(wid)
@@ -294,6 +295,9 @@ func (w *window) processClosed() {
 func (w *window) destroy(d *gLDriver) {
 	cache.CleanCanvas(w.canvas)
 	w.frame.free()
+	if curWindow == w {
+		curWindow = nil
+	}
 
 	if w.master {
 		d.Quit()

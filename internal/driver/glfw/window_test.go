@@ -15,6 +15,7 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal/build"
+	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/scale"
 	internalTest "fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/layout"
@@ -2028,6 +2029,23 @@ func TestWindow_CloseInterception(t *testing.T) {
 		}
 		w.destroy(d)
 	})
+}
+
+func TestWindow_Destroy_ReleasesReferences(t *testing.T) {
+	d := NewGLDriver().(*gLDriver)
+	w := createWindow("test")
+	curWindow = w.window
+	ent := cache.FontCacheEntry{Canvas: w.window.canvas}
+	freed := false
+	cache.SetTextTexture(ent, cache.NoTexture, w.window.canvas, func() { freed = true })
+
+	w.Close()
+	w.destroy(d)
+
+	_, ok := cache.GetTextTexture(ent)
+	assert.False(t, ok, "text textures of a closed window should be released")
+	assert.True(t, freed)
+	assert.Nil(t, curWindow, "a destroyed window should not stay as the current window")
 }
 
 func TestWindow_ClosedBeforeShow(t *testing.T) {
