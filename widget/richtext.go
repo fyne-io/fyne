@@ -379,6 +379,10 @@ func (t *RichText) deleteFromTo(lowBound int, highBound int) []rune {
 			to := min(highBound-start, len(r))
 			ret = append(ret, r[from:to]...)
 			holder.setContent(string(r[:from]) + string(r[to:]))
+
+			if _, isLink := seg.(*HyperlinkSegment); isLink && holder.content() == "" {
+				dropped = append(dropped, seg) // a link with no text left has nothing to click
+			}
 		} else { // an object cannot be split, so it goes entirely
 			ret = append(ret, []rune(seg.Textual())...)
 			dropped = append(dropped, seg)
@@ -523,6 +527,12 @@ func (t *RichText) insertAt(pos int, runes []rune) {
 			break
 		}
 		end := start + utf8.RuneCountInString(seg.Textual())
+
+		if _, isLink := seg.(*HyperlinkSegment); isLink && (pos <= start || pos >= end) {
+			// text typed beside a link is not part of it, only text typed inside
+			start = end
+			continue
+		}
 
 		if holder, ok := seg.(textHolder); ok {
 			switch {

@@ -111,6 +111,66 @@ func TestRichTextEntry_Backspace_AcrossSegments(t *testing.T) {
 	assert.Equal(t, 2, e.CursorColumn)
 }
 
+func TestRichTextEntry_EditLinkText(t *testing.T) {
+	e := NewRichTextEntryFromMarkdown("link to [fyne project](https://fyne.io) web site")
+	e.CursorRow, e.CursorColumn = 0, 13 // after "fyne "
+
+	e.TypedKey(&fyne.KeyEvent{Name: fyne.KeyBackspace})
+	assert.Equal(t, "link to fyneproject web site", e.Text)
+	assert.Equal(t, []string{"link to |", "fyneproject|object", " web site|"}, segmentDump(e))
+	assert.Equal(t, 12, e.CursorColumn)
+
+	e.TypedRune('-')
+	assert.Equal(t, "link to fyne-project web site", e.Text)
+	assert.Equal(t, []string{"link to |", "fyne-project|object", " web site|"}, segmentDump(e))
+	assert.Equal(t, 13, e.CursorColumn)
+
+	link := e.Segments()[1].(*HyperlinkSegment)
+	assert.Equal(t, "https://fyne.io", link.URL.String())
+	assert.Equal(t, "link to [fyne-project](https://fyne.io) web site", e.Markdown())
+
+	e.Undo()
+	assert.Equal(t, "link to fyneproject web site", e.Text)
+	e.Undo()
+	assert.Equal(t, "link to fyne project web site", e.Text)
+	assert.Equal(t, []string{"link to |", "fyne project|object", " web site|"}, segmentDump(e))
+}
+
+func TestRichTextEntry_ReplaceLinkSelection(t *testing.T) {
+	e := NewRichTextEntryFromMarkdown("link to [fyne project](https://fyne.io) web site")
+	e.CursorRow, e.CursorColumn = 0, 18
+	e.sel.selectRow, e.sel.selectColumn = 0, 15 // "oje", selected leftwards
+	e.sel.selecting = true
+
+	e.TypedRune('X')
+	assert.Equal(t, "link to fyne prXct web site", e.Text)
+	assert.Equal(t, []string{"link to |", "fyne prXct|object", " web site|"}, segmentDump(e))
+	assert.Equal(t, 16, e.CursorColumn)
+}
+
+func TestRichTextEntry_TypeAtLinkEnds(t *testing.T) {
+	e := NewRichTextEntryFromMarkdown("link to [fyne](https://fyne.io) site")
+	e.CursorRow, e.CursorColumn = 0, 12 // just after the link
+
+	e.TypedRune('!')
+	e.CursorColumn = 8 // just before the link
+	e.TypedRune('>')
+	assert.Equal(t, "link to >fyne! site", e.Text)
+	assert.Equal(t, []string{"link to >|", "fyne|object", "! site|"}, segmentDump(e))
+}
+
+func TestRichTextEntry_DeleteWholeLink(t *testing.T) {
+	e := NewRichTextEntryFromMarkdown("a [b](https://fyne.io) c")
+	e.CursorRow, e.CursorColumn = 0, 3
+
+	e.TypedKey(&fyne.KeyEvent{Name: fyne.KeyBackspace})
+	assert.Equal(t, "a  c", e.Text)
+	for _, seg := range e.Segments() {
+		_, isLink := seg.(*HyperlinkSegment)
+		assert.False(t, isLink)
+	}
+}
+
 func TestRichTextEntry_Rows(t *testing.T) {
 	e := NewRichTextEntryFromMarkdown("# Title\n\nBody text")
 	provider := e.textProvider()

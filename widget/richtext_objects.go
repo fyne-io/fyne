@@ -139,6 +139,16 @@ func (h *HyperlinkSegment) Textual() string {
 	return h.Text
 }
 
+// content returns the text that this link shows.
+func (h *HyperlinkSegment) content() string {
+	return h.Text
+}
+
+// setContent replaces the text that this link shows.
+func (h *HyperlinkSegment) setContent(text string) {
+	h.Text = text
+}
+
 // Visual returns a new instance of a hyperlink widget required to render this segment.
 func (h *HyperlinkSegment) Visual() fyne.CanvasObject {
 	link := NewHyperlink(h.Text, h.URL)
@@ -150,6 +160,7 @@ func (h *HyperlinkSegment) Visual() fyne.CanvasObject {
 // Update applies the current state of this hyperlink segment to an existing visual.
 func (h *HyperlinkSegment) Update(o fyne.CanvasObject) {
 	link, _ := o.(*fyne.Container).Objects[0].(*Hyperlink)
+	link.Text = h.Text
 	link.URL = h.URL
 	link.Alignment = h.Alignment
 	link.SizeName = h.SizeName
