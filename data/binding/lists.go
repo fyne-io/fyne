@@ -331,14 +331,23 @@ func (l *boundList[T]) Append(val T) error {
 	l.lock.Lock()
 	*l.val = append(*l.val, val)
 
-	trigger, err := l.doReload()
-	l.lock.Unlock()
+	if l.updateExternal {
+		// the bound slice may also have been changed directly, so check every item
+		trigger, err := l.doReload()
+		l.lock.Unlock()
 
-	if trigger {
-		l.trigger()
+		if trigger {
+			l.trigger()
+		}
+
+		return err
 	}
 
-	return err
+	l.appendItem(l.bindItem(len(*l.val) - 1))
+	l.lock.Unlock()
+
+	l.trigger()
+	return nil
 }
 
 func (l *boundList[T]) Get() ([]T, error) {
@@ -446,16 +455,7 @@ func (l *boundList[T]) doReload() (trigger bool, retErr error) {
 		trigger = true
 	} else if oldLen < newLen {
 		for i := oldLen; i < newLen; i++ {
-			item := bindListItem(l.val, i, l.updateExternal, l.comparator)
-
-			if l.parentListener != nil {
-				index := i
-				item.AddListener(NewDataListener(func() {
-					l.parentListener(index)
-				}))
-			}
-
-			l.appendItem(item)
+			l.appendItem(l.bindItem(i))
 		}
 		trigger = true
 	}
@@ -476,6 +476,17 @@ func (l *boundList[T]) doReload() (trigger bool, retErr error) {
 		}
 	}
 	return trigger, retErr
+}
+
+func (l *boundList[T]) bindItem(i int) Item[T] {
+	item := bindListItem(l.val, i, l.updateExternal, l.comparator)
+	if l.parentListener != nil {
+		item.AddListener(NewDataListener(func() {
+			l.parentListener(i)
+		}))
+	}
+
+	return item
 }
 
 func (l *boundList[T]) SetValue(i int, v T) error {
