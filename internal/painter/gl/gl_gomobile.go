@@ -88,7 +88,6 @@ func (p *painter) Init() {
 
 type mobileContext struct {
 	glContext gl.Context
-	byteBuf   []byte // scratch buffer for BufferData/BufferSubData, reused between uploads
 }
 
 var _ context = (*mobileContext)(nil)
@@ -118,12 +117,12 @@ func (c *mobileContext) BlendFunc(srcFactor, destFactor uint32) {
 }
 
 func (c *mobileContext) BufferData(target uint32, points []float32, usage uint32) {
-	data := c.toLEByteOrder(points)
+	data := toLEByteOrder(points...)
 	c.glContext.BufferData(gl.Enum(target), data, gl.Enum(usage))
 }
 
 func (c *mobileContext) BufferSubData(target uint32, points []float32) {
-	data := c.toLEByteOrder(points)
+	data := toLEByteOrder(points...)
 	c.glContext.BufferSubData(gl.Enum(target), data)
 }
 
@@ -296,21 +295,19 @@ func (c *mobileContext) Viewport(x, y, width, height int) {
 }
 
 // toLEByteOrder returns the byte representation of float32 values in little
-// endian byte order, reusing the context's scratch buffer. GL copies the bytes
-// during the upload, so the buffer is free to be overwritten on the next call -
-// which keeps per-frame vertex flushes from allocating.
-func (c *mobileContext) toLEByteOrder(values []float32) []byte {
-	n := 4 * len(values)
-	if cap(c.byteBuf) < n {
-		c.byteBuf = make([]byte, n)
-	}
-	c.byteBuf = c.byteBuf[:n]
+// endian byte order. Each call allocates its own slice: on the gomobile
+// backend BufferData/BufferSubData only enqueue the payload pointer and the
+// GL worker reads it later from the work queue (internal/driver/mobile/gl),
+// so a shared scratch buffer would let a later upload overwrite an earlier
+// queued payload and corrupt mobile vertex/UV uploads outside debug builds.
+func toLEByteOrder(values ...float32) []byte {
+	b := make([]byte, 4*len(values))
 	for i, v := range values {
 		u := math.Float32bits(v)
-		c.byteBuf[4*i+0] = byte(u >> 0)
-		c.byteBuf[4*i+1] = byte(u >> 8)
-		c.byteBuf[4*i+2] = byte(u >> 16)
-		c.byteBuf[4*i+3] = byte(u >> 24)
+		b[4*i+0] = byte(u >> 0)
+		b[4*i+1] = byte(u >> 8)
+		b[4*i+2] = byte(u >> 16)
+		b[4*i+3] = byte(u >> 24)
 	}
-	return c.byteBuf
+	return b
 }
