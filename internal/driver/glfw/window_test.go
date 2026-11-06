@@ -15,6 +15,7 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal/build"
+	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/scale"
 	internalTest "fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/layout"
@@ -2028,6 +2029,19 @@ func TestWindow_CloseInterception(t *testing.T) {
 		}
 		w.destroy(d)
 	})
+}
+
+func TestWindow_Close_ReleasesTextTextures(t *testing.T) {
+	w := createWindow("test")
+	ent := cache.FontCacheEntry{Canvas: w.canvas}
+	freed := false
+	cache.SetTextTexture(ent, cache.NoTexture, w.canvas, func() { freed = true })
+
+	w.Close()
+
+	_, ok := cache.GetTextTexture(ent)
+	assert.False(t, ok, "text textures of a closed window should be released")
+	assert.True(t, freed)
 }
 
 func TestWindow_ClosedBeforeShow(t *testing.T) {
