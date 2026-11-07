@@ -165,7 +165,7 @@ func updateConfig(width, height, orientation int32) {
 var touchIDs [11]uintptr
 
 //export sendTouch
-func sendTouch(cTouch, cTouchType uintptr, x, y float32) {
+func sendTouch(cTouch, cTouchType uintptr, x, y float32, precise int32) {
 	id := -1
 	for i, val := range touchIDs {
 		if val == cTouch {
@@ -202,6 +202,7 @@ func sendTouch(cTouch, cTouchType uintptr, x, y float32) {
 		Y:        y,
 		Sequence: touch.Sequence(id),
 		Type:     t,
+		Precise:  precise != 0,
 	}
 }
 
