@@ -256,6 +256,7 @@ func (r *scrollBarAreaRenderer) barSizeAndOffset(th fyne.Theme, contentOffset, c
 var (
 	_ desktop.Hoverable = (*scrollBarArea)(nil)
 	_ fyne.Tappable     = (*scrollBarArea)(nil)
+	_ fyne.Draggable    = (*scrollBarArea)(nil)
 )
 
 type scrollBarArea struct {
@@ -280,6 +281,14 @@ func (a *scrollBarArea) CreateRenderer() fyne.WidgetRenderer {
 	background := canvas.NewRectangle(th.Color(theme.ColorNameScrollBarBackground, v))
 	background.Hidden = !a.isLarge()
 	return newScrollBarAreaRenderer(a, a.bar, background)
+}
+
+func (a *scrollBarArea) DragEnd() {
+	a.bar.DragEnd()
+}
+
+func (a *scrollBarArea) Dragged(e *fyne.DragEvent) {
+	a.bar.Dragged(e)
 }
 
 func (a *scrollBarArea) Tapped(e *fyne.PointEvent) {

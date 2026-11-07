@@ -20,8 +20,8 @@ func Test_canvas_Dragged(t *testing.T) {
 	c.Resize(fyne.NewSize(40, 24))
 	assert.Equal(t, float32(0), scroll.Offset.Y)
 
-	c.tapDown(fyne.NewPos(32, 5), 0)
-	c.tapMove(fyne.NewPos(32, 10), 0, func(wid fyne.Draggable, ev *fyne.DragEvent) {
+	c.tapDown(fyne.NewPos(20, 5), 0)
+	c.tapMove(fyne.NewPos(20, 10), 0, func(wid fyne.Draggable, ev *fyne.DragEvent) {
 		wid.Dragged(ev)
 		dragged = true
 		draggedObj = wid
@@ -30,7 +30,7 @@ func Test_canvas_Dragged(t *testing.T) {
 	assert.True(t, dragged)
 	assert.Equal(t, scroll, draggedObj)
 	dragged = false
-	c.tapMove(fyne.NewPos(32, 5), 0, func(wid fyne.Draggable, ev *fyne.DragEvent) {
+	c.tapMove(fyne.NewPos(20, 5), 0, func(wid fyne.Draggable, ev *fyne.DragEvent) {
 		wid.Dragged(ev)
 		dragged = true
 	})
