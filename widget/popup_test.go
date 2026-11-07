@@ -645,3 +645,17 @@ func TestModelPopUp_ResizeBeforeShow_CanvasSizeZero(t *testing.T) {
 	assert.Equal(t, popBgSize.Subtract(popContentPadding), pop.Content.Size())
 	assert.Equal(t, popBgSize, pop.Size())
 }
+
+func TestPopUp_ShowAtPosition_ConstrainedToCanvas(t *testing.T) {
+	c := test.NewCanvas()
+	c.Resize(fyne.NewSize(100, 100))
+	label := NewLabel("Some\nMultiline\nLabel")
+	pop := NewPopUp(label, c)
+	defer pop.Hide()
+
+	pop.ShowAtPosition(fyne.NewPos(80, 90))
+
+	pos, size := pop.Position(), pop.Size()
+	assert.LessOrEqual(t, pos.X+size.Width, float32(100))
+	assert.LessOrEqual(t, pos.Y+size.Height, float32(100))
+}

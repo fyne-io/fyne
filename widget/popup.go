@@ -45,6 +45,12 @@ func (p *PopUp) Hide() {
 	}
 }
 
+// Move moves the pop-up, adjusting the position if needed to keep it inside the canvas.
+// The position is absolute to the top, left of its canvas.
+func (p *PopUp) Move(pos fyne.Position) {
+	p.BaseWidget.Move(p.constrainedPosition(pos, p.Size()))
+}
+
 // Refresh the background for a modal popup and the content of this popup.
 func (p *PopUp) Refresh() {
 	if p.modal && p.overlay != nil {
@@ -173,6 +179,24 @@ func ShowModalPopUp(content fyne.CanvasObject, c fyne.Canvas) {
 	p.Show()
 }
 
+func (p *PopUp) constrainedPosition(pos fyne.Position, size fyne.Size) fyne.Position {
+	if p.Canvas == nil {
+		return pos
+	}
+	canvasSize := p.Canvas.Size()
+	if canvasSize.IsZero() {
+		return pos
+	}
+
+	if pos.X+size.Width > canvasSize.Width {
+		pos.X = max(canvasSize.Width-size.Width, 0)
+	}
+	if pos.Y+size.Height > canvasSize.Height {
+		pos.Y = max(canvasSize.Height-size.Height, 0)
+	}
+	return pos
+}
+
 type popUpBaseRenderer struct {
 	popUp      *PopUp
 	background *canvas.Rectangle
@@ -197,6 +221,7 @@ func (r *popUpRenderer) Layout(s fyne.Size) {
 		}
 	}
 	r.popUp.Content.Resize(size)
+	r.popUp.BaseWidget.Move(r.popUp.constrainedPosition(r.popUp.Position(), size))
 
 	r.background.Resize(size)
 }
