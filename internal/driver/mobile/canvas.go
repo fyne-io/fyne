@@ -341,13 +341,22 @@ func (c *canvas) tapMove(pos fyne.Position, tapID int,
 	}
 
 	if c.dragging == nil {
+		if _, ok := co.(fyne.Draggable); !ok {
+			return
+		}
+
+		pressPos := c.tapCaptured[tapID].downPos
+		co, objPos, _ = c.findObjectAtPositionMatching(pressPos, func(object fyne.CanvasObject) bool {
+			_, ok := object.(fyne.Draggable)
+			return ok
+		})
 		drag, ok := co.(fyne.Draggable)
 		if !ok {
 			return
 		}
 
 		c.dragging = drag
-		c.dragOffset = previousPos.Subtract(objPos)
+		c.dragOffset = pressPos.Subtract(objPos)
 		c.dragStart = co.Position()
 		if scrollOtherDirection != nil {
 			c.draggingOuter, _ = scrollOtherDirection.(fyne.Draggable)
