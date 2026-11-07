@@ -367,6 +367,9 @@ func (a *scrollBarArea) moveBar(offset float32, barSize fyne.Size) {
 
 func (*scrollBarArea) computeScrollOffset(length, offset, scrollLength, contentLength float32) float32 {
 	maxOffset := scrollLength - length
+	if maxOffset <= 0 {
+		return 0
+	}
 	if offset < 0 {
 		offset = 0
 	} else if offset > maxOffset {
