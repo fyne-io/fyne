@@ -115,12 +115,13 @@ func renderNode(source []byte, n ast.Node, quotingDepth int, listDepth int) ([]R
 		return renderEmphasis(source, n, quotingDepth, 3, listDepth)
 	case *ast.Text:
 		text := string(t.Value(source))
-		if text == "" {
+		if t.HardLineBreak() {
+			text += "\n"
+		} else if text == "" {
 			// These empty text elements indicate single line breaks after non-text elements in goldmark.
 			return []RichTextSegment{&TextSegment{Style: RichTextStyleInline, Text: textSpace}}, nil
-		}
-		if n.(*ast.Text).SoftLineBreak() {
-			text = text + textSpace
+		} else if t.SoftLineBreak() {
+			text += textSpace
 		}
 		if quotingDepth > 0 {
 			style := RichTextStyleBlockquote
