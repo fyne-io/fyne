@@ -863,3 +863,24 @@ func TestScrollContainer_TapToScroll(t *testing.T) {
 	})
 	assert.Less(t, s.Offset.X, oldX)
 }
+
+func TestScrollBarArea_ComputeScrollOffset(t *testing.T) {
+	area := &scrollBarArea{}
+	tests := []struct {
+		name                                        string
+		length, offset, scrollLength, contentLength float32
+		want                                        float32
+	}{
+		{"normal", 50, 25, 100, 200, 50},
+		{"clamp to start", 50, -10, 100, 200, 0},
+		{"clamp to end", 50, 100, 100, 200, 100},
+		{"thumb fills track", 100, 5, 100, 200, 0},
+		{"thumb larger than track", 120, 5, 100, 200, 0},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := area.computeScrollOffset(tt.length, tt.offset, tt.scrollLength, tt.contentLength)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
