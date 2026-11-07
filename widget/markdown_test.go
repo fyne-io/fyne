@@ -715,6 +715,14 @@ func TestRichTextMarkdown_NewlineInHyperlink(t *testing.T) {
 	assert.Equal(t, "foo bar", r.String())
 }
 
+func TestRichTextMarkdown_UnderscoreInHyperlink(t *testing.T) {
+	r := NewRichTextFromMarkdown("[under_score](https://fyne.io/)")
+	assert.Equal(t, "under_score", r.String())
+
+	r.ParseMarkdown("[foo _bar_ baz](https://fyne.io/)")
+	assert.Equal(t, "foo bar baz", r.String())
+}
+
 func BenchmarkMarkdownParsing(b *testing.B) {
 	md := `# Test heading
 This is some test markdown. It contains some different markdown
