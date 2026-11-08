@@ -400,11 +400,11 @@ func (s *fromIntTo[T]) Set(val T) error {
 		return err
 	}
 	old, err := s.from.Get()
-	if i == old {
-		return nil
-	}
 	if err != nil {
 		return err
+	}
+	if i == old {
+		return nil
 	}
 	err = s.from.Set(i)
 	if err != nil {

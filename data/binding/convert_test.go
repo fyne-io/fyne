@@ -1,6 +1,7 @@
 package binding
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -590,4 +591,22 @@ func TestIntToFloat(t *testing.T) {
 	v2, err := i.Get()
 	assert.Nil(t, err)
 	assert.Equal(t, 5, v2)
+}
+
+type failingInt struct {
+	Int
+	err error
+}
+
+func (f failingInt) Get() (int, error) {
+	return 0, f.err
+}
+
+func TestIntToFloat_SetReturnsSourceReadError(t *testing.T) {
+	readErr := errors.New("source read failed")
+	f := IntToFloat(failingInt{Int: NewInt(), err: readErr})
+
+	for _, v := range []float64{0, 0.75, -0.75, 3} {
+		assert.Equal(t, readErr, f.Set(v), "value %v", v)
+	}
 }
