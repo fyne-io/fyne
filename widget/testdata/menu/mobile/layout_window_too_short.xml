@@ -27,8 +27,8 @@
 					<widget pos="0,40" size="66x0" type="*widget.Shadow">
 						<linearGradient endColor="shadow" pos="0,-8" size="66x8"/>
 					</widget>
-					<widget pos="60,0" size="6x40" type="*widget.scrollBarArea">
-						<widget pos="3,0" size="3x16" type="*widget.scrollBar">
+					<widget pos="50,0" size="16x40" type="*widget.scrollBarArea">
+						<widget pos="13,0" size="3x16" type="*widget.scrollBar">
 							<rectangle fillColor="scrollbar" radius="3" size="3x16"/>
 						</widget>
 					</widget>
