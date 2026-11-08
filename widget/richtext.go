@@ -3,6 +3,7 @@ package widget
 import (
 	"image/color"
 	"math"
+	"slices"
 	"sort"
 	"strings"
 	"unicode"
@@ -520,6 +521,7 @@ func (t *RichText) cleanVisualCache() {
 func (t *RichText) insertAt(pos int, runes []rune) {
 	// Find best segment if multiple match.
 	var contains, empty, before, after textHolder
+	var linkBefore RichTextSegment
 	beforeEndsLine, beforeEndsBlock := false, false
 	offset, start := 0, 0
 	for _, seg := range t.contentSegments() {
@@ -530,6 +532,9 @@ func (t *RichText) insertAt(pos int, runes []rune) {
 
 		if _, isLink := seg.(*HyperlinkSegment); isLink && (pos <= start || pos >= end) {
 			// text typed beside a link is not part of it, only text typed inside
+			if end == pos {
+				linkBefore = seg
+			}
 			start = end
 			continue
 		}
@@ -579,7 +584,14 @@ func (t *RichText) insertAt(pos int, runes []rune) {
 	}
 
 	if into == nil { // no text segment covers this position, so start a new one
-		t.Segments = append(t.Segments, &TextSegment{Style: RichTextStyleInline, Text: string(runes), parent: t})
+		text := &TextSegment{Style: RichTextStyleInline, Text: string(runes), parent: t}
+		if linkBefore != nil { // such as between two links, so it goes right after the first
+			if segs, ok := insertSegmentAfter(t.Segments, linkBefore, text); ok {
+				t.Segments = segs
+				return
+			}
+		}
+		t.Segments = append(t.Segments, text)
 		return
 	}
 
@@ -590,6 +602,30 @@ func (t *RichText) insertAt(pos int, runes []rune) {
 	r2 = append(r2, runes...)
 	r2 = append(r2, r[offset:]...)
 	into.setContent(string(r2))
+}
+
+// insertSegmentAfter places seg straight after target, looking inside paragraphs
+// and lists too, and reports whether target was found.
+func insertSegmentAfter(segs []RichTextSegment, target, seg RichTextSegment) ([]RichTextSegment, bool) {
+	for i, s := range segs {
+		if s == target {
+			return slices.Insert(segs, i+1, seg), true
+		}
+
+		switch block := s.(type) {
+		case *ParagraphSegment:
+			if inner, ok := insertSegmentAfter(block.Texts, target, seg); ok {
+				block.Texts = inner
+				return segs, true
+			}
+		case *ListSegment:
+			if inner, ok := insertSegmentAfter(block.Items, target, seg); ok {
+				block.Items = inner
+				return segs, true
+			}
+		}
+	}
+	return segs, false
 }
 
 // Len returns the text widget buffer length

@@ -139,12 +139,10 @@ func (h *HyperlinkSegment) Textual() string {
 	return h.Text
 }
 
-// content returns the text that this link shows.
 func (h *HyperlinkSegment) content() string {
 	return h.Text
 }
 
-// setContent replaces the text that this link shows.
 func (h *HyperlinkSegment) setContent(text string) {
 	h.Text = text
 }

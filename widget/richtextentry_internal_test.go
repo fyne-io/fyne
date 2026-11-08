@@ -159,6 +159,18 @@ func TestRichTextEntry_TypeAtLinkEnds(t *testing.T) {
 	assert.Equal(t, []string{"link to >|", "fyne|object", "! site|"}, segmentDump(e))
 }
 
+func TestRichTextEntry_TypeBetweenAdjacentLinks(t *testing.T) {
+	e := NewRichTextEntryFromMarkdown("see [fyne](https://fyne.io)[fyne](https://fyne.io) site")
+	e.CursorRow, e.CursorColumn = 0, 8 // between the two links
+
+	e.TypedRune('t')
+	e.TypedRune('h')
+	e.TypedRune('e')
+	assert.Equal(t, "see fynethefyne site", e.Text)
+	assert.Equal(t, []string{"see |", "fyne|object", "the|", "fyne|object", " site|"}, segmentDump(e))
+	assert.Equal(t, 11, e.CursorColumn)
+}
+
 func TestRichTextEntry_DeleteWholeLink(t *testing.T) {
 	e := NewRichTextEntryFromMarkdown("a [b](https://fyne.io) c")
 	e.CursorRow, e.CursorColumn = 0, 3
