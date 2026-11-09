@@ -33,6 +33,10 @@ func (p *preferences) watch() {
 	// no-op for web driver
 }
 
+func (p *preferences) ensureWatching() {
+	// no-op for web driver
+}
+
 type readerNopCloser struct {
 	reader io.Reader
 }
