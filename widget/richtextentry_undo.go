@@ -321,10 +321,10 @@ func (e *RichTextEntry) recordUndo(cursor int) {
 	e.undoEdit, e.undoNestedEdit = richTextEditText, richTextEditText
 	if !merged && typed == nil {
 		edit = max(edit, nested)
+		if edit == richTextEditText {
+			return
+		}
 	} // else OnChanged restyled the typing, which stays one run that later typing can join
-	if !merged && typed == nil && edit == richTextEditText {
-		return
-	}
 
 	state := cloneSegments(e.richProvider().Segments)
 	action := top
