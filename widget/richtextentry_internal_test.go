@@ -171,6 +171,54 @@ func TestRichTextEntry_TypeBetweenAdjacentLinks(t *testing.T) {
 	assert.Equal(t, 11, e.CursorColumn)
 }
 
+func TestRichTextEntry_TypeAtLinkEdges(t *testing.T) {
+	for name, tt := range map[string]struct {
+		md        string
+		row, col  int
+		want      string
+		wantLinks []string
+	}{
+		"before leading link":       {"[fyne project](https://fyne.io) web site", 0, 0, "thefyne project web site", []string{"fyne project"}},
+		"after leading link":        {"[fyne project](https://fyne.io) web site", 0, 12, "fyne projectthe web site", []string{"fyne project"}},
+		"before link mid text":      {"see [fyne](https://fyne.io) site", 0, 4, "see thefyne site", []string{"fyne"}},
+		"after trailing link":       {"see [fyne](https://fyne.io)", 0, 8, "see fynethe", []string{"fyne"}},
+		"before trailing link":      {"see [fyne](https://fyne.io)", 0, 4, "see thefyne", []string{"fyne"}},
+		"before only link":          {"[fyne](https://fyne.io)", 0, 0, "thefyne", []string{"fyne"}},
+		"after only link":           {"[fyne](https://fyne.io)", 0, 4, "fynethe", []string{"fyne"}},
+		"before link in list item":  {"- [fyne](https://fyne.io) site", 0, 0, "thefyne site", []string{"fyne"}},
+		"after link in list item":   {"- see [fyne](https://fyne.io)", 0, 8, "see fynethe", []string{"fyne"}},
+		"before link in second row": {"Title\n\n[fyne](https://fyne.io) site", 1, 0, "Title\nthefyne site", []string{"fyne"}},
+	} {
+		t.Run(name, func(t *testing.T) {
+			e := NewRichTextEntryFromMarkdown(tt.md)
+			e.CursorRow, e.CursorColumn = tt.row, tt.col
+
+			e.TypedRune('t')
+			e.TypedRune('h')
+			e.TypedRune('e')
+			assert.Equal(t, tt.want, e.Text)
+			assert.Equal(t, tt.wantLinks, linkTexts(e.Segments()))
+			assert.Equal(t, tt.row, e.CursorRow)
+			assert.Equal(t, tt.col+3, e.CursorColumn)
+		})
+	}
+}
+
+func linkTexts(segs []RichTextSegment) []string {
+	var out []string
+	for _, seg := range segs {
+		switch s := seg.(type) {
+		case *HyperlinkSegment:
+			out = append(out, s.Text)
+		case *ParagraphSegment:
+			out = append(out, linkTexts(s.Texts)...)
+		case *ListSegment:
+			out = append(out, linkTexts(s.Items)...)
+		}
+	}
+	return out
+}
+
 func TestRichTextEntry_DeleteWholeLink(t *testing.T) {
 	e := NewRichTextEntryFromMarkdown("a [b](https://fyne.io) c")
 	e.CursorRow, e.CursorColumn = 0, 3

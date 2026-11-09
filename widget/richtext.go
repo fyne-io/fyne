@@ -521,7 +521,7 @@ func (t *RichText) cleanVisualCache() {
 func (t *RichText) insertAt(pos int, runes []rune) {
 	// Find best segment if multiple match.
 	var contains, empty, before, after textHolder
-	var linkBefore RichTextSegment
+	var linkBefore, linkAfter RichTextSegment
 	beforeEndsLine, beforeEndsBlock := false, false
 	offset, start := 0, 0
 	for _, seg := range t.contentSegments() {
@@ -534,6 +534,8 @@ func (t *RichText) insertAt(pos int, runes []rune) {
 			// text typed beside a link is not part of it, only text typed inside
 			if end == pos {
 				linkBefore = seg
+			} else if start == pos && linkAfter == nil {
+				linkAfter = seg
 			}
 			start = end
 			continue
@@ -585,8 +587,16 @@ func (t *RichText) insertAt(pos int, runes []rune) {
 
 	if into == nil { // no text segment covers this position, so start a new one
 		text := &TextSegment{Style: RichTextStyleInline, Text: string(runes), parent: t}
-		if linkBefore != nil { // such as between two links, so it goes right after the first
-			if segs, ok := insertSegmentAfter(t.Segments, linkBefore, text); ok {
+		// it goes next to the link at the cursor: after one that ends here,
+		// or else before one that starts here, such as at the start of the content
+		if linkBefore != nil {
+			if segs, ok := insertSegmentBeside(t.Segments, linkBefore, text, 1); ok {
+				t.Segments = segs
+				return
+			}
+		}
+		if linkAfter != nil {
+			if segs, ok := insertSegmentBeside(t.Segments, linkAfter, text, 0); ok {
 				t.Segments = segs
 				return
 			}
@@ -604,22 +614,22 @@ func (t *RichText) insertAt(pos int, runes []rune) {
 	into.setContent(string(r2))
 }
 
-// insertSegmentAfter places seg straight after target, looking inside paragraphs
-// and lists too, and reports whether target was found.
-func insertSegmentAfter(segs []RichTextSegment, target, seg RichTextSegment) ([]RichTextSegment, bool) {
+// insertSegmentBeside places seg straight before (shift 0) or after (shift 1) target,
+// looking inside paragraphs and lists too, and reports whether target was found.
+func insertSegmentBeside(segs []RichTextSegment, target, seg RichTextSegment, shift int) ([]RichTextSegment, bool) {
 	for i, s := range segs {
 		if s == target {
-			return slices.Insert(segs, i+1, seg), true
+			return slices.Insert(segs, i+shift, seg), true
 		}
 
 		switch block := s.(type) {
 		case *ParagraphSegment:
-			if inner, ok := insertSegmentAfter(block.Texts, target, seg); ok {
+			if inner, ok := insertSegmentBeside(block.Texts, target, seg, shift); ok {
 				block.Texts = inner
 				return segs, true
 			}
 		case *ListSegment:
-			if inner, ok := insertSegmentAfter(block.Items, target, seg); ok {
+			if inner, ok := insertSegmentBeside(block.Items, target, seg, shift); ok {
 				block.Items = inner
 				return segs, true
 			}
