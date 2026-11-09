@@ -519,89 +519,20 @@ func (t *RichText) cleanVisualCache() {
 // insertAt inserts the text at the specified position.
 // The position is a rune offset into the whole content, spanning all segments.
 func (t *RichText) insertAt(pos int, runes []rune) {
-	// Find best segment if multiple match.
-	var contains, empty, before, after textHolder
-	var linkBefore, linkAfter RichTextSegment
-	beforeEndsLine, beforeEndsBlock := false, false
-	offset, start := 0, 0
+	c := insertCandidates{}
+	start := 0
 	for _, seg := range t.contentSegments() {
 		if start > pos {
 			break
 		}
 		end := start + utf8.RuneCountInString(seg.Textual())
-
-		if _, isLink := seg.(*HyperlinkSegment); isLink && (pos <= start || pos >= end) {
-			// text typed beside a link is not part of it, only text typed inside
-			if end == pos {
-				linkBefore = seg
-			} else if start == pos && linkAfter == nil {
-				linkAfter = seg
-			}
-			start = end
-			continue
-		}
-
-		if holder, ok := seg.(textHolder); ok {
-			switch {
-			case start < pos && pos < end:
-				if contains == nil {
-					contains, offset = holder, pos-start
-				}
-			case start == pos && end == pos:
-				if empty == nil {
-					empty = holder
-				}
-			case end == pos:
-				before = holder
-				// content that closes a line hands this position to what follows it
-				beforeEndsLine = !seg.Inline() || strings.HasSuffix(holder.content(), "\n")
-
-				// a block that was closed by a line break has the next line below its panel
-				_, isPanel := seg.(panelSegment)
-				beforeEndsBlock = isPanel && strings.HasSuffix(holder.content(), "\n")
-			case start == pos:
-				if after == nil {
-					after = holder
-				}
-			}
-		} else if start == pos && end == pos {
-			// a decoration such as a list bullet sits here, so text typed at this
-			// position belongs to the content that follows it
-			empty, before = nil, nil
-		}
+		c.note(seg, start, end, pos)
 		start = end
 	}
 
-	into := contains
-	switch {
-	case into != nil:
-	case empty != nil:
-		into, offset = empty, 0
-	case before != nil && !beforeEndsLine:
-		into, offset = before, utf8.RuneCountInString(before.content())
-	case after != nil:
-		into, offset = after, 0
-	case before != nil && !beforeEndsBlock: // there is nothing after it, so the line grows instead
-		into, offset = before, utf8.RuneCountInString(before.content())
-	}
-
+	into, offset := c.choose()
 	if into == nil { // no text segment covers this position, so start a new one
-		text := &TextSegment{Style: RichTextStyleInline, Text: string(runes), parent: t}
-		// it goes next to the link at the cursor: after one that ends here,
-		// or else before one that starts here, such as at the start of the content
-		if linkBefore != nil {
-			if segs, ok := insertSegmentBeside(t.Segments, linkBefore, text, 1); ok {
-				t.Segments = segs
-				return
-			}
-		}
-		if linkAfter != nil {
-			if segs, ok := insertSegmentBeside(t.Segments, linkAfter, text, 0); ok {
-				t.Segments = segs
-				return
-			}
-		}
-		t.Segments = append(t.Segments, text)
+		t.insertPlainSegment(string(runes), c.linkBefore, c.linkAfter)
 		return
 	}
 
@@ -612,6 +543,109 @@ func (t *RichText) insertAt(pos int, runes []rune) {
 	r2 = append(r2, runes...)
 	r2 = append(r2, r[offset:]...)
 	into.setContent(string(r2))
+}
+
+// insertCandidates collects the segments around an insert position,
+// so that insertAt can pick the best one if multiple match.
+type insertCandidates struct {
+	contains, empty, before, after  textHolder
+	linkBefore, linkAfter           RichTextSegment
+	beforeEndsLine, beforeEndsBlock bool
+	offset                          int
+}
+
+// note records seg, which spans start to end, if it touches pos.
+func (c *insertCandidates) note(seg RichTextSegment, start, end, pos int) {
+	if _, isLink := seg.(*HyperlinkSegment); isLink && (pos <= start || pos >= end) {
+		c.noteLink(seg, start, end, pos)
+		return
+	}
+
+	holder, ok := seg.(textHolder)
+	if !ok {
+		if start == pos && end == pos {
+			// a decoration such as a list bullet sits here, so text typed at this
+			// position belongs to the content that follows it
+			c.empty, c.before = nil, nil
+		}
+		return
+	}
+
+	switch {
+	case start < pos && pos < end:
+		if c.contains == nil {
+			c.contains, c.offset = holder, pos-start
+		}
+	case start == pos && end == pos:
+		if c.empty == nil {
+			c.empty = holder
+		}
+	case end == pos:
+		c.noteBefore(seg, holder)
+	case start == pos:
+		if c.after == nil {
+			c.after = holder
+		}
+	}
+}
+
+// noteLink remembers a link that ends or starts at pos.
+// Text typed beside a link is not part of it, only text typed inside.
+func (c *insertCandidates) noteLink(seg RichTextSegment, start, end, pos int) {
+	if end == pos {
+		c.linkBefore = seg
+	} else if start == pos && c.linkAfter == nil {
+		c.linkAfter = seg
+	}
+}
+
+// noteBefore records the text that ends at the insert position.
+func (c *insertCandidates) noteBefore(seg RichTextSegment, holder textHolder) {
+	c.before = holder
+	// content that closes a line hands this position to what follows it
+	endsLine := strings.HasSuffix(holder.content(), "\n")
+	c.beforeEndsLine = !seg.Inline() || endsLine
+
+	// a block that was closed by a line break has the next line below its panel
+	_, isPanel := seg.(panelSegment)
+	c.beforeEndsBlock = isPanel && endsLine
+}
+
+// choose returns the text to insert into and the offset within it, or nil if none fits.
+func (c *insertCandidates) choose() (textHolder, int) {
+	switch {
+	case c.contains != nil:
+		return c.contains, c.offset
+	case c.empty != nil:
+		return c.empty, 0
+	case c.before != nil && !c.beforeEndsLine:
+		return c.before, utf8.RuneCountInString(c.before.content())
+	case c.after != nil:
+		return c.after, 0
+	case c.before != nil && !c.beforeEndsBlock: // there is nothing after it, so the line grows instead
+		return c.before, utf8.RuneCountInString(c.before.content())
+	}
+	return nil, 0
+}
+
+// insertPlainSegment adds a new inline text segment next to the link at the cursor:
+// after one that ends here, or else before one that starts here, such as at the
+// start of the content. Without a link nearby it is appended.
+func (t *RichText) insertPlainSegment(text string, linkBefore, linkAfter RichTextSegment) {
+	seg := &TextSegment{Style: RichTextStyleInline, Text: text, parent: t}
+	if linkBefore != nil {
+		if segs, ok := insertSegmentBeside(t.Segments, linkBefore, seg, 1); ok {
+			t.Segments = segs
+			return
+		}
+	}
+	if linkAfter != nil {
+		if segs, ok := insertSegmentBeside(t.Segments, linkAfter, seg, 0); ok {
+			t.Segments = segs
+			return
+		}
+	}
+	t.Segments = append(t.Segments, seg)
 }
 
 // insertSegmentBeside places seg straight before (shift 0) or after (shift 1) target,
