@@ -274,11 +274,15 @@ func (e *RichTextEntry) syncUndo() int {
 func (e *RichTextEntry) resetUndo() {
 	e.undoStack.Clear()
 	e.undoState = cloneSegments(e.richProvider().Segments)
-	e.undoEdit = richTextEditText
+	e.undoEdit, e.undoNestedEdit = richTextEditText, richTextEditText
 }
 
 // noteEdit records that the edit taking place changed more than the text.
 func (e *RichTextEntry) noteEdit(edit richTextEdit) {
+	if e.undoDepth > 1 {
+		e.undoNestedEdit = max(e.undoNestedEdit, edit)
+		return
+	}
 	e.undoEdit = max(e.undoEdit, edit)
 }
 
@@ -313,8 +317,11 @@ func (e *RichTextEntry) recordUndo(cursor int) {
 
 	top := e.lastUndoAction()
 	merged := top != nil && top.merged
-	edit := e.undoEdit
-	e.undoEdit = richTextEditText
+	edit, nested := e.undoEdit, e.undoNestedEdit
+	e.undoEdit, e.undoNestedEdit = richTextEditText, richTextEditText
+	if !merged && typed == nil {
+		edit = max(edit, nested)
+	} // else OnChanged restyled the typing, which stays one run that later typing can join
 	if !merged && typed == nil && edit == richTextEditText {
 		return
 	}

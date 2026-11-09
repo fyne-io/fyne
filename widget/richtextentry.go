@@ -50,6 +50,8 @@ type RichTextEntry struct {
 	undoEdit richTextEdit
 	// undoDepth counts the edits under way, as OnChanged may start one inside another
 	undoDepth int
+	// undoNestedEdit notes what the edits started from OnChanged changed beyond the text
+	undoNestedEdit richTextEdit
 }
 
 // NewRichTextEntry creates a new rich text entry widget.

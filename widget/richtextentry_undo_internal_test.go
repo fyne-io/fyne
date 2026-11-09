@@ -436,14 +436,39 @@ func TestRichTextEntry_Undo_TypingRestyledOnChange(t *testing.T) {
 	e := NewRichTextEntry()
 	restyleOnChange(e)
 
-	e.TypedRune('a')
-	e.TypedRune('b')
-	assert.Equal(t, "ab", e.Text)
+	for _, r := range "hello" {
+		e.TypedRune(r)
+	}
+	assert.Equal(t, "hello", e.Text)
+	assert.Equal(t, []string{"hello|b"}, segmentDump(e))
+
+	// the restyling is part of the typing, which undoes as one run as in an Entry
+	undo(e)
+	assert.Empty(t, e.Text)
+
+	redo(e)
+	assert.Equal(t, "hello", e.Text)
+	assert.Equal(t, []string{"hello|b"}, segmentDump(e))
+}
+
+func TestRichTextEntry_Undo_TypingThenStyleOnChange(t *testing.T) {
+	e := NewRichTextEntry()
+	restyleOnChange(e)
+
+	for _, r := range "hi" {
+		e.TypedRune(r)
+	}
+	e.TypedShortcut(&fyne.ShortcutSelectAll{})
+	e.TypedShortcut(&fyne.ShortcutCut{Clipboard: test.NewClipboard()})
+	for _, r := range "yo" {
+		e.TypedRune(r)
+	}
+	assert.Equal(t, "yo", e.Text)
 
 	undo(e)
-	assert.NotEqual(t, "ab", e.Text)
-	for e.undoStack.CanUndo() {
-		undo(e)
-	}
+	assert.Empty(t, e.Text)
+	undo(e)
+	assert.Equal(t, "hi", e.Text)
+	undo(e)
 	assert.Empty(t, e.Text)
 }
