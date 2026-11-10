@@ -1713,11 +1713,15 @@ func wrapWordLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth 
 				reuse++
 				low = high
 				high = l.segEnd
-				// the space we wrapped on belongs to neither row, unless it is the
-				// last of the line - then dropping it would leave the position
-				// after it, where the cursor sits, outside of every row
-				if low+1 < high && unicode.IsSpace(text[low]) {
+				if low < high && unicode.IsSpace(text[low]) {
 					low++
+					if low == high {
+						// the space we wrapped on is the last rune of the line, so there
+						// is no following row to put the rest on. Keep it on the row we
+						// just closed, else no row covers the position after it and the
+						// cursor at the end of the line resolves outside of every row.
+						bounds[len(bounds)-1].segEnd = high
+					}
 				}
 				measureWidth = maxSize.Width
 

@@ -415,10 +415,11 @@ func TestEntry_Backspace_TrailingSpaceAtWrapBoundary(t *testing.T) {
 		e.SetText(text)
 
 		provider := e.textProvider()
-		for i := 0; i < provider.rows(); i++ {
-			if b := provider.rowBoundary(i); b.docBegin == lineEnd-1 && b.docEnd == lineEnd {
-				wrapped++ // the trailing space wrapped on to a row of its own
-			}
+		row, col := e.rowColFromTextPos(lineEnd)
+		assert.LessOrEqual(t, col, provider.rowLength(row),
+			"width %v: the end of the line is not inside any row", width)
+		if provider.rowBoundary(row).docBegin > 0 {
+			wrapped++ // the trailing space is on a row that the wrapping produced
 		}
 
 		// put the cursor at the start of the empty line and join it to the one above
@@ -429,5 +430,44 @@ func TestEntry_Backspace_TrailingSpaceAtWrapBoundary(t *testing.T) {
 		assert.Equal(t, lineEnd, e.CursorTextOffset(), "width %v", width)
 	}
 
-	assert.NotZero(t, wrapped, "no width wrapped the trailing space, so the boundary was never reached")
+	assert.NotZero(t, wrapped, "no width wrapped the first line")
+}
+
+// Resizing a wrapped Entry moves the wrap points, so the cursor has to follow the
+// position it was on to whichever row now holds it. Comparing text positions could
+// not see that for a cursor on the first row, where the position is just the column,
+// and left the cursor stranded past the end of that row.
+func TestEntry_Resize_CursorFollowsWrap(t *testing.T) {
+	text := "one two three four five six " // six words, and a space at the end
+	end := len([]rune(text))
+
+	wrapped := 0
+	for width := float32(40); width <= 200; width += 4 {
+		e := NewMultiLineEntry()
+		e.Wrapping = fyne.TextWrapWord
+		w := test.NewTempWindow(t, e)
+		w.Resize(fyne.NewSize(400, 150))
+		e.SetText(text)
+
+		e.CursorRow, e.CursorColumn = e.rowColFromTextPos(end)
+		assert.Equal(t, 0, e.CursorRow, "the text did not start out on one row")
+
+		w.Resize(fyne.NewSize(width, 150))
+
+		provider := e.textProvider()
+		assert.Equal(t, end, provider.rowBoundary(provider.rows()-1).docEnd,
+			"width %v: the trailing space is not in any row", width)
+
+		row, col := e.rowColFromTextPos(end)
+		assert.Equal(t, row, e.CursorRow, "width %v", width)
+		assert.Equal(t, col, e.CursorColumn, "width %v", width)
+		assert.LessOrEqual(t, e.CursorColumn, provider.rowLength(e.CursorRow),
+			"width %v: the cursor is past the end of its own row", width)
+
+		if e.CursorRow > 0 {
+			wrapped++
+		}
+	}
+
+	assert.NotZero(t, wrapped, "no width wrapped the text, so the cursor never had to move")
 }
