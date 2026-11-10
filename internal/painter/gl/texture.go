@@ -262,7 +262,7 @@ func (p *painter) newGlTextTexture(obj fyne.CanvasObject) Texture {
 	img := image.NewRGBA(image.Rect(0, 0, width, height))
 
 	face := paint.CachedFontFace(text.TextStyle, text.FontSource, text)
-	paint.DrawString(img, text.Text, color, face.Fonts, text.TextSize, p.pixScale, text.TextStyle)
+	paint.DrawStringNative(img, text.Text, color, face.Fonts, text.TextSize, p.pixScale, text.TextStyle, 0)
 	return p.imgToTexture(img, canvas.ImageScaleSmooth)
 }
 
@@ -284,7 +284,7 @@ func (p *painter) clippedTextTexture(text *canvas.Text, visibleOffset, visibleWi
 	}
 	img := image.NewRGBA(image.Rect(0, 0, width, height))
 	face := paint.CachedFontFace(text.TextStyle, text.FontSource, text)
-	paint.DrawStringOffset(img, text.Text, color, face.Fonts, text.TextSize, p.pixScale, text.TextStyle, offset)
+	paint.DrawStringNative(img, text.Text, color, face.Fonts, text.TextSize, p.pixScale, text.TextStyle, offset)
 	texture := p.imgToTexture(img, canvas.ImageScaleSmooth)
 
 	if p.clippedTextTextures == nil {

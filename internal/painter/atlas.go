@@ -2,7 +2,6 @@ package painter
 
 import (
 	"image"
-	"image/color"
 	"math"
 
 	"github.com/go-text/typesetting/font"
@@ -257,21 +256,21 @@ func (a *GlyphAtlas) glyph(pg PlacedGlyph, sub int, fontSize, pixScale float32, 
 	}
 
 	// Rasterise at an origin chosen so the ink, shifted right by the sub-pixel
-	// offset and with a pixel of room for the antialiased edge, lands inside the
-	// bitmap. The offset is under a pixel and folded into the floor, so the
-	// width below still has room for it.
+	// offset and with glyphMargin pixels of room for the antialiased edge, lands
+	// inside the bitmap. The offset is under a pixel and folded into the floor,
+	// so the width below still has room for it.
 	subX := float32(sub) / subpixelUnits
-	originX := 1 - int(math.Floor(float64(relX+subX)))
-	originY := 1 + int(math.Ceil(float64(relY)))
-	w := int(math.Ceil(float64(inkW))) + 3
-	h := int(math.Ceil(float64(inkH))) + 3
+	originX := glyphMargin - int(math.Floor(float64(relX+subX)))
+	originY := glyphMargin + int(math.Ceil(float64(relY)))
+	w := int(math.Ceil(float64(inkW))) + 1 + 2*glyphMargin
+	h := int(math.Ceil(float64(inkH))) + 1 + 2*glyphMargin
 
 	x, y, ok := a.place(w, h, tex)
 	if !ok {
 		return glyphEntry{}, false // larger than the atlas itself
 	}
 	img := image.NewRGBA(image.Rect(0, 0, w, h))
-	RasteriseGlyph(img, pg, color.White, fontSize, pixScale, originX, originY, subX)
+	rasteriseAtlasGlyph(img, pg, fontSize, pixScale, originX, originY, subX)
 	tex.UploadGlyph(img, x, y)
 
 	e := glyphEntry{x: x, y: y, width: w, height: h, bearX: -originX, bearY: -originY}
