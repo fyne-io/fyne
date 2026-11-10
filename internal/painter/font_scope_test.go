@@ -55,12 +55,28 @@ func TestCachedFontFace_RefreshedOverrideKeepsFaces(t *testing.T) {
 // A theme may return a Resource whose concrete type cannot be a map key.
 type sliceResource struct{ content []byte }
 
-func (r sliceResource) Name() string    { return "slice.ttf" }
+func (sliceResource) Name() string      { return "slice.ttf" }
 func (r sliceResource) Content() []byte { return r.content }
 
 func TestCachedFontFace_NonComparableFontKeepsScope(t *testing.T) {
 	painter.ClearFontCache()
 	res := sliceResource{theme.DefaultTextFont().Content()}
+	a, b := canvas.NewText("a", nil), canvas.NewText("b", nil)
+	cache.OverrideTheme(a, fontTheme{theme.DefaultTheme(), res})
+	cache.OverrideTheme(b, fontTheme{theme.DefaultTheme(), res})
+
+	fa := painter.CachedFontFace(fyne.TextStyle{}, nil, a)
+	assert.NotNil(t, fa)
+	assert.Same(t, fa, painter.CachedFontFace(fyne.TextStyle{}, nil, a))
+	assert.NotSame(t, fa, painter.CachedFontFace(fyne.TextStyle{}, nil, b))
+}
+
+// A struct type is comparable even when the value held in its interface field is not.
+type wrappedResource struct{ fyne.Resource }
+
+func TestCachedFontFace_WrappedNonComparableFontKeepsScope(t *testing.T) {
+	painter.ClearFontCache()
+	res := wrappedResource{sliceResource{theme.DefaultTextFont().Content()}}
 	a, b := canvas.NewText("a", nil), canvas.NewText("b", nil)
 	cache.OverrideTheme(a, fontTheme{theme.DefaultTheme(), res})
 	cache.OverrideTheme(b, fontTheme{theme.DefaultTheme(), res})

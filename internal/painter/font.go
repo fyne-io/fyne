@@ -234,7 +234,7 @@ func DrawStringOffset(dst draw.Image, s string, color color.Color, f shaping.Fon
 
 // hashable reports whether res can be used as a map key.
 func hashable(res fyne.Resource) bool {
-	return res != nil && reflect.TypeOf(res).Comparable()
+	return res != nil && reflect.ValueOf(res).Comparable()
 }
 
 func loadMeasureFont(data fyne.Resource) *font.Face {
