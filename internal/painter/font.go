@@ -286,7 +286,7 @@ func RasteriseGlyph(dst draw.Image, g PlacedGlyph, c color.Color, fontSize, scal
 
 // hashable reports whether res can be used as a map key.
 func hashable(res fyne.Resource) bool {
-	return res != nil && reflect.TypeOf(res).Comparable()
+	return res != nil && reflect.ValueOf(res).Comparable()
 }
 
 // loadMeasureFont returns a new face for the font, which callers may use
