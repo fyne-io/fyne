@@ -33,6 +33,10 @@ type PopUp struct {
 // Hide this widget, if it was previously visible
 func (p *PopUp) Hide() {
 	if p.overlay != nil {
+		// removing the overlay drops its focus manager, so unfocus first or the content never sees FocusLost
+		if p.Canvas.Overlays().Top() == p.overlay && p.Canvas.Focused() != nil {
+			p.Canvas.Unfocus()
+		}
 		p.Canvas.Overlays().Remove(p.overlay)
 		p.overlay = nil
 	}

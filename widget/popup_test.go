@@ -147,6 +147,58 @@ func TestPopUp_Hide(t *testing.T) {
 	assert.Empty(t, test.Canvas().Overlays().List())
 }
 
+func TestPopUp_Hide_Unfocuses(t *testing.T) {
+	for name, newPop := range map[string]func(fyne.CanvasObject, fyne.Canvas) *PopUp{
+		"non-modal": NewPopUp,
+		"modal":     NewModalPopUp,
+	} {
+		t.Run(name, func(t *testing.T) {
+			test.NewTempApp(t)
+			w := test.NewTempWindow(t, NewLabel(""))
+			w.Resize(fyne.NewSize(200, 200))
+			c := w.Canvas()
+			entry := NewEntry()
+			pop := newPop(entry, c)
+			pop.Show()
+			c.Focus(entry)
+			require.True(t, entry.focused)
+
+			pop.Hide()
+			assert.False(t, entry.focused)
+			assert.Nil(t, c.Focused())
+
+			pop.Show()
+			assert.False(t, entry.focused)
+			assert.Nil(t, c.Focused())
+			pop.Hide()
+		})
+	}
+}
+
+func TestPopUp_Hide_KeepsFocusBelow(t *testing.T) {
+	test.NewTempApp(t)
+	below := NewEntry()
+	w := test.NewTempWindow(t, below)
+	w.Resize(fyne.NewSize(200, 200))
+	c := w.Canvas()
+	c.Focus(below)
+
+	pop := NewPopUp(NewLabel("Hi"), c)
+	pop.Show()
+	pop.Hide()
+	assert.True(t, below.focused)
+	assert.Same(t, below, c.Focused())
+
+	inner := NewEntry()
+	pop = NewPopUp(inner, c)
+	pop.Show()
+	c.Focus(inner)
+	pop.Hide()
+	assert.False(t, inner.focused)
+	assert.True(t, below.focused)
+	assert.Same(t, below, c.Focused())
+}
+
 func TestPopUp_OnDismiss(t *testing.T) {
 	label := NewLabel("Hi")
 	pop := NewPopUp(label, test.Canvas())
