@@ -102,6 +102,9 @@ type Entry struct {
 	// tripleTapped records that the current touch selected a row, so the touch up must not move the cursor
 	tripleTapped bool
 
+	// keepScrollOffset stops a refresh caused by a focus change from scrolling to the cursor
+	keepScrollOffset bool
+
 	sel   *selectable
 	popUp *PopUpMenu
 	// TODO: Add OnSelectChanged
@@ -321,6 +324,8 @@ func (e *Entry) ExtendBaseWidget(wid fyne.Widget) {
 
 // FocusGained is called when the Entry has been given focus.
 func (e *Entry) FocusGained() {
+	e.keepScrollOffset = true
+	defer func() { e.keepScrollOffset = false }()
 	e.setFieldsAndRefresh(func() {
 		e.hasFocused = true
 		e.dirty = true
@@ -333,6 +338,8 @@ func (e *Entry) FocusGained() {
 
 // FocusLost is called when the Entry has had focus removed.
 func (e *Entry) FocusLost() {
+	e.keepScrollOffset = true
+	defer func() { e.keepScrollOffset = false }()
 	e.setFieldsAndRefresh(func() {
 		e.focused = false
 		e.selectKeyDown = false
@@ -1676,6 +1683,18 @@ func (r *entryRenderer) Layout(size fyne.Size) {
 	prov := r.entry.textProvider()
 	textPos := textPosFromRowCol(r.entry.CursorRow, r.entry.CursorColumn, prov)
 	selectPos := textPosFromRowCol(r.entry.sel.selectRow, r.entry.sel.selectColumn, prov)
+	// Wrapping may have changed since SetText created the providers.
+	wrap := r.entry.textWrap()
+	for _, provider := range []*RichText{prov, r.entry.placeholderProvider()} {
+		if provider.Wrapping != wrap {
+			provider.Wrapping = wrap
+			provider.Refresh()
+		}
+	}
+	if rend := cache.Renderer(r.entry.content); rend != nil {
+		rend.(*entryContentRenderer).updateScrollDirections()
+	}
+
 	if r.entry.Wrapping == fyne.TextWrapOff && r.entry.Scroll == widget.ScrollNone {
 		r.entry.content.Resize(entrySize)
 		r.entry.content.Move(entryPos)
@@ -1688,7 +1707,7 @@ func (r *entryRenderer) Layout(size fyne.Size) {
 	if textPos != resizedTextPos {
 		r.entry.setFieldsAndRefresh(func() {
 			r.entry.CursorRow, r.entry.CursorColumn = r.entry.rowColFromTextPos(textPos)
-			r.entry.sel.cursorRow, r.entry.sel.cursorRow = r.entry.CursorRow, r.entry.CursorColumn
+			r.entry.sel.cursorRow, r.entry.sel.cursorColumn = r.entry.CursorRow, r.entry.CursorColumn
 
 			if r.entry.sel.selecting {
 				r.entry.sel.selectRow, r.entry.sel.selectColumn = r.entry.rowColFromTextPos(selectPos)
@@ -1993,7 +2012,9 @@ func (r *entryContentRenderer) moveCursor() {
 	r.cursor.Move(r.content.entry.CursorPosition())
 
 	callback := r.content.entry.OnCursorChanged
-	r.ensureCursorVisible()
+	if !r.content.entry.keepScrollOffset {
+		r.ensureCursorVisible()
+	}
 
 	if callback != nil {
 		callback()

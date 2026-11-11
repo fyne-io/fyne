@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"image/color"
 	"reflect"
-	"sort"
+	"slices"
 	"strings"
 	"unsafe"
 
@@ -708,6 +708,6 @@ func sortedKeys(m map[string]*string) []string {
 	for k := range m {
 		keys = append(keys, k)
 	}
-	sort.Strings(keys)
+	slices.Sort(keys)
 	return keys
 }

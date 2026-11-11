@@ -96,8 +96,6 @@ linters:
             - "**/*_test.go"
         - name: unhandled-error
           disabled: true # we rely on errcheck
-        - name: use-slices-sort
-          disabled: true # TODO
     staticcheck:
       checks:
         - all

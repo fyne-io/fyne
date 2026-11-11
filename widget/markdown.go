@@ -115,12 +115,13 @@ func renderNode(source []byte, n ast.Node, quotingDepth int, listDepth int) ([]R
 		return renderEmphasis(source, n, quotingDepth, 3, listDepth)
 	case *ast.Text:
 		text := string(t.Value(source))
-		if text == "" {
+		if t.HardLineBreak() {
+			text += "\n"
+		} else if text == "" {
 			// These empty text elements indicate single line breaks after non-text elements in goldmark.
 			return []RichTextSegment{&TextSegment{Style: RichTextStyleInline, Text: textSpace}}, nil
-		}
-		if n.(*ast.Text).SoftLineBreak() {
-			text = text + textSpace
+		} else if t.SoftLineBreak() {
+			text += textSpace
 		}
 		if quotingDepth > 0 {
 			style := RichTextStyleBlockquote
@@ -298,17 +299,21 @@ func renderHeading(source []byte, n ast.Node, quotingDepth int, listDepth int) (
 
 func forceIntoText(source []byte, n ast.Node) string {
 	text := strings.Builder{}
+	lineBreak := false
 	// ast.Walk() only ever returns an error if the walker does and our walker does not.
 	_ = ast.Walk(n, func(n2 ast.Node, entering bool) (ast.WalkStatus, error) {
 		if entering {
 			if t, ok := n2.(*ast.Text); ok {
+				if lineBreak {
+					text.WriteByte(' ')
+				}
 				text.Write(t.Value(source))
-				text.WriteByte(' ')
+				lineBreak = t.SoftLineBreak() || t.HardLineBreak()
 			}
 		}
 		return ast.WalkContinue, nil
 	})
-	return strings.TrimSuffix(text.String(), textSpace)
+	return text.String()
 }
 
 func parseMarkdown(content string) []RichTextSegment {

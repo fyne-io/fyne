@@ -108,6 +108,24 @@ func Test_canvas_DraggingOutOfWidget(t *testing.T) {
 	assert.Greater(t, slider.Value, lastValue)
 }
 
+func Test_canvas_NoDragAfterPressOutsideObject(t *testing.T) {
+	c := newCanvas(fyne.CurrentDevice()).(*canvas)
+	slider := widget.NewSlider(0.0, 100.0)
+	c.SetContent(container.NewGridWithRows(2, widget.NewLabel("Outside"), slider))
+	c.Resize(fyne.NewSize(100, 200))
+
+	dragged := false
+	drag := func(wid fyne.Draggable, ev *fyne.DragEvent) {
+		wid.Dragged(ev)
+		dragged = true
+	}
+	c.tapDown(fyne.NewPos(23, 13), 0)
+	c.tapMove(fyne.NewPos(23, 120), 0, drag)
+	c.tapMove(fyne.NewPos(30, 120), 0, drag)
+	assert.False(t, dragged)
+	assert.Zero(t, slider.Value)
+}
+
 func Test_canvas_Focusable(t *testing.T) {
 	// Discarding log output for tests
 	// The following method logs an error:

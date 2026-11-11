@@ -205,16 +205,7 @@ func (r *scrollBarAreaRenderer) MinSize() fyne.Size {
 	th := theme.CurrentForWidget(r.area)
 
 	barSize := th.Size(theme.SizeNameScrollBar)
-	minBarWidth := barSize
-	if !r.area.isLarge() {
-		minBarWidth = th.Size(theme.SizeNameScrollBarSmall) * 2
-	}
-	switch r.area.orientation {
-	case scrollBarOrientationHorizontal:
-		return fyne.NewSize(barSize, minBarWidth)
-	default:
-		return fyne.NewSize(minBarWidth, barSize)
-	}
+	return fyne.NewSize(barSize, barSize)
 }
 
 func (r *scrollBarAreaRenderer) Refresh() {
@@ -247,8 +238,8 @@ func (r *scrollBarAreaRenderer) barSizeAndOffset(th fyne.Theme, contentOffset, c
 	if r.area.isLarge() {
 		width = scrollBarSize
 	} else {
-		widthOffset = th.Size(theme.SizeNameScrollBarSmall)
-		width = widthOffset
+		width = th.Size(theme.SizeNameScrollBarSmall)
+		widthOffset = scrollBarSize - width
 	}
 	return length, width, lengthOffset, widthOffset
 }
@@ -256,6 +247,7 @@ func (r *scrollBarAreaRenderer) barSizeAndOffset(th fyne.Theme, contentOffset, c
 var (
 	_ desktop.Hoverable = (*scrollBarArea)(nil)
 	_ fyne.Tappable     = (*scrollBarArea)(nil)
+	_ fyne.Draggable    = (*scrollBarArea)(nil)
 )
 
 type scrollBarArea struct {
@@ -280,6 +272,14 @@ func (a *scrollBarArea) CreateRenderer() fyne.WidgetRenderer {
 	background := canvas.NewRectangle(th.Color(theme.ColorNameScrollBarBackground, v))
 	background.Hidden = !a.isLarge()
 	return newScrollBarAreaRenderer(a, a.bar, background)
+}
+
+func (a *scrollBarArea) DragEnd() {
+	a.bar.DragEnd()
+}
+
+func (a *scrollBarArea) Dragged(e *fyne.DragEvent) {
+	a.bar.Dragged(e)
 }
 
 func (a *scrollBarArea) Tapped(e *fyne.PointEvent) {
@@ -367,6 +367,9 @@ func (a *scrollBarArea) moveBar(offset float32, barSize fyne.Size) {
 
 func (*scrollBarArea) computeScrollOffset(length, offset, scrollLength, contentLength float32) float32 {
 	maxOffset := scrollLength - length
+	if maxOffset <= 0 {
+		return 0
+	}
 	if offset < 0 {
 		offset = 0
 	} else if offset > maxOffset {
