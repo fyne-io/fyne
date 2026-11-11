@@ -2,6 +2,7 @@ package painter
 
 import (
 	"bytes"
+	"image"
 	"image/color"
 	"image/draw"
 	"math"
@@ -72,6 +73,17 @@ func lookupLangFont(family string, aspect font.Aspect) *font.Face {
 	fm.SetQuery(fontscan.Query{Families: []string{family}, Aspect: aspect})
 	l, _ := language.NewLangID(language.NewLanguage(lang.SystemLocale().LanguageString()))
 	return fm.ResolveFaceForLang(l)
+}
+
+// systemFontLocation is the file a system fallback face was loaded from.
+func systemFontLocation(f *font.Font) (fontscan.Location, bool) {
+	fontScanLock.Lock()
+	defer fontScanLock.Unlock()
+	if fm == nil {
+		return fontscan.Location{}, false
+	}
+	loc := fm.FontLocation(f)
+	return loc, loc.File != ""
 }
 
 func lookupRuneFont(r rune, family string, aspect font.Aspect) *font.Face {
@@ -194,6 +206,7 @@ func ClearFontCache() {
 	fontCache.Clear()
 	fontCustomCache.Clear()
 	parsedFonts.Clear()
+	forgetNativeFonts()
 
 	runBufferMut.Lock()
 	clear(shapeCache)
@@ -207,6 +220,19 @@ func DrawString(dst draw.Image, s string, c color.Color, f shaping.Fontmap, font
 
 // DrawStringOffset draws a string shifted left by the specified pixel offset.
 func DrawStringOffset(dst draw.Image, s string, c color.Color, f shaping.Fontmap, fontSize, scale float32, style fyne.TextStyle, offset int) {
+	drawText(dst, s, c, f, fontSize, scale, style, offset, false)
+}
+
+// DrawStringNative is DrawStringOffset drawing outlines as the glyph atlas
+// does: through the platform's rasteriser where it has one. A GPU painter
+// draws the strings its atlas cannot hold with this, so they have the same
+// weight. The software painter keeps DrawString, whose output is the same
+// on every platform.
+func DrawStringNative(dst draw.Image, s string, c color.Color, f shaping.Fontmap, fontSize, scale float32, style fyne.TextStyle, offset int) {
+	drawText(dst, s, c, f, fontSize, scale, style, offset, nativeGlyphs)
+}
+
+func drawText(dst draw.Image, s string, c color.Color, f shaping.Fontmap, fontSize, scale float32, style fyne.TextStyle, offset int, native bool) {
 	r := render.Renderer{
 		FontSize: fontSize,
 		PixScale: scale,
@@ -223,8 +249,49 @@ func DrawStringOffset(dst draw.Image, s string, c color.Color, f shaping.Fontmap
 			return
 		}
 
+		if native {
+			drawRunByGlyph(&r, run, dst, c, fontSize, scale, float32(int(x)-offset), float32(yPix))
+			return
+		}
 		r.DrawShapedRunAt(run, dst, int(x)-offset, yPix)
 	})
+}
+
+// drawRunByGlyph draws a run a glyph at a time, rasterising each outline as
+// the atlas does, so a string drawn whole has the weight of the same string
+// drawn from the atlas. Other glyphs, such as colour emoji, are go-text's.
+func drawRunByGlyph(r *render.Renderer, run shaping.Output, dst draw.Image, c color.Color, fontSize, scale, x, y float32) {
+	fill := image.NewUniform(c)
+	for _, g := range run.Glyphs {
+		penX := x + fixed266ToFloat32(g.XOffset)*scale
+		penY := y - fixed266ToFloat32(g.YOffset)*scale
+		x += fixed266ToFloat32(g.Advance) * scale
+
+		pg := PlacedGlyph{Glyph: g, Face: run.Face, X: penX, Y: penY}
+		if _, ok := run.Face.GlyphData(g.GlyphID).(font.GlyphOutline); ok {
+			relX := fixed266ToFloat32(g.XBearing) * scale
+			relY := fixed266ToFloat32(g.YBearing) * scale
+			inkW := fixed266ToFloat32(g.Width) * scale
+			inkH := -fixed266ToFloat32(g.Height) * scale
+			if inkW <= 0 || inkH <= 0 {
+				continue
+			}
+			whole := float32(math.Floor(float64(penX)))
+			subX := penX - whole
+			originX := glyphMargin - int(math.Floor(float64(relX+subX)))
+			originY := glyphMargin + int(math.Ceil(float64(relY)))
+			w := int(math.Ceil(float64(inkW))) + 1 + 2*glyphMargin
+			h := int(math.Ceil(float64(inkH))) + 1 + 2*glyphMargin
+			mask := image.NewRGBA(image.Rect(0, 0, w, h))
+			rasteriseAtlasGlyph(mask, pg, fontSize, scale, originX, originY, subX)
+			at := image.Pt(int(whole)-originX, int(math.Round(float64(penY)))-originY)
+			draw.DrawMask(dst, mask.Bounds().Add(at), fill, image.Point{}, mask, image.Point{}, draw.Over)
+			continue
+		}
+		one := shaping.Output{Face: run.Face, Glyphs: []shaping.Glyph{g}}
+		one.Glyphs[0].XOffset, one.Glyphs[0].YOffset = 0, 0
+		r.DrawShapedRunAt(one, dst, int(penX), int(math.Round(float64(penY))))
+	}
 }
 
 // PlacedGlyph is one shaped glyph together with the position DrawString would
@@ -278,6 +345,16 @@ func RasteriseGlyph(dst draw.Image, g PlacedGlyph, c color.Color, fontSize, scal
 	r.DrawShapedRunAt(run, dst, x, y)
 }
 
+// rasteriseAtlasGlyph draws a glyph's coverage in white, through the
+// platform's rasteriser where it has one, which on macOS is what gives text
+// its system weight, and otherwise as RasteriseGlyph does.
+func rasteriseAtlasGlyph(dst *image.RGBA, g PlacedGlyph, fontSize, scale float32, x, y int, subX float32) {
+	if rasteriseGlyphNative(dst, g, fontSize, scale, x, y, subX) {
+		return
+	}
+	RasteriseGlyph(dst, g, color.White, fontSize, scale, x, y, subX)
+}
+
 // loadMeasureFont returns a new face for the font, which callers may use
 // without locking. Faces are not safe for concurrent use, but the parsed Font
 // they share is, so the parse is reused.
@@ -291,6 +368,7 @@ func loadMeasureFont(data fyne.Resource) *font.Face {
 		return nil
 	}
 	parsedFonts.Store(data, loaded.Font)
+	rememberFontSource(loaded.Font, data.Content())
 	return loaded
 }
 

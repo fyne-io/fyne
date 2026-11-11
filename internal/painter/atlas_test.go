@@ -247,7 +247,7 @@ func (c *cpuAtlasTexture) ResizeAtlas(size int) {
 }
 
 // TestGlyphAtlas_MatchesDrawString composites a string's quads and compares the
-// coverage with DrawString, which is what the whole-run texture path draws.
+// coverage with DrawStringNative, which is what the whole-run texture path draws.
 // Spacing is where the two could part: a glyph snapped to a whole pixel sits up
 // to half a pixel from where the shaper put it, and over a line of text that
 // shows as uneven kerning.
@@ -268,7 +268,7 @@ func TestGlyphAtlas_MatchesDrawString(t *testing.T) {
 		}
 		want := image.NewRGBA(bounds)
 		face := painter.CachedFontFace(text.TextStyle, nil, nil)
-		painter.DrawString(want, s, color.White, face.Fonts, text.TextSize, scale, text.TextStyle)
+		painter.DrawStringNative(want, s, color.White, face.Fonts, text.TextSize, scale, text.TextStyle, 0)
 
 		var diff, ink float64
 		for i := 3; i < len(want.Pix); i += 4 {
