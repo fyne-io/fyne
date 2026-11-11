@@ -11,6 +11,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -22,10 +23,10 @@ func TestNewScroll(t *testing.T) {
 	barArea := cache.Renderer(scroll).(*scrollContainerRenderer).vertArea
 	bar := cache.Renderer(barArea).(*scrollBarAreaRenderer).bar
 	assert.Equal(t, float32(0), scroll.Offset.Y)
-	assert.Equal(t, theme.ScrollBarSmallSize()*2, barArea.Size().Width)
+	assert.Equal(t, theme.ScrollBarSize(), barArea.Size().Width)
 	assert.Equal(t, theme.ScrollBarSmallSize(), bar.Size().Width)
-	assert.Equal(t, theme.ScrollBarSmallSize(), bar.Position().X)
-	assert.Equal(t, fyne.NewPos(100-theme.ScrollBarSmallSize()*2, 0), barArea.Position())
+	assert.Equal(t, theme.ScrollBarSize()-theme.ScrollBarSmallSize(), bar.Position().X)
+	assert.Equal(t, fyne.NewPos(100-theme.ScrollBarSize(), 0), barArea.Position())
 }
 
 func TestScrollContainer_MinSize(t *testing.T) {
@@ -334,14 +335,14 @@ func TestScrollContainer_ScrollBarIsSmall(t *testing.T) {
 	require.True(t, areaVert.Visible())
 	require.Less(t, theme.ScrollBarSmallSize(), theme.ScrollBarSize())
 
-	assert.Equal(t, theme.ScrollBarSmallSize()*2, areaHoriz.Size().Height)
-	assert.Equal(t, theme.ScrollBarSmallSize()*2, areaVert.Size().Width)
-	assert.Equal(t, fyne.NewPos(0, 100-theme.ScrollBarSmallSize()*2), areaHoriz.Position())
-	assert.Equal(t, fyne.NewPos(100-theme.ScrollBarSmallSize()*2, 0), areaVert.Position())
+	assert.Equal(t, theme.ScrollBarSize(), areaHoriz.Size().Height)
+	assert.Equal(t, theme.ScrollBarSize(), areaVert.Size().Width)
+	assert.Equal(t, fyne.NewPos(0, 100-theme.ScrollBarSize()), areaHoriz.Position())
+	assert.Equal(t, fyne.NewPos(100-theme.ScrollBarSize(), 0), areaVert.Position())
 	assert.Equal(t, theme.ScrollBarSmallSize(), barHoriz.Size().Height)
 	assert.Equal(t, theme.ScrollBarSmallSize(), barVert.Size().Width)
-	assert.Equal(t, theme.ScrollBarSmallSize(), barHoriz.Position().Y)
-	assert.Equal(t, theme.ScrollBarSmallSize(), barVert.Position().X)
+	assert.Equal(t, theme.ScrollBarSize()-theme.ScrollBarSmallSize(), barHoriz.Position().Y)
+	assert.Equal(t, theme.ScrollBarSize()-theme.ScrollBarSmallSize(), barVert.Position().X)
 }
 
 func TestScrollContainer_ScrollBarGrowsAndShrinksOnMouseInAndMouseOut(t *testing.T) {
@@ -355,36 +356,36 @@ func TestScrollContainer_ScrollBarGrowsAndShrinksOnMouseInAndMouseOut(t *testing
 	barVert := cache.Renderer(areaVert).(*scrollBarAreaRenderer).bar
 	require.True(t, barHoriz.Visible())
 	require.Less(t, theme.ScrollBarSmallSize(), theme.ScrollBarSize())
-	require.Equal(t, theme.ScrollBarSmallSize()*2, areaHoriz.Size().Height)
-	require.Equal(t, fyne.NewPos(0, 100-theme.ScrollBarSmallSize()*2), areaHoriz.Position())
+	require.Equal(t, theme.ScrollBarSize(), areaHoriz.Size().Height)
+	require.Equal(t, fyne.NewPos(0, 100-theme.ScrollBarSize()), areaHoriz.Position())
 	require.Equal(t, theme.ScrollBarSmallSize(), barHoriz.Size().Height)
-	require.Equal(t, theme.ScrollBarSmallSize(), barHoriz.Position().Y)
+	require.Equal(t, theme.ScrollBarSize()-theme.ScrollBarSmallSize(), barHoriz.Position().Y)
 	barHoriz.MouseIn(&desktop.MouseEvent{})
 	assert.Equal(t, theme.ScrollBarSize(), areaHoriz.Size().Height)
 	assert.Equal(t, fyne.NewPos(0, 100-theme.ScrollBarSize()), areaHoriz.Position())
 	assert.Equal(t, theme.ScrollBarSize(), barHoriz.Size().Height)
 	assert.Equal(t, float32(0), barHoriz.Position().Y)
 	barHoriz.MouseOut()
-	assert.Equal(t, theme.ScrollBarSmallSize()*2, areaHoriz.Size().Height)
-	assert.Equal(t, fyne.NewPos(0, 100-theme.ScrollBarSmallSize()*2), areaHoriz.Position())
+	assert.Equal(t, theme.ScrollBarSize(), areaHoriz.Size().Height)
+	assert.Equal(t, fyne.NewPos(0, 100-theme.ScrollBarSize()), areaHoriz.Position())
 	assert.Equal(t, theme.ScrollBarSmallSize(), barHoriz.Size().Height)
-	assert.Equal(t, theme.ScrollBarSmallSize(), barHoriz.Position().Y)
+	assert.Equal(t, theme.ScrollBarSize()-theme.ScrollBarSmallSize(), barHoriz.Position().Y)
 	require.True(t, barVert.Visible())
 	require.Less(t, theme.ScrollBarSmallSize(), theme.ScrollBarSize())
-	require.Equal(t, theme.ScrollBarSmallSize()*2, areaVert.Size().Width)
-	require.Equal(t, fyne.NewPos(100-theme.ScrollBarSmallSize()*2, 0), areaVert.Position())
+	require.Equal(t, theme.ScrollBarSize(), areaVert.Size().Width)
+	require.Equal(t, fyne.NewPos(100-theme.ScrollBarSize(), 0), areaVert.Position())
 	require.Equal(t, theme.ScrollBarSmallSize(), barVert.Size().Width)
-	require.Equal(t, theme.ScrollBarSmallSize(), barVert.Position().X)
+	require.Equal(t, theme.ScrollBarSize()-theme.ScrollBarSmallSize(), barVert.Position().X)
 	barVert.MouseIn(&desktop.MouseEvent{})
 	assert.Equal(t, theme.ScrollBarSize(), areaVert.Size().Width)
 	assert.Equal(t, fyne.NewPos(100-theme.ScrollBarSize(), 0), areaVert.Position())
 	assert.Equal(t, theme.ScrollBarSize(), barVert.Size().Width)
 	assert.Equal(t, float32(0), barVert.Position().X)
 	barVert.MouseOut()
-	assert.Equal(t, theme.ScrollBarSmallSize()*2, areaVert.Size().Width)
-	assert.Equal(t, fyne.NewPos(100-theme.ScrollBarSmallSize()*2, 0), areaVert.Position())
+	assert.Equal(t, theme.ScrollBarSize(), areaVert.Size().Width)
+	assert.Equal(t, fyne.NewPos(100-theme.ScrollBarSize(), 0), areaVert.Position())
 	assert.Equal(t, theme.ScrollBarSmallSize(), barVert.Size().Width)
-	assert.Equal(t, theme.ScrollBarSmallSize(), barVert.Position().X)
+	assert.Equal(t, theme.ScrollBarSize()-theme.ScrollBarSmallSize(), barVert.Position().X)
 }
 
 func TestScrollContainer_ShowShadowOnLeftIfContentIsScrolled(t *testing.T) {
@@ -616,6 +617,25 @@ func TestScrollContainerRenderer_SetMinSize_Direction(t *testing.T) {
 		assert.Equal(t, float32(50), size.Height)
 		assert.Equal(t, float32(100), size.Width)
 	})
+}
+
+func TestScrollBarArea_DraggableFromGutter(t *testing.T) {
+	rect := canvas.NewRectangle(color.Black)
+	rect.SetMinSize(fyne.NewSize(500, 500))
+	scroll := NewScroll(rect)
+	scroll.Resize(fyne.NewSize(100, 100))
+	area := cache.Renderer(scroll).(*scrollContainerRenderer).vertArea
+
+	// The visible bar is at the top of the gutter. A drag starting further down
+	// the gutter should still find the scroll bar area as the draggable object.
+	found, _, _ := driver.FindObjectAtPositionMatching(fyne.NewPos(97, 50), func(obj fyne.CanvasObject) bool {
+		_, ok := obj.(fyne.Draggable)
+		return ok
+	}, nil, scroll)
+	require.Equal(t, area, found)
+
+	found.(fyne.Draggable).Dragged(&fyne.DragEvent{Dragged: fyne.Delta{DY: 20}})
+	assert.Equal(t, float32(100), scroll.Offset.Y)
 }
 
 func TestScrollBar_Dragged_ClickedInside(t *testing.T) {

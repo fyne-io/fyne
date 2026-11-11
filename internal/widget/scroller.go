@@ -205,16 +205,7 @@ func (r *scrollBarAreaRenderer) MinSize() fyne.Size {
 	th := theme.CurrentForWidget(r.area)
 
 	barSize := th.Size(theme.SizeNameScrollBar)
-	minBarWidth := barSize
-	if !r.area.isLarge() {
-		minBarWidth = th.Size(theme.SizeNameScrollBarSmall) * 2
-	}
-	switch r.area.orientation {
-	case scrollBarOrientationHorizontal:
-		return fyne.NewSize(barSize, minBarWidth)
-	default:
-		return fyne.NewSize(minBarWidth, barSize)
-	}
+	return fyne.NewSize(barSize, barSize)
 }
 
 func (r *scrollBarAreaRenderer) Refresh() {
@@ -247,8 +238,8 @@ func (r *scrollBarAreaRenderer) barSizeAndOffset(th fyne.Theme, contentOffset, c
 	if r.area.isLarge() {
 		width = scrollBarSize
 	} else {
-		widthOffset = th.Size(theme.SizeNameScrollBarSmall)
-		width = widthOffset
+		width = th.Size(theme.SizeNameScrollBarSmall)
+		widthOffset = scrollBarSize - width
 	}
 	return length, width, lengthOffset, widthOffset
 }
