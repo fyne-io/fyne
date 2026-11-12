@@ -405,3 +405,70 @@ func TestDiffSegments_Repeated(t *testing.T) {
 	assert.True(t, sameSegments(before, change.apply(after)))
 	assert.True(t, sameSegments(after, change.revert(before)))
 }
+
+// restyleOnChange styles all of the text from OnChanged, as an editor that
+// highlights its own syntax does.
+func restyleOnChange(e *RichTextEntry) {
+	e.OnChanged = func(text string) {
+		e.SetStyleForRange(0, len([]rune(text)), RichTextStyleStrong)
+	}
+}
+
+func TestRichTextEntry_Undo_PasteRestyledOnChange(t *testing.T) {
+	e := NewRichTextEntry()
+	restyleOnChange(e)
+	clipboard := test.NewClipboard()
+	clipboard.SetContent("pasted")
+
+	e.TypedShortcut(&fyne.ShortcutPaste{Clipboard: clipboard})
+	assert.Equal(t, "pasted", e.Text)
+	assert.Equal(t, []string{"pasted|b"}, segmentDump(e))
+
+	undo(e)
+	assert.Empty(t, e.Text)
+
+	redo(e)
+	assert.Equal(t, "pasted", e.Text)
+	assert.Equal(t, []string{"pasted|b"}, segmentDump(e))
+}
+
+func TestRichTextEntry_Undo_TypingRestyledOnChange(t *testing.T) {
+	e := NewRichTextEntry()
+	restyleOnChange(e)
+
+	for _, r := range "hello" {
+		e.TypedRune(r)
+	}
+	assert.Equal(t, "hello", e.Text)
+	assert.Equal(t, []string{"hello|b"}, segmentDump(e))
+
+	// the restyling is part of the typing, which undoes as one run as in an Entry
+	undo(e)
+	assert.Empty(t, e.Text)
+
+	redo(e)
+	assert.Equal(t, "hello", e.Text)
+	assert.Equal(t, []string{"hello|b"}, segmentDump(e))
+}
+
+func TestRichTextEntry_Undo_TypingThenStyleOnChange(t *testing.T) {
+	e := NewRichTextEntry()
+	restyleOnChange(e)
+
+	for _, r := range "hi" {
+		e.TypedRune(r)
+	}
+	e.TypedShortcut(&fyne.ShortcutSelectAll{})
+	e.TypedShortcut(&fyne.ShortcutCut{Clipboard: test.NewClipboard()})
+	for _, r := range "yo" {
+		e.TypedRune(r)
+	}
+	assert.Equal(t, "yo", e.Text)
+
+	undo(e)
+	assert.Empty(t, e.Text)
+	undo(e)
+	assert.Equal(t, "hi", e.Text)
+	undo(e)
+	assert.Empty(t, e.Text)
+}
