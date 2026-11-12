@@ -1704,8 +1704,11 @@ func (r *entryRenderer) Layout(size fyne.Size) {
 		r.scroll.Move(entryPos)
 	}
 
+	// a cursor on the first row keeps its text position whatever the wrapping does,
+	// because that position is just the column, so look for a column that the new
+	// rows have left past the end of its own row as well.
 	resizedTextPos := textPosFromRowCol(r.entry.CursorRow, r.entry.CursorColumn, prov)
-	if textPos != resizedTextPos {
+	if textPos != resizedTextPos || r.entry.CursorColumn > prov.rowLength(r.entry.CursorRow) {
 		r.entry.setFieldsAndRefresh(func() {
 			r.entry.CursorRow, r.entry.CursorColumn = r.entry.rowColFromTextPos(textPos)
 			r.entry.sel.cursorRow, r.entry.sel.cursorColumn = r.entry.CursorRow, r.entry.CursorColumn

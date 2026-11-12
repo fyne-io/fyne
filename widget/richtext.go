@@ -1717,6 +1717,13 @@ func wrapWordLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth 
 				high = l.segEnd
 				if low < high && unicode.IsSpace(text[low]) {
 					low++
+					if low == high {
+						// the space we wrapped on is the last rune of the line, so there
+						// is no following row to put the rest on. Keep it on the row we
+						// just closed, else no row covers the position after it and the
+						// cursor at the end of the line resolves outside of every row.
+						bounds[len(bounds)-1].segEnd = high
+					}
 				}
 				measureWidth = maxSize.Width
 
