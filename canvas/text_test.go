@@ -51,6 +51,21 @@ func TestText_MinSize(t *testing.T) {
 	assert.Greater(t, min2.Width, minSize.Width)
 }
 
+func TestText_MinSize_FollowsChanges(t *testing.T) {
+	test.NewTempApp(t)
+	text := canvas.NewText("a", color.Black)
+	one := text.MinSize()
+	assert.Equal(t, one, text.MinSize(), "asked again, the same")
+	text.Text = "aaaa"
+	assert.Greater(t, text.MinSize().Width, one.Width)
+	text.TextSize *= 2
+	assert.Greater(t, text.MinSize().Height, one.Height)
+	text.TextStyle.Bold = true
+	bold := text.MinSize()
+	text.TextStyle.Bold = false
+	assert.NotEqual(t, bold, text.MinSize())
+}
+
 func TestText_MinSize_NoMultiLine(t *testing.T) {
 	text := canvas.NewText("Break", color.NRGBA{0, 0, 0, 0xff})
 	minSize := text.MinSize()
@@ -243,4 +258,7 @@ func TestText_MinSize_ThemeOverrideFont(t *testing.T) {
 	under := &canvas.Text{Text: "ABCDEFG", TextSize: 21, TextStyle: style}
 	cache.OverrideTheme(under, th)
 	assert.Equal(t, want, under.MinSize())
+
+	cache.OverrideTheme(plain, th)
+	assert.Equal(t, want, plain.MinSize(), "a measured text follows its new theme scope")
 }
