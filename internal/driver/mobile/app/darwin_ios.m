@@ -27,7 +27,16 @@ static CGFloat keyboardHeight;
 @interface GoAppAppDelegate : UIResponder<UIApplicationDelegate>
 @property (strong, nonatomic) UIWindow *window;
 @property (strong, nonatomic) GoAppAppController *controller;
+- (void)showWindow:(UIWindow *)window;
 @end
+
+@interface GoAppSceneDelegate : UIResponder<UIWindowSceneDelegate>
+@property (strong, nonatomic) UIWindow *window;
+@end
+
+static BOOL usesSceneLifecycle(void) {
+	return [[NSBundle mainBundle] objectForInfoDictionaryKey:@"UIApplicationSceneManifest"] != nil;
+}
 
 @implementation GoAppAppDelegate
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
@@ -39,14 +48,11 @@ static CGFloat keyboardHeight;
     setDisplayMetrics((int)size.width, (int)size.height, scale);
 
 	lifecycleAlive();
-	self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-	self.controller = [[GoAppAppController alloc] initWithNibName:nil bundle:nil];
-	self.window.rootViewController = self.controller;
-	[self.window makeKeyAndVisible];
 
-    // update insets once key window is set
-	UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
-	updateConfig((int)size.width, (int)size.height, orientation);
+	if (!usesSceneLifecycle()) {
+		// Classic life cycle: no scene will connect, so the window is ours to make.
+		[self showWindow:[[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]]];
+	}
 
 	UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
 	center.delegate = (id) self;
@@ -54,6 +60,30 @@ static CGFloat keyboardHeight;
 	return YES;
 }
 
+// showWindow installs the Fyne view controller into window and makes it visible.
+// It is shared by the classic and scene based start up paths.
+- (void)showWindow:(UIWindow *)window {
+	self.window = window;
+	self.controller = [[GoAppAppController alloc] initWithNibName:nil bundle:nil];
+	self.window.rootViewController = self.controller;
+	[self.window makeKeyAndVisible];
+
+    // update insets once key window is set
+    CGSize size = [UIScreen mainScreen].nativeBounds.size;
+	UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
+	updateConfig((int)size.width, (int)size.height, orientation);
+}
+
+- (UISceneConfiguration *)application:(UIApplication *)application configurationForConnectingSceneSession:(UISceneSession *)connectingSceneSession options:(UISceneConnectionOptions *)options {
+	// Used when the manifest does not name a delegate class, and as the single
+	// place the scene delegate is chosen when it does.
+	UISceneConfiguration *config = [[UISceneConfiguration alloc] initWithName:@"Default Configuration" sessionRole:connectingSceneSession.role];
+	config.delegateClass = [GoAppSceneDelegate class];
+	return config;
+}
+
+// The application level callbacks below are only delivered on the classic life cycle;
+// with scenes UIKit calls the GoAppSceneDelegate equivalents instead.
 - (void)applicationDidBecomeActive:(UIApplication * )application {
 	lifecycleFocused();
 }
@@ -97,6 +127,35 @@ static CGFloat keyboardHeight;
        willPresentNotification:(UNNotification *)notification
          withCompletionHandler:(void (^)(UNNotificationPresentationOptions options))completionHandler {
 	completionHandler(UNNotificationPresentationOptionAlert);
+}
+@end
+
+@implementation GoAppSceneDelegate
+- (void)scene:(UIScene *)scene willConnectToSession:(UISceneSession *)session options:(UISceneConnectionOptions *)connectionOptions {
+	if (![scene isKindOfClass:[UIWindowScene class]]) {
+		return;
+	}
+	UIWindowScene *windowScene = (UIWindowScene *)scene;
+
+	GoAppAppDelegate *appDelegate = (GoAppAppDelegate *)[[UIApplication sharedApplication] delegate];
+	self.window = [[UIWindow alloc] initWithWindowScene:windowScene];
+	[appDelegate showWindow:self.window];
+}
+
+- (void)sceneDidBecomeActive:(UIScene *)scene {
+	lifecycleFocused();
+}
+
+- (void)sceneWillResignActive:(UIScene *)scene {
+	lifecycleVisible();
+}
+
+- (void)sceneWillEnterForeground:(UIScene *)scene {
+	lifecycleVisible();
+}
+
+- (void)sceneDidEnterBackground:(UIScene *)scene {
+	lifecycleAlive();
 }
 @end
 
