@@ -656,15 +656,9 @@ func insertSegmentBeside(segs []RichTextSegment, target, seg RichTextSegment, sh
 			return slices.Insert(segs, i+shift, seg), true
 		}
 
-		switch block := s.(type) {
-		case *ParagraphSegment:
-			if inner, ok := insertSegmentBeside(block.Texts, target, seg, shift); ok {
-				block.Texts = inner
-				return segs, true
-			}
-		case *ListSegment:
-			if inner, ok := insertSegmentBeside(block.Items, target, seg, shift); ok {
-				block.Items = inner
+		if inner := blockContainer(s); inner != nil {
+			if found, ok := insertSegmentBeside(*inner, target, seg, shift); ok {
+				*inner = found
 				return segs, true
 			}
 		}
