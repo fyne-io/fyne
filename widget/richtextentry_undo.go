@@ -191,6 +191,9 @@ func cloneSegments(in []RichTextSegment) []RichTextSegment {
 			out[i] = &text
 		case *CodeBlockSegment:
 			out[i] = &CodeBlockSegment{Text: t.Text, quotingLevel: t.quotingLevel}
+		case *HyperlinkSegment:
+			link := *t
+			out[i] = &link
 		case *ListSegment:
 			list := *t
 			list.Items = cloneSegments(t.Items)
@@ -218,6 +221,9 @@ func sameSegment(a, b RichTextSegment) bool {
 	case *CodeBlockSegment:
 		second, ok := b.(*CodeBlockSegment)
 		return ok && first.Text == second.Text && first.quotingLevel == second.quotingLevel
+	case *HyperlinkSegment:
+		second, ok := b.(*HyperlinkSegment)
+		return ok && first.Text == second.Text && sameLink(first, second)
 	case *ListSegment:
 		second, ok := b.(*ListSegment)
 		return ok && first.Ordered == second.Ordered && first.startIndex == second.startIndex &&
@@ -242,8 +248,19 @@ func sameHolder(a, b RichTextSegment) bool {
 	case *CodeBlockSegment:
 		second, ok := b.(*CodeBlockSegment)
 		return ok && first.quotingLevel == second.quotingLevel
+	case *HyperlinkSegment:
+		second, ok := b.(*HyperlinkSegment)
+		return ok && sameLink(first, second)
 	}
 	return false
+}
+
+// sameLink reports whether two hyperlinks go to the same place and look the same,
+// whatever text they show.
+func sameLink(a, b *HyperlinkSegment) bool {
+	sameURL := a.URL == b.URL || (a.URL != nil && b.URL != nil && a.URL.String() == b.URL.String())
+	return sameURL && a.Alignment == b.Alignment &&
+		a.TextStyle == b.TextStyle && a.SizeName == b.SizeName && a.quotingLevel == b.quotingLevel
 }
 
 // beginUndo prepares the undo history for an edit, returning the rune offset of
