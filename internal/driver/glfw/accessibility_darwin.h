@@ -20,6 +20,8 @@ typedef enum {
 
 typedef void (*AccessibilityActionCallback)(void* context);
 
+// Create returns a caller-owned reference. Destroy every created element,
+// including children; registering a child or root retains it independently.
 AccessibilityElementRef AccessibilityElementCreate(
     AccessibilityRole role,
     const char* title,
@@ -41,8 +43,8 @@ void AccessibilityElementAddChild(AccessibilityElementRef parent, AccessibilityE
 void AccessibilityElementRemoveChild(AccessibilityElementRef parent, AccessibilityElementRef child);
 void AccessibilityElementSetParent(AccessibilityElementRef child, AccessibilityElementRef parent);
 
-void AccessibilitySetTargetWindow(void* nsWindow);
-void AccessibilityAttachToWindow(AccessibilityElementRef elem);
+// A NULL window leaves the element unattached, for window-free native testing.
+void AccessibilityAttachToWindow(AccessibilityElementRef elem, void* nsWindow);
 void AccessibilityPostNotification(AccessibilityElementRef elem, const char* notification);
 void AccessibilityElementDestroy(AccessibilityElementRef elem);
 

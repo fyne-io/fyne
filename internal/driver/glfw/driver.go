@@ -105,6 +105,7 @@ func (d *gLDriver) Quit() {
 	// Only call close once to avoid panic.
 	if running.CompareAndSwap(true, false) {
 		close(d.done)
+		wakeMainLoop()
 	}
 }
 
