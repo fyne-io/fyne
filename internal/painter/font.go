@@ -203,6 +203,7 @@ func ClearFontCache() {
 
 	runBufferMut.Lock()
 	clear(shapeCache)
+	shaper = &shaping.HarfbuzzShaper{}
 	runBufferMut.Unlock()
 }
 
