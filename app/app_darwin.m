@@ -7,18 +7,21 @@
 
 static int notifyNum = 0;
 
-extern void fallbackSend(char *cTitle, char *cBody);
+extern void fallbackSend(char *cTitle, char *cBody, bool silent);
 
 bool isBundled() {
     return [[NSBundle mainBundle] bundleIdentifier] != nil;
 }
 
 #if __MAC_OS_X_VERSION_MAX_ALLOWED >= 101400 || TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
-void doSendNotification(UNUserNotificationCenter *center, NSString *title, NSString *body) {
+void doSendNotification(UNUserNotificationCenter *center, NSString *title, NSString *body, bool silent) {
     UNMutableNotificationContent *content = [UNMutableNotificationContent new];
     [content autorelease];
     content.title = title;
     content.body = body;
+    if (!silent) {
+        content.sound = [UNNotificationSound defaultSound];
+    }
 
     notifyNum++;
     NSString *identifier = [NSString stringWithFormat:@"fyne-notify-%d", notifyNum];
@@ -32,29 +35,29 @@ void doSendNotification(UNUserNotificationCenter *center, NSString *title, NSStr
     }];
 }
 
-void sendNotification(char *cTitle, char *cBody) {
+void sendNotification(char *cTitle, char *cBody, bool silent) {
     UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
     NSString *title = [NSString stringWithUTF8String:cTitle];
     NSString *body = [NSString stringWithUTF8String:cBody];
 
-    UNAuthorizationOptions options = UNAuthorizationOptionAlert;
+    UNAuthorizationOptions options = UNAuthorizationOptionAlert | UNAuthorizationOptionSound;
     [center requestAuthorizationWithOptions:options
         completionHandler:^(BOOL granted, NSError *_Nullable error) {
             if (!granted) {
                 if (error != NULL) {
                     NSLog(@"Error asking for permission to send notifications %@", error);
                     // this happens if our app was not signed, so do it the old way
-                    fallbackSend((char *)[title UTF8String], (char *)[body UTF8String]);
+                    fallbackSend((char *)[title UTF8String], (char *)[body UTF8String], silent);
                 } else {
                     NSLog(@"Unable to get permission to send notifications");
                 }
             } else {
-                doSendNotification(center, title, body);
+                doSendNotification(center, title, body, silent);
             }
         }];
 }
 
-bool scheduleNotification(char *cID, char *cTitle, char *cBody, double seconds) {
+bool scheduleNotification(char *cID, char *cTitle, char *cBody, bool silent, double seconds) {
     if (seconds <= 0) {
         return false;
     }
@@ -68,13 +71,16 @@ bool scheduleNotification(char *cID, char *cTitle, char *cBody, double seconds) 
     [content autorelease];
     content.title = title;
     content.body = body;
+    if (!silent) {
+        content.sound = [UNNotificationSound defaultSound];
+    }
 
     UNTimeIntervalNotificationTrigger *trigger =
         [UNTimeIntervalNotificationTrigger triggerWithTimeInterval:seconds repeats:NO];
     UNNotificationRequest *request = [UNNotificationRequest requestWithIdentifier:identifier
         content:content trigger:trigger];
 
-    UNAuthorizationOptions options = UNAuthorizationOptionAlert;
+    UNAuthorizationOptions options = UNAuthorizationOptionAlert | UNAuthorizationOptionSound;
     [center requestAuthorizationWithOptions:options
         completionHandler:^(BOOL granted, NSError *_Nullable error) {
             if (!granted) {
@@ -100,11 +106,11 @@ void cancelScheduledNotification(char *cID) {
     [center removePendingNotificationRequestsWithIdentifiers:@[identifier]];
 }
 #else
-void sendNotification(char *cTitle, char *cBody) {
-	fallbackSend(cTitle, cBody);
+void sendNotification(char *cTitle, char *cBody, bool silent) {
+	fallbackSend(cTitle, cBody, silent);
 }
 
-bool scheduleNotification(char *cID, char *cTitle, char *cBody, double seconds) {
+bool scheduleNotification(char *cID, char *cTitle, char *cBody, bool silent, double seconds) {
     return false;
 }
 

@@ -77,9 +77,17 @@ func (a *fyneApp) SendNotification(n *fyne.Notification) {
 	appIcon := a.cachedIconPath()
 	timeout := int32(0) // we don't support this yet
 
+	// sound hints are optional in the spec, servers without the "sound" capability ignore them
+	hints := map[string]dbus.Variant{}
+	if n.Silent {
+		hints["suppress-sound"] = dbus.MakeVariant(true)
+	} else {
+		hints["sound-name"] = dbus.MakeVariant("message-new-instant")
+	}
+
 	obj := conn.Object("org.freedesktop.Notifications", "/org/freedesktop/Notifications")
 	call := obj.Call("org.freedesktop.Notifications.Notify", 0, a.uniqueID, uint32(0),
-		appIcon, n.Title, n.Content, []string{}, map[string]dbus.Variant{}, timeout)
+		appIcon, n.Title, n.Content, []string{}, hints, timeout)
 	if call.Err != nil {
 		fyne.LogError("Failed to send message to bus", call.Err)
 	}
@@ -99,6 +107,7 @@ func (a *fyneApp) CancelScheduledNotification(id string) error {
 var notificationID atomic.Uint64
 
 // See https://flatpak.github.io/xdg-desktop-portal/docs/#gdbus-org.freedesktop.portal.Notification.
+// The portal library does not expose a sound option yet, so [fyne.Notification.Silent] has no effect here.
 func (a *fyneApp) sendNotificationThroughPortal(n *fyne.Notification) error {
 	return notification.Add(
 		uint(notificationID.Add(1)),

@@ -21,12 +21,18 @@ import (
 const notificationTemplate = `$title = %q
 $content = %q
 $iconPath = "file:///%s"
+$silent = $%t
 [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] > $null
 $template = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent([Windows.UI.Notifications.ToastTemplateType]::ToastImageAndText02)
 $toastXml = [xml] $template.GetXml()
 $toastXml.GetElementsByTagName("text")[0].AppendChild($toastXml.CreateTextNode($title)) > $null
 $toastXml.GetElementsByTagName("text")[1].AppendChild($toastXml.CreateTextNode($content)) > $null
 $toastXml.GetElementsByTagName("image")[0].SetAttribute("src", $iconPath) > $null
+if ($silent) {
+    $audio = $toastXml.CreateElement("audio")
+    $audio.SetAttribute("silent", "true") > $null
+    $toastXml.DocumentElement.AppendChild($audio) > $null
+}
 $xml = New-Object Windows.Data.Xml.Dom.XmlDocument
 $xml.LoadXml($toastXml.OuterXml)
 $toast = [Windows.UI.Notifications.ToastNotification]::new($xml)
@@ -35,6 +41,7 @@ $toast = [Windows.UI.Notifications.ToastNotification]::new($xml)
 const scheduledNotificationTemplate = `$title = %q
 $content = %q
 $iconPath = "file:///%s"
+$silent = $%t
 $id = %q
 $delivery = [DateTimeOffset]::Parse(%q)
 [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] > $null
@@ -43,6 +50,11 @@ $toastXml = [xml] $template.GetXml()
 $toastXml.GetElementsByTagName("text")[0].AppendChild($toastXml.CreateTextNode($title)) > $null
 $toastXml.GetElementsByTagName("text")[1].AppendChild($toastXml.CreateTextNode($content)) > $null
 $toastXml.GetElementsByTagName("image")[0].SetAttribute("src", $iconPath) > $null
+if ($silent) {
+    $audio = $toastXml.CreateElement("audio")
+    $audio.SetAttribute("silent", "true") > $null
+    $toastXml.DocumentElement.AppendChild($audio) > $null
+}
 $xml = New-Object Windows.Data.Xml.Dom.XmlDocument
 $xml.LoadXml($toastXml.OuterXml)
 $scheduled = [Windows.UI.Notifications.ScheduledToastNotification]::new($xml, $delivery)
@@ -70,7 +82,7 @@ func (a *fyneApp) SendNotification(n *fyne.Notification) {
 	iconFilePath := a.cachedIconPath()
 	appID := a.notificationAppID()
 
-	script := fmt.Sprintf(notificationTemplate, title, content, iconFilePath, appID)
+	script := fmt.Sprintf(notificationTemplate, title, content, iconFilePath, n.Silent, appID)
 	go runScript("notify", script)
 }
 
@@ -90,7 +102,7 @@ func (a *fyneApp) ScheduleNotification(n *fyne.Notification, when time.Time) (*f
 	delivery := when.UTC().Format(time.RFC3339)
 	appID := a.notificationAppID()
 
-	script := fmt.Sprintf(scheduledNotificationTemplate, title, content, iconFilePath, id, delivery, appID)
+	script := fmt.Sprintf(scheduledNotificationTemplate, title, content, iconFilePath, n.Silent, id, delivery, appID)
 	go runScript("schedule", script)
 	return fyne.NewScheduledNotification(id, n, when), nil
 }

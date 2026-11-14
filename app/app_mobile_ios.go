@@ -9,7 +9,6 @@ package app
 #include <stdlib.h>
 
 void openURL(char *urlStr);
-void sendNotification(char *title, char *content);
 */
 import "C"
 
