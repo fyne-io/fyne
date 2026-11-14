@@ -756,12 +756,14 @@ func flattenSegments(in []RichTextSegment, out []RichTextSegment) []RichTextSegm
 			t.Text = strings.TrimSuffix(t.Text, newLineChar) + newLineChar
 			out = append(out, t)
 		case *CheckBoxSegment:
-			marker := "- [ ] "
+			marker := "[ ] "
 			if t.Checked {
-				marker = "- [x] "
+				marker = "[x] "
 			}
 			appendText(RichTextStyleInline, marker+t.Text)
-			newline()
+			if t.Text != "" {
+				newline()
+			}
 		case *ListSegment:
 			newline()
 			out = append(out, editableList(t))

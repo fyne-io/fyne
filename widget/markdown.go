@@ -84,12 +84,7 @@ func renderNode(source []byte, n ast.Node, quotingDepth int, listDepth int) ([]R
 		return result, err
 	case *ast.TextBlock:
 		if c, ok := t.FirstChild().(*ast2.TaskCheckBox); ok {
-			child := c.NextSibling()
-			text := ""
-			if child != nil {
-				text = string(child.(*ast.Text).Value(source))
-			}
-			return []RichTextSegment{&CheckBoxSegment{Text: decodeText(text), Checked: c.IsChecked}}, nil
+			return renderTaskList(source, c, quotingDepth, listDepth)
 		}
 		return renderChildren(source, n, quotingDepth, listDepth)
 	case *ast.Heading:
@@ -200,6 +195,26 @@ func renderChildren(source []byte, n ast.Node, quotingDepth int, listDepth int) 
 		child = child.NextSibling()
 	}
 	return children, nil
+}
+
+func renderTaskList(source []byte, c *ast2.TaskCheckBox, quotingDepth int, listDepth int) ([]RichTextSegment, error) {
+	if text, ok := c.NextSibling().(*ast.Text); ok && text.NextSibling() == nil &&
+		!text.SoftLineBreak() && !text.HardLineBreak() {
+		return []RichTextSegment{&CheckBoxSegment{
+			Checked: c.IsChecked,
+			Text:    decodeText(string(text.Value(source))),
+		}}, nil
+	}
+
+	segments := []RichTextSegment{&CheckBoxSegment{Checked: c.IsChecked}}
+	for child := c.NextSibling(); child != nil; child = child.NextSibling() {
+		segs, err := renderNode(source, child, quotingDepth, listDepth)
+		if err != nil {
+			return segments, err
+		}
+		segments = append(segments, segs...)
+	}
+	return segments, nil
 }
 
 func renderEmphasis(source []byte, n ast.Node, quotingDepth int, strength, listDepth int) ([]RichTextSegment, error) {
