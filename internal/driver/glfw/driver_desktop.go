@@ -167,10 +167,6 @@ func itemForMenuItem(i *fyne.MenuItem, parent *systray.MenuItem) *systray.MenuIt
 }
 
 func applyMenuItemIcon(i *fyne.MenuItem, item *systray.MenuItem) {
-	if i.Icon == nil {
-		return
-	}
-
 	data := i.Icon.Content()
 	if svg.IsResourceSVG(i.Icon) {
 		b := &bytes.Buffer{}
