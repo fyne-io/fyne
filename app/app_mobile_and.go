@@ -9,9 +9,9 @@ package app
 #include <stdlib.h>
 
 void openURL(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx, char *url);
-void sendNotification(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx, char *title, char *content);
+void sendNotification(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx, char *title, char *content, bool silent);
 bool scheduleNotification(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx,
-	char *id, char *title, char *body, long long deliveryMillis);
+	char *id, char *title, char *body, bool silent, long long deliveryMillis);
 void cancelScheduledNotification(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx, char *id);
 */
 import "C"
@@ -45,7 +45,7 @@ func (a *fyneApp) SendNotification(n *fyne.Notification) {
 	defer C.free(unsafe.Pointer(contentStr))
 
 	app.RunOnJVM(func(vm, env, ctx uintptr) error {
-		C.sendNotification(C.uintptr_t(vm), C.uintptr_t(env), C.uintptr_t(ctx), titleStr, contentStr)
+		C.sendNotification(C.uintptr_t(vm), C.uintptr_t(env), C.uintptr_t(ctx), titleStr, contentStr, C.bool(n.Silent))
 		return nil
 	})
 }
@@ -75,7 +75,7 @@ func (a *fyneApp) ScheduleNotification(n *fyne.Notification, when time.Time) (*f
 	var ok bool
 	app.RunOnJVM(func(vm, env, ctx uintptr) error {
 		ok = bool(C.scheduleNotification(C.uintptr_t(vm), C.uintptr_t(env), C.uintptr_t(ctx),
-			idStr, titleStr, bodyStr, deliveryMillis))
+			idStr, titleStr, bodyStr, C.bool(n.Silent), deliveryMillis))
 		return nil
 	})
 

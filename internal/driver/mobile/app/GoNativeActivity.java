@@ -293,14 +293,14 @@ public class GoNativeActivity extends NativeActivity {
     // PendingIntent can be reproduced and removed from AlarmManager.
     // -------------------------------------------------------------------------
 
-    static boolean scheduleNotification(String id, String title, String body, long deliveryTimeMillis) {
+    static boolean scheduleNotification(String id, String title, String body, boolean silent, long deliveryTimeMillis) {
         if (goNativeActivity == null) {
             return false;
         }
-        return goNativeActivity.doScheduleNotification(id, title, body, deliveryTimeMillis);
+        return goNativeActivity.doScheduleNotification(id, title, body, silent, deliveryTimeMillis);
     }
 
-    boolean doScheduleNotification(String id, String title, String body, long deliveryTimeMillis) {
+    boolean doScheduleNotification(String id, String title, String body, boolean silent, long deliveryTimeMillis) {
         // If the receiver is not registered in the manifest the scheduled alarm
         // will fire into the void once the app is killed; report failure so the
         // Go layer can fall back to in-process scheduling instead.
@@ -319,6 +319,7 @@ public class GoNativeActivity extends NativeActivity {
         Intent intent = new Intent(this, FyneNotificationReceiver.class);
         intent.putExtra("title", title);
         intent.putExtra("body", body);
+        intent.putExtra("silent", silent);
         intent.putExtra("notif_id", id.hashCode());
 
         int flags = PendingIntent.FLAG_UPDATE_CURRENT;

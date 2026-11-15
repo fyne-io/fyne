@@ -5,6 +5,11 @@ import "time"
 // Notification represents a user notification that can be sent to the operating system.
 type Notification struct {
 	Title, Content string
+
+	// Silent requests that the notification is delivered without playing a sound.
+	//
+	// Since: 2.9
+	Silent bool
 }
 
 // NewNotification creates a notification that can be passed to [App.SendNotification].
