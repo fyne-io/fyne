@@ -594,6 +594,92 @@ func TestRichTextMarkdown_List(t *testing.T) {
 	}
 }
 
+func TestRichTextMarkdown_TaskList_PlainLabel(t *testing.T) {
+	r := NewRichTextFromMarkdown("- [ ] buy milk")
+
+	list, ok := r.Segments[0].(*ListSegment)
+	if !ok {
+		t.Fatal("Segment should be a List")
+	}
+	texts := list.Items[0].(*ParagraphSegment).Texts
+	assert.Len(t, texts, 1)
+
+	checkbox, ok := texts[0].(*CheckBoxSegment)
+	if !ok {
+		t.Fatal("Item should start with a checkbox")
+	}
+	assert.False(t, checkbox.Checked)
+	assert.Equal(t, "buy milk", checkbox.Text)
+}
+
+func TestRichTextMarkdown_TaskList_EmphasisLabel(t *testing.T) {
+	r := NewRichTextFromMarkdown("- [x] **buy milk**")
+
+	list, ok := r.Segments[0].(*ListSegment)
+	if !ok {
+		t.Fatal("Segment should be a List")
+	}
+	texts := list.Items[0].(*ParagraphSegment).Texts
+	assert.Len(t, texts, 2)
+
+	checkbox, ok := texts[0].(*CheckBoxSegment)
+	if !ok {
+		t.Fatal("Item should start with a checkbox")
+	}
+	assert.True(t, checkbox.Checked)
+	assert.Empty(t, checkbox.Text)
+
+	label, ok := texts[1].(*TextSegment)
+	if !ok {
+		t.Fatal("Label should be text")
+	}
+	assert.Equal(t, "buy milk", label.Text)
+	assert.True(t, label.Style.TextStyle.Bold)
+}
+
+func TestRichTextMarkdown_TaskList_LinkLabel(t *testing.T) {
+	r := NewRichTextFromMarkdown("- [x] [docs](https://fyne.io/)")
+
+	list, ok := r.Segments[0].(*ListSegment)
+	if !ok {
+		t.Fatal("Segment should be a List")
+	}
+	texts := list.Items[0].(*ParagraphSegment).Texts
+	assert.Len(t, texts, 2)
+
+	checkbox, ok := texts[0].(*CheckBoxSegment)
+	if !ok {
+		t.Fatal("Item should start with a checkbox")
+	}
+	assert.True(t, checkbox.Checked)
+
+	label, ok := texts[1].(*HyperlinkSegment)
+	if !ok {
+		t.Fatal("Label should be a hyperlink")
+	}
+	assert.Equal(t, "docs", label.Text)
+	assert.Equal(t, "https://fyne.io/", label.URL.String())
+}
+
+func TestRichTextMarkdown_TaskList_MixedLabel(t *testing.T) {
+	r := NewRichTextFromMarkdown("- [ ] buy **milk** and *more*")
+
+	list, ok := r.Segments[0].(*ListSegment)
+	if !ok {
+		t.Fatal("Segment should be a List")
+	}
+	texts := list.Items[0].(*ParagraphSegment).Texts
+	assert.Len(t, texts, 5)
+
+	assert.IsType(t, &CheckBoxSegment{}, texts[0])
+	assert.Equal(t, "buy ", texts[1].(*TextSegment).Text)
+	assert.Equal(t, "milk", texts[2].(*TextSegment).Text)
+	assert.True(t, texts[2].(*TextSegment).Style.TextStyle.Bold)
+	assert.Equal(t, " and ", texts[3].(*TextSegment).Text)
+	assert.Equal(t, "more", texts[4].(*TextSegment).Text)
+	assert.True(t, texts[4].(*TextSegment).Style.TextStyle.Italic)
+}
+
 func TestRichTextMarkdown_ListWithDifferentStartingIndex(t *testing.T) {
 	for name, tt := range map[string]struct {
 		text       string
