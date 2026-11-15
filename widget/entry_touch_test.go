@@ -62,16 +62,16 @@ func TestEntry_WrapOff_ClearsScrollOffset(t *testing.T) {
 	w := test.NewTempWindow(t, e)
 	w.Resize(fyne.NewSize(200, 80))
 
-	e.scroller.Offset.Y = 50
+	e.scroll.Offset.Y = 50
 	e.Wrapping = fyne.TextWrapOff
 	e.Scroll = fyne.ScrollNone
 	e.Refresh()
 
-	if e.scroller.Content != nil {
+	if e.scroll.Content != nil {
 		t.Error("expected scroller content to be detached")
 	}
-	if e.scroller.Offset != fyne.NewPos(0, 0) {
-		t.Errorf("expected zero scroll offset, got %v", e.scroller.Offset)
+	if e.scroll.Offset != fyne.NewPos(0, 0) {
+		t.Errorf("expected zero scroll offset, got %v", e.scroll.Offset)
 	}
 
 	pos := fyne.NewPos(10, 10)
@@ -98,11 +98,11 @@ func TestEntry_WrapOff_ClearsScrollOffset(t *testing.T) {
 
 	e.Wrapping = fyne.TextWrapWord
 	e.Refresh()
-	if e.scroller.Content == nil {
+	if e.scroll.Content == nil {
 		t.Fatal("expected scroller to reattach")
 	}
-	if e.scroller.Offset != fyne.NewPos(0, 0) {
-		t.Errorf("expected zero scroll offset after reattach, got %v", e.scroller.Offset)
+	if e.scroll.Offset != fyne.NewPos(0, 0) {
+		t.Errorf("expected zero scroll offset after reattach, got %v", e.scroll.Offset)
 	}
 	e.sel.doubleTappedAtUnixMillis = 0
 	e.tripleTapped = false
@@ -124,16 +124,16 @@ func TestEntry_WrapOff_ScrollBothKeepsOffset(t *testing.T) {
 
 	// Park the cursor on a row that is already inside this offset, so refresh
 	// keeps the scroll position instead of chasing the cursor back to the top.
-	e.scroller.Offset.Y = 50
+	e.scroll.Offset.Y = 50
 	e.CursorRow = 4
 	e.Wrapping = fyne.TextWrapOff
 	e.Scroll = fyne.ScrollBoth
 	e.Refresh()
 
-	if e.scroller.Content == nil {
+	if e.scroll.Content == nil {
 		t.Fatal("expected scroller to stay attached")
 	}
-	if e.scroller.Offset.Y != 50 {
-		t.Errorf("expected offset to stay 50, got %v", e.scroller.Offset)
+	if e.scroll.Offset.Y != 50 {
+		t.Errorf("expected offset to stay 50, got %v", e.scroll.Offset)
 	}
 }
