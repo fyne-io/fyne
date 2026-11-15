@@ -11,5 +11,5 @@ import (
 
 func rootCacheDir(a fyne.App) string {
 	desktopCache, _ := os.UserCacheDir()
-	return filepath.Join(desktopCache, "fyne", a.UniqueID())
+	return a.(*fyneApp).appDir(filepath.Join(desktopCache, "fyne"))
 }
