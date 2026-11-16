@@ -3,15 +3,40 @@ package painter
 import (
 	"image"
 	"image/color"
+	"runtime"
 	"strconv"
 	"testing"
+	"time"
 
+	"github.com/go-text/typesetting/font"
 	"github.com/go-text/typesetting/shaping"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"fyne.io/fyne/v2"
 )
+
+// TestClearFontCache_ReleasesShapedFonts checks that a font shaped before the
+// cache is cleared can be collected afterwards.
+func TestClearFontCache_ReleasesShapedFonts(t *testing.T) {
+	ClearFontCache()
+	face := CachedFontFace(fyne.TextStyle{}, nil, nil)
+	MeasureString(face.Fonts, "Hello", 14, fyne.TextStyle{})
+
+	released := make(chan struct{})
+	runtime.SetFinalizer(face.Fonts.(*dynamicFontMap).faces[0].Font, func(*font.Font) { close(released) })
+	ClearFontCache()
+
+	for i := 0; i < 10; i++ {
+		runtime.GC() //nolint:revive // the test waits for the font to be collected
+		select {
+		case <-released:
+			return
+		case <-time.After(10 * time.Millisecond):
+		}
+	}
+	t.Error("font shaped before ClearFontCache was not released")
+}
 
 // TestWalkString_MeasureAndDrawShareShaping checks that a string measured and
 // then drawn, at another scale, is shaped once.
