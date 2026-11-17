@@ -2,6 +2,6 @@
 
 package app
 
-func rootConfigDir() string {
+func RootConfigDir() string {
 	return "/data/"
 }

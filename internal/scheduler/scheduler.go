@@ -30,6 +30,7 @@ type Entry struct {
 	ID           string    `json:"id"`
 	Title        string    `json:"title"`
 	Content      string    `json:"content"`
+	Silent       bool      `json:"silent,omitempty"`
 	DeliveryTime time.Time `json:"deliveryTime"`
 }
 
@@ -106,6 +107,7 @@ func (s *Scheduler) Schedule(n *fyne.Notification, when time.Time) (string, erro
 		ID:           id,
 		Title:        n.Title,
 		Content:      n.Content,
+		Silent:       n.Silent,
 		DeliveryTime: when,
 	}
 
@@ -174,7 +176,7 @@ func (s *Scheduler) deliver(e *Entry) {
 	if s.fire == nil {
 		return
 	}
-	s.fire(&fyne.Notification{Title: e.Title, Content: e.Content})
+	s.fire(&fyne.Notification{Title: e.Title, Content: e.Content, Silent: e.Silent})
 }
 
 // saveLocked writes the current entries map to the cache. Must be called with s.mu held.

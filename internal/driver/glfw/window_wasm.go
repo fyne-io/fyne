@@ -5,6 +5,7 @@ package glfw
 import (
 	"context"
 	_ "image/png" // for the icon
+	"sync"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -92,7 +93,8 @@ type window struct {
 
 	pending []func()
 
-	lastWalkedTime time.Time
+	lastWalkedTime   time.Time
+	sizeLimitWarning sync.Once
 }
 
 func (w *window) SetFullScreen(full bool) {
@@ -475,7 +477,9 @@ func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, a
 	keyAction := convertAction(action)
 	keyASCII := convertASCII(key)
 
-	w.processKeyPressed(keyName, keyASCII, scancode, keyAction, keyDesktopModifier)
+	runOnMain(func() {
+		w.processKeyPressed(keyName, keyASCII, scancode, keyAction, keyDesktopModifier)
+	})
 }
 
 func desktopModifier(mods glfw.ModifierKey) fyne.KeyModifier {
@@ -500,11 +504,15 @@ func desktopModifier(mods glfw.ModifierKey) fyne.KeyModifier {
 //
 // Characters do not map 1:1 to physical keys, as a key may produce zero, one or more characters.
 func (w *window) charInput(viewport *glfw.Window, char rune) {
-	w.processCharInput(char)
+	runOnMain(func() {
+		w.processCharInput(char)
+	})
 }
 
 func (w *window) focused(_ *glfw.Window, focused bool) {
-	w.processFocused(focused)
+	runOnMain(func() {
+		w.processFocused(focused)
+	})
 }
 
 func (w *window) DetachCurrentContext() {
@@ -535,11 +543,11 @@ func (w *window) create() {
 	initWindowHints()
 
 	pixWidth, pixHeight := w.screenSize(w.canvas.size)
-	pixWidth = int(fyne.Max(float32(pixWidth), float32(w.width)))
+	pixWidth = int(max(float32(pixWidth), float32(w.width)))
 	if pixWidth == 0 {
 		pixWidth = 10
 	}
-	pixHeight = int(fyne.Max(float32(pixHeight), float32(w.height)))
+	pixHeight = int(max(float32(pixHeight), float32(w.height)))
 	if pixHeight == 0 {
 		pixHeight = 10
 	}

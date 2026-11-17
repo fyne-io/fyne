@@ -2,7 +2,6 @@ package glfw
 
 import (
 	"context"
-	"image/color"
 	_ "image/png" // for the icon
 	"math"
 	"runtime"
@@ -10,8 +9,6 @@ import (
 	"time"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/canvas"
-	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/app"
@@ -51,9 +48,41 @@ func (w *window) minSizeOnScreen() (width, height int) {
 	return w.screenSize(w.canvas.MinSize())
 }
 
-// screenSize computes the actual output size of the given content size in screen pixels
+// screenSize computes the actual output size of the given content size in screen pixels.
+// The result is limited to a size that the graphics driver can allocate a framebuffer for.
 func (w *window) screenSize(canvasSize fyne.Size) (width, height int) {
-	return scale.ToScreenCoordinate(w.canvas, canvasSize.Width), scale.ToScreenCoordinate(w.canvas, canvasSize.Height)
+	maxTexture := 0
+	if p := w.canvas.Painter(); p != nil {
+		maxTexture = p.MaxTextureSize()
+	}
+	limit := maxWindowSize(maxTexture, w.canvas.texScale)
+	width, height = scale.ToScreenCoordinate(w.canvas, canvasSize.Width), scale.ToScreenCoordinate(w.canvas, canvasSize.Height)
+	if width > limit || height > limit {
+		w.warnSizeLimit()
+	}
+	return min(width, limit), min(height, limit)
+}
+
+func (w *window) warnSizeLimit() {
+	w.sizeLimitWarning.Do(func() {
+		fyne.LogError("Window content is wider or taller than the maximum supported size and has been clamped; consider wrapping, truncation, or scrolling", nil)
+	})
+}
+
+// maxWindowSize returns the largest window dimension, in screen pixels, that can be drawn.
+// Until the GL driver reports its maximum texture size we assume a size that desktop GPUs support,
+// and X11 cannot address drawables larger than 32767 pixels.
+func maxWindowSize(maxTextureSize int, texScale float32) int {
+	const defaultMaxTextureSize, maxDrawableSize = 16384, 32767
+
+	limit := defaultMaxTextureSize
+	if maxTextureSize > 0 {
+		limit = min(maxTextureSize, maxDrawableSize)
+	}
+	if texScale > 0 {
+		return int(float32(limit) / texScale)
+	}
+	return limit
 }
 
 func (w *window) Resize(size fyne.Size) {
@@ -61,7 +90,7 @@ func (w *window) Resize(size fyne.Size) {
 	// we cannot perform this until window is prepared as we don't know its scale!
 	bigEnough := internal.MaxSizes(size, w.canvas.canvasSize(w.canvas.Content().MinSize()))
 	w.runOnMainWhenCreated(func() {
-		width, height := scale.ToScreenCoordinate(w.canvas, bigEnough.Width), scale.ToScreenCoordinate(w.canvas, bigEnough.Height)
+		width, height := w.screenSize(bigEnough)
 		if w.fixedSize || !w.visible { // fixed size ignores future `resized` and if not visible we may not get the event
 			w.shouldWidth, w.shouldHeight = width, height
 			w.width, w.height = width, height
@@ -216,6 +245,7 @@ func (w *window) Close() {
 		w.viewport.SetShouldClose(true)
 
 		cache.RangeTexturesFor(w.canvas, w.canvas.Painter().Free)
+		cache.DeleteTextTexturesFor(w.canvas)
 		w.canvas.WalkTrees(nil, func(node *common.RenderCacheNode, _ fyne.Position) {
 			if wid, ok := node.Obj().(fyne.Widget); ok {
 				cache.DestroyRenderer(wid)
@@ -265,6 +295,9 @@ func (w *window) processClosed() {
 func (w *window) destroy(d *gLDriver) {
 	cache.CleanCanvas(w.canvas)
 	w.frame.free()
+	if curWindow == w {
+		curWindow = nil
+	}
 
 	if w.master {
 		d.Quit()
@@ -339,7 +372,6 @@ func (*window) findObjectAtPositionMatching(c *glCanvas, mouse fyne.Position, ma
 }
 
 func (w *window) processMouseMoved(xpos float64, ypos float64) {
-	previousPos := w.mousePos
 	w.mousePos = fyne.NewPos(scale.ToFyneCoordinate(w.canvas, int(xpos)), scale.ToFyneCoordinate(w.canvas, int(ypos)))
 	mousePos := w.mousePos
 	mouseButton := w.mouseButton
@@ -374,7 +406,7 @@ func (w *window) processMouseMoved(xpos float64, ypos float64) {
 	}
 
 	if w.mouseButton != 0 && w.mouseButton != desktop.MouseButtonSecondary && !w.mouseDragStarted {
-		obj, pos, _ := w.findObjectAtPositionMatching(w.canvas, previousPos, func(object fyne.CanvasObject) bool {
+		obj, pos, _ := w.findObjectAtPositionMatching(w.canvas, mouseDragPos, func(object fyne.CanvasObject) bool {
 			_, ok := object.(fyne.Draggable)
 			return ok
 		})
@@ -385,7 +417,7 @@ func (w *window) processMouseMoved(xpos float64, ypos float64) {
 
 		if wid, ok := obj.(fyne.Draggable); ok && overThreshold {
 			w.mouseDragged = wid
-			w.mouseDraggedOffset = previousPos.Subtract(pos)
+			w.mouseDraggedOffset = mouseDragPos.Subtract(pos)
 			w.mouseDraggedObjStart = obj.Position()
 			w.mouseDragStarted = true
 		}
@@ -465,7 +497,6 @@ func (w *window) mouseOut() {
 func (w *window) processMouseClicked(button desktop.MouseButton, action action, modifiers fyne.KeyModifier) {
 	w.ensurePositionProcessed()
 
-	w.mouseDragPos = w.mousePos
 	mousePos := w.mousePos
 	mouseDragStarted := w.mouseDragStarted
 	if mousePos.IsZero() { // window may not be focused (darwin mostly) and so position callbacks not happening
@@ -473,6 +504,7 @@ func (w *window) processMouseClicked(button desktop.MouseButton, action action, 
 		w.mousePos = fyne.NewPos(scale.ToFyneCoordinate(w.canvas, int(xpos)), scale.ToFyneCoordinate(w.canvas, int(ypos)))
 		mousePos = w.mousePos
 	}
+	w.mouseDragPos = mousePos
 
 	co, pos, _ := w.findObjectAtPositionMatching(w.canvas, mousePos, func(object fyne.CanvasObject) bool {
 		switch object.(type) {
@@ -660,15 +692,15 @@ func (w *window) processMouseScrolled(xoff float64, yoff float64) {
 		return ok
 	})
 	if wid, ok := co.(fyne.Scrollable); ok {
-		if math.Abs(xoff) >= scrollAccelerateCutoff {
-			xoff *= scrollAccelerateRate
+		if math.Abs(xoff) >= common.ScrollAccelerateCutoff {
+			xoff *= common.ScrollAccelerateRate
 		}
-		if math.Abs(yoff) >= scrollAccelerateCutoff {
-			yoff *= scrollAccelerateRate
+		if math.Abs(yoff) >= common.ScrollAccelerateCutoff {
+			yoff *= common.ScrollAccelerateRate
 		}
 
 		ev := &fyne.ScrollEvent{}
-		ev.Scrolled = fyne.NewDelta(float32(xoff)*scrollSpeed, float32(yoff)*scrollSpeed)
+		ev.Scrolled = fyne.NewDelta(float32(xoff)*common.ScrollSpeed, float32(yoff)*common.ScrollSpeed)
 		ev.Position = pos
 		ev.AbsolutePosition = mousePos
 		wid.Scrolled(ev)
@@ -958,61 +990,6 @@ func (w *window) runOnMainWhenCreated(fn func()) {
 	w.pending = append(w.pending, fn)
 }
 
-func (d *gLDriver) CreateWindow(title string) (win fyne.Window) {
-	if runtime.GOOS != goos.JavaScript {
-		async.EnsureMain(func() {
-			win = d.createWindow(title, true)
-		})
-		return win
-	}
-
-	// handling multiple windows by overlaying on the root for web
-	var root fyne.Window
-	hasVisible := false
-	for _, w := range d.windows {
-		if w.(*window).visible {
-			hasVisible = true
-			root = w
-			break
-		}
-	}
-
-	if !hasVisible {
-		return d.createWindow(title, true)
-	}
-
-	c, _ := root.Canvas().(*glCanvas)
-	multi := c.webExtraWindows
-	if multi == nil {
-		multi = container.NewMultipleWindows()
-		multi.Resize(c.Size())
-		c.webExtraWindows = multi
-	}
-	inner := container.NewInnerWindow(title, canvas.NewRectangle(color.Transparent))
-	multi.Add(inner)
-
-	return wrapInnerWindow(inner, root, d)
-}
-
-func (d *gLDriver) createWindow(title string, decorate bool) fyne.Window {
-	var ret *window
-	if title == "" {
-		title = defaultTitle
-	}
-
-	d.init()
-
-	// A window starts with no mouse move outstanding: the zero value would read
-	// as one pending at (0,0), which the first click would then apply.
-	ret = &window{title: title, decorate: decorate, driver: d, mousePosUpdateProcessed: true}
-	ret.frame = newPresentGate(ret)
-	ret.canvas = newCanvas()
-	ret.canvas.context = ret
-	ret.SetIcon(ret.icon)
-	d.addWindow(ret)
-	return ret
-}
-
 func (w *window) doShowAgain() {
 	if w.isClosing() {
 		return
@@ -1048,17 +1025,6 @@ func (w *window) toggleVisible() {
 	} else {
 		w.Show()
 	}
-}
-
-func (d *gLDriver) CreateSplashWindow() fyne.Window {
-	win := d.createWindow("", false)
-	win.SetPadded(false)
-	win.CenterOnScreen()
-	return win
-}
-
-func (d *gLDriver) AllWindows() []fyne.Window {
-	return d.windows
 }
 
 func isKeyModifier(keyName fyne.KeyName) bool {

@@ -10,11 +10,11 @@ import (
 	"os"
 	"runtime"
 	"strings"
+	"sync"
 	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
-	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/async"
@@ -119,7 +119,8 @@ type window struct {
 
 	pending []func()
 
-	lastWalkedTime time.Time
+	lastWalkedTime   time.Time
+	sizeLimitWarning sync.Once
 }
 
 func (w *window) SetFullScreen(full bool) {
@@ -185,6 +186,7 @@ func (w *window) SetOnDropped(dropped func(pos fyne.Position, items []fyne.URI))
 				uris[i] = storage.NewFileURI(name)
 			}
 
+			w.ensurePositionProcessed()
 			dropped(w.mousePos, uris)
 		})
 	})
@@ -736,9 +738,10 @@ func desktopModifier(mods glfw.ModifierKey) fyne.KeyModifier {
 func desktopModifierCorrected(mods glfw.ModifierKey, key glfw.Key, action glfw.Action) fyne.KeyModifier {
 	// On X11, pressing/releasing modifier keys does not include newly pressed/released keys in 'mod' mask.
 	// https://github.com/glfw/glfw/issues/1630
-	if action == glfw.Press {
+	switch action {
+	case glfw.Press:
 		mods |= glfwKeyToModifier(key)
-	} else {
+	case glfw.Release:
 		mods &= ^glfwKeyToModifier(key)
 	}
 	return desktopModifier(mods)
@@ -829,11 +832,11 @@ func (w *window) create() {
 	}
 
 	pixWidth, pixHeight := w.screenSize(w.canvas.size)
-	pixWidth = int(fyne.Max(float32(pixWidth), float32(w.width)))
+	pixWidth = int(max(float32(pixWidth), float32(w.width)))
 	if pixWidth == 0 {
 		pixWidth = fallbackScreenSize
 	}
-	pixHeight = int(fyne.Max(float32(pixHeight), float32(w.height)))
+	pixHeight = int(max(float32(pixHeight), float32(w.height)))
 	if pixHeight == 0 {
 		pixHeight = fallbackScreenSize
 	}
@@ -901,7 +904,7 @@ func (w *window) create() {
 
 	if w.FixedSize() && (w.requestedWidth == 0 || w.requestedHeight == 0) {
 		bigEnough := w.canvas.canvasSize(w.canvas.Content().MinSize())
-		w.width, w.height = scale.ToScreenCoordinate(w.canvas, bigEnough.Width), scale.ToScreenCoordinate(w.canvas, bigEnough.Height)
+		w.width, w.height = w.screenSize(bigEnough)
 		w.shouldWidth, w.shouldHeight = w.width, w.height
 	}
 
@@ -918,9 +921,4 @@ func (w *window) view() *glfw.Window {
 		return nil
 	}
 	return w.viewport
-}
-
-// wrapInnerWindow is a no-op to match what the web driver provides
-func wrapInnerWindow(*container.InnerWindow, fyne.Window, *gLDriver) fyne.Window {
-	return nil
 }

@@ -137,7 +137,7 @@ func (c *glCanvas) Scale() float32 {
 func (c *glCanvas) SetContent(content fyne.CanvasObject) {
 	newSize := internal.MaxSizes(c.size, c.canvasSize(content.MinSize()))
 
-	c.setContent(content)
+	c.applyContent(content)
 
 	c.Resize(newSize)
 	c.SetDirty()
@@ -186,6 +186,11 @@ func (c *glCanvas) ToggleMenu() {
 	if c.menu != nil {
 		c.menu.(*MenuBar).Toggle()
 	}
+}
+
+func (c *glCanvas) applyContent(content fyne.CanvasObject) {
+	c.content = content
+	c.SetContentTreeAndFocusMgr(content)
 }
 
 func (c *glCanvas) buildMenu(w *window, m *fyne.MainMenu) {
@@ -246,7 +251,7 @@ func (c *glCanvas) paint(size fyne.Size) {
 
 	paint := func(node *common.RenderCacheNode, pos fyne.Position) {
 		obj := node.Obj()
-		if driver.IsClip(obj) {
+		if node.IsClip() {
 			inner := clips.Push(pos, obj.Size())
 			c.Painter().StartClipping(inner.Rect())
 		}
@@ -256,7 +261,7 @@ func (c *glCanvas) paint(size fyne.Size) {
 		c.Painter().Paint(obj, pos, size, clips.Top())
 	}
 	afterPaint := func(node *common.RenderCacheNode, pos fyne.Position) {
-		if driver.IsClip(node.Obj()) {
+		if node.IsClip() {
 			clips.Pop()
 			if top := clips.Top(); top != nil {
 				c.Painter().StartClipping(top.Rect())
@@ -270,11 +275,11 @@ func (c *glCanvas) paint(size fyne.Size) {
 		}
 	}
 	c.WalkTrees(paint, afterPaint)
-}
-
-func (c *glCanvas) setContent(content fyne.CanvasObject) {
-	c.content = content
-	c.SetContentTreeAndFocusMgr(content)
+	// The painter batches text and plain rectangles, so the tail of the tree can
+	// still be sitting in a queue when the walk ends.
+	if p, ok := c.Painter().(interface{ FlushGlyphs() }); ok {
+		p.FlushGlyphs()
+	}
 }
 
 func (c *glCanvas) setMenuOverlay(b fyne.CanvasObject) {
@@ -302,6 +307,6 @@ func newCanvas() *glCanvas {
 	c := &glCanvas{scale: 1.0, texScale: 1.0, padded: true}
 	connectKeyboard(c)
 	c.Initialize(c, c.overlayChanged)
-	c.setContent(&canvas.Rectangle{FillColor: theme.Color(theme.ColorNameBackground)})
+	c.applyContent(&canvas.Rectangle{FillColor: theme.Color(theme.ColorNameBackground)})
 	return c
 }

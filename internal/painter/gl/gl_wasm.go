@@ -64,6 +64,9 @@ var (
 	textureFilterToGL = [...]int32{gl.LINEAR, gl.NEAREST, gl.LINEAR}
 )
 
+// glyphAtlasSupported enables batched atlas text; see atlas.go.
+const glyphAtlasSupported = true
+
 func (p *painter) Init() {
 	p.ctx = &xjsContext{}
 	p.maxTextureSize = p.ctx.GetInteger(maxTextureSizeParam)
@@ -235,6 +238,10 @@ func (c *xjsContext) TexImage2D(target uint32, level, width, height int, colorFo
 		gl.Enum(typ),
 		jsData,
 	)
+}
+
+func (c *xjsContext) TexSubImage2D(target uint32, level, x, y, width, height int, colorFormat, typ uint32, data []uint8) {
+	gl.TexSubImage2D(gl.Enum(target), level, x, y, width, height, gl.Enum(colorFormat), gl.Enum(typ), data)
 }
 
 func (c *xjsContext) TexParameteri(target, param uint32, value int32) {

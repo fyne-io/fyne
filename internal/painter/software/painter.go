@@ -25,8 +25,8 @@ func (*Painter) Paint(c fyne.Canvas) image.Image {
 	base := image.NewNRGBA(bounds)
 
 	paint := func(obj fyne.CanvasObject, pos, clipPos fyne.Position, clipSize fyne.Size) bool {
-		w := fyne.Min(clipPos.X+clipSize.Width, c.Size().Width)
-		h := fyne.Min(clipPos.Y+clipSize.Height, c.Size().Height)
+		w := min(clipPos.X+clipSize.Width, c.Size().Width)
+		h := min(clipPos.Y+clipSize.Height, c.Size().Height)
 		clip := image.Rect(
 			scale.ToScreenCoordinate(c, clipPos.X),
 			scale.ToScreenCoordinate(c, clipPos.Y),

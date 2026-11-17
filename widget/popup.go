@@ -33,6 +33,10 @@ type PopUp struct {
 // Hide this widget, if it was previously visible
 func (p *PopUp) Hide() {
 	if p.overlay != nil {
+		// removing the overlay drops its focus manager, so unfocus first or the content never sees FocusLost
+		if p.Canvas.Overlays().Top() == p.overlay && p.Canvas.Focused() != nil {
+			p.Canvas.Unfocus()
+		}
 		p.Canvas.Overlays().Remove(p.overlay)
 		p.overlay = nil
 	}
@@ -133,7 +137,7 @@ func (p *PopUp) CreateRenderer() fyne.WidgetRenderer {
 // ShowPopUpAtPosition creates a new popUp for the specified content at the specified absolute position.
 // It will then display the popup on the passed canvas.
 func ShowPopUpAtPosition(content fyne.CanvasObject, c fyne.Canvas, pos fyne.Position) {
-	newPopUp(content, c).ShowAtPosition(pos)
+	NewPopUp(content, c).ShowAtPosition(pos)
 }
 
 // ShowPopUpAtRelativePosition shows a new popUp for the specified content at the given position relative to stated object.
@@ -146,38 +150,30 @@ func ShowPopUpAtRelativePosition(content fyne.CanvasObject, c fyne.Canvas, rel f
 	})
 }
 
-func newPopUp(content fyne.CanvasObject, c fyne.Canvas) *PopUp {
+// NewPopUp creates a new popUp for the specified content and displays it on the passed canvas.
+func NewPopUp(content fyne.CanvasObject, c fyne.Canvas) *PopUp {
 	ret := &PopUp{Content: content, Canvas: c, modal: false}
 	ret.ExtendBaseWidget(ret)
 	return ret
 }
 
-// NewPopUp creates a new popUp for the specified content and displays it on the passed canvas.
-func NewPopUp(content fyne.CanvasObject, c fyne.Canvas) *PopUp {
-	return newPopUp(content, c)
-}
-
 // ShowPopUp creates a new popUp for the specified content and displays it on the passed canvas.
 func ShowPopUp(content fyne.CanvasObject, c fyne.Canvas) {
-	newPopUp(content, c).Show()
-}
-
-func newModalPopUp(content fyne.CanvasObject, c fyne.Canvas) *PopUp {
-	p := &PopUp{Content: content, Canvas: c, modal: true}
-	p.ExtendBaseWidget(p)
-	return p
+	NewPopUp(content, c).Show()
 }
 
 // NewModalPopUp creates a new popUp for the specified content and displays it on the passed canvas.
 // A modal PopUp blocks interactions with underlying elements, covered with a semi-transparent overlay.
 func NewModalPopUp(content fyne.CanvasObject, c fyne.Canvas) *PopUp {
-	return newModalPopUp(content, c)
+	p := &PopUp{Content: content, Canvas: c, modal: true}
+	p.ExtendBaseWidget(p)
+	return p
 }
 
 // ShowModalPopUp creates a new popUp for the specified content and displays it on the passed canvas.
 // A modal PopUp blocks interactions with underlying elements, covered with a semi-transparent overlay.
 func ShowModalPopUp(content fyne.CanvasObject, c fyne.Canvas) {
-	p := newModalPopUp(content, c)
+	p := NewModalPopUp(content, c)
 	p.Show()
 }
 

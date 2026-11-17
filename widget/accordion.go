@@ -209,10 +209,10 @@ func (r *accordionRenderer) MinSize() fyne.Size {
 			size.Height += pad
 		}
 		minSize := r.headers[i].MinSize()
-		size.Width = fyne.Max(size.Width, minSize.Width)
+		size.Width = max(size.Width, minSize.Width)
 		size.Height += minSize.Height
 		minSize = ai.Detail.MinSize()
-		size.Width = fyne.Max(size.Width, minSize.Width)
+		size.Width = max(size.Width, minSize.Width)
 		if ai.Open {
 			size.Height += minSize.Height
 			size.Height += pad

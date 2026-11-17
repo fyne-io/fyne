@@ -10,8 +10,8 @@ package app
 #include <stdlib.h>
 
 bool isBundled();
-void sendNotification(char *title, char *content);
-bool scheduleNotification(char *id, char *title, char *content, double seconds);
+void sendNotification(char *title, char *content, bool silent);
+bool scheduleNotification(char *id, char *title, char *content, bool silent, double seconds);
 void cancelScheduledNotification(char *id);
 */
 import "C"
@@ -36,11 +36,11 @@ func (*fyneApp) SendNotification(n *fyne.Notification) {
 		contentStr := C.CString(n.Content)
 		defer C.free(unsafe.Pointer(contentStr))
 
-		C.sendNotification(titleStr, contentStr)
+		C.sendNotification(titleStr, contentStr, C.bool(n.Silent))
 		return
 	}
 
-	fallbackNotification(n.Title, n.Content)
+	fallbackNotification(n.Title, n.Content, n.Silent)
 }
 
 func (a *fyneApp) ScheduleNotification(n *fyne.Notification, when time.Time) (*fyne.ScheduledNotification, error) {
@@ -65,7 +65,7 @@ func (a *fyneApp) ScheduleNotification(n *fyne.Notification, when time.Time) (*f
 	contentStr := C.CString(n.Content)
 	defer C.free(unsafe.Pointer(contentStr))
 
-	if !bool(C.scheduleNotification(idStr, titleStr, contentStr, C.double(delay))) {
+	if !bool(C.scheduleNotification(idStr, titleStr, contentStr, C.bool(n.Silent), C.double(delay))) {
 		// older SDK or runtime refusal - use the in-process scheduler instead
 		return a.scheduleViaScheduler(n, when)
 	}
@@ -97,15 +97,18 @@ func escapeNotificationString(in string) string {
 }
 
 //export fallbackSend
-func fallbackSend(cTitle, cContent *C.char) {
+func fallbackSend(cTitle, cContent *C.char, silent C.bool) {
 	title := C.GoString(cTitle)
 	content := C.GoString(cContent)
-	fallbackNotification(title, content)
+	fallbackNotification(title, content, bool(silent))
 }
 
-func fallbackNotification(title, content string) {
+func fallbackNotification(title, content string, silent bool) {
 	template := `display notification "%s" with title "%s"`
 	script := fmt.Sprintf(template, escapeNotificationString(content), escapeNotificationString(title))
+	if !silent {
+		script += ` sound name "default"`
+	}
 
 	err := exec.Command("osascript", "-e", script).Start()
 	if err != nil {

@@ -125,6 +125,26 @@ func TestTextTextureWindow(t *testing.T) {
 	assert.False(t, cached.covers(7200, 400, 40, 1))
 }
 
+func TestShaderFrameSize(t *testing.T) {
+	frame := fyne.NewSize(400, 300)
+
+	p := &painter{pixScale: 1.0}
+	// without a known drawable size, fall back to the canvas height
+	w, h := p.shaderFrameSize(frame)
+	assert.Equal(t, float32(400), w)
+	assert.Equal(t, float32(300), h)
+
+	// the height follows the drawable, which may differ from the canvas while
+	// a resize is catching up
+	p.fbHeight = 500
+	_, h = p.shaderFrameSize(frame)
+	assert.Equal(t, float32(500), h)
+
+	p.fbHeight = 200
+	_, h = p.shaderFrameSize(frame)
+	assert.Equal(t, float32(200), h)
+}
+
 func TestVecRectCoordsWithPad_Shadow(t *testing.T) {
 	p := &painter{pixScale: 1.0}
 	rect := &canvas.Rectangle{}
@@ -155,4 +175,28 @@ func TestVecRectCoordsWithPad_Shadow(t *testing.T) {
 		-1.9200001, -0.32000005,
 		1.3199999, -0.32000005,
 	}, coords)
+}
+
+// A bar filling a track from the bottom shares the track's bottom edge, and
+// has to land on the same pixel row for every fractional size a resize or a
+// new value produces.
+func TestVecRectCoordsWithPad_SharedEdge(t *testing.T) {
+	for _, scale := range []float32{1, 1.25, 2} {
+		p := &painter{pixScale: scale}
+		frame := fyne.NewSize(400, 800)
+		for trackY := float32(20); trackY < 22; trackY += 0.13 {
+			for fill := float32(10); fill < 300; fill += 0.37 {
+				track, bar := &canvas.Rectangle{}, &canvas.Rectangle{}
+				track.Resize(fyne.NewSize(50, 500.3))
+				bar.Resize(fyne.NewSize(50, fill))
+				barY := trackY + track.Size().Height - fill
+
+				_, tb := p.vecRectCoordsWithPad(fyne.NewPos(0, trackY), track, frame, 0, 0, canvas.Shadow{})
+				_, bb := p.vecRectCoordsWithPad(fyne.NewPos(0, barY), bar, frame, 0, 0, canvas.Shadow{})
+				if tb[3] != bb[3] {
+					t.Fatalf("scale %v, track at %v, fill %v: track bottom %v, bar bottom %v", scale, trackY, fill, tb[3], bb[3])
+				}
+			}
+		}
+	}
 }

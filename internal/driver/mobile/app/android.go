@@ -89,6 +89,26 @@ func GoBack() {
 	}
 }
 
+// Main is called by the main.main function to run the mobile application.
+//
+// It calls f on the App, in a separate goroutine, as some OS-specific
+// libraries require being on 'the main thread'.
+func Main(f func(App)) {
+	mainUserFn = f
+	// TODO: merge the runInputQueue and mainUI functions?
+	go func() {
+		if err := mobileinit.RunOnJVM(runInputQueue); err != nil {
+			log.Fatalf("app: %v", err) //revive:disable-line:deep-exit
+		}
+	}()
+	// Preserve this OS thread for:
+	//	1. the attached JNI thread
+	//	2. the GL context
+	if err := mobileinit.RunOnJVM(mainUI); err != nil {
+		log.Fatalf("app: %v", err) //revive:disable-line:deep-exit
+	}
+}
+
 // RunOnJVM runs fn on a new goroutine locked to an OS thread with a JNIEnv.
 //
 // RunOnJVM blocks until the call to fn is complete. Any Java
@@ -301,22 +321,6 @@ var (
 
 func init() {
 	theApp.registerGLViewportFilter()
-}
-
-func main(f func(App)) {
-	mainUserFn = f
-	// TODO: merge the runInputQueue and mainUI functions?
-	go func() {
-		if err := mobileinit.RunOnJVM(runInputQueue); err != nil {
-			log.Fatalf("app: %v", err)
-		}
-	}()
-	// Preserve this OS thread for:
-	//	1. the attached JNI thread
-	//	2. the GL context
-	if err := mobileinit.RunOnJVM(mainUI); err != nil {
-		log.Fatalf("app: %v", err)
-	}
 }
 
 // driverShowVirtualKeyboard requests the driver to show a virtual keyboard for text input

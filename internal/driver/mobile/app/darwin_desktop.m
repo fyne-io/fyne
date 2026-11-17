@@ -106,6 +106,13 @@ uint64 threadID() {
 	eventMouseDragged(p.x * scale, p.y * scale);
 }
 
+- (void)scrollWheel:(NSEvent *)theEvent {
+	double scale = [[NSScreen mainScreen] backingScaleFactor];
+	NSPoint p = [theEvent locationInWindow];
+	eventScrollWheel(p.x * scale, p.y * scale, [theEvent scrollingDeltaY],
+		[theEvent hasPreciseScrollingDeltas] ? 1 : 0);
+}
+
 - (void)windowDidBecomeKey:(NSNotification *)notification {
 	lifecycleFocused();
 }

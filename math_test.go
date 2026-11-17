@@ -7,11 +7,11 @@ import (
 )
 
 func TestMin(t *testing.T) {
-	assert.Equal(t, float32(1), Min(1, 3))
-	assert.Equal(t, float32(-3), Min(1, -3))
+	assert.Equal(t, float32(1), min(float32(1), float32(3)))
+	assert.Equal(t, float32(-3), min(float32(1), float32(-3)))
 }
 
 func TestMax(t *testing.T) {
-	assert.Equal(t, float32(3), Max(1, 3))
-	assert.Equal(t, float32(1), Max(1, -3))
+	assert.Equal(t, float32(3), max(float32(1), float32(3)))
+	assert.Equal(t, float32(1), max(float32(1), float32(-3)))
 }

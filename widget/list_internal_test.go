@@ -680,9 +680,9 @@ func TestList_LimitUpdateItem(t *testing.T) {
 	w.SetContent(list)
 	w.ShowAndRun()
 	assert.Equal(t, "0.1.", printOut)
-	list.scrollTo(1)
+	list.scrollWithoutItemCheckTo(1)
 	assert.Equal(t, "0.1.2.", printOut)
-	list.scrollTo(2)
+	list.scrollWithoutItemCheckTo(2)
 	assert.Equal(t, "0.1.2.3.", printOut)
 }
 
@@ -725,7 +725,7 @@ func TestList_ScrollToLargeItem(t *testing.T) {
 	w := test.NewTempWindow(t, list)
 
 	w.SetContent(list)
-	list.scrollTo(9)
+	list.scrollWithoutItemCheckTo(9)
 	assert.Equal(t, list.scroller.Content.MinSize().Height-list.Size().Height, list.scroller.Offset.Y)
 }
 

@@ -56,6 +56,7 @@ func (nav *Navigation) Push(obj fyne.CanvasObject) {
 //
 // Since: 2.7
 func (nav *Navigation) PushWithTitle(obj fyne.CanvasObject, s string) {
+	nav.setup()
 	obj.Show()
 	objs := nav.stack.Objects[:nav.level]
 	if len(objs) > 0 {
@@ -128,7 +129,12 @@ func (nav *Navigation) SetCurrentTitle(s string) {
 	}
 }
 
+// setup prepares the stack the first time it is needed.
 func (nav *Navigation) setup() {
+	if nav.stack.Layout != nil {
+		return
+	}
+
 	objs := []fyne.CanvasObject{}
 	titles := []string{}
 	if nav.Root != nil {

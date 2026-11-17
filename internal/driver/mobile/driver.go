@@ -8,6 +8,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	fynecanvas "fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/driver/mobile"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/animation"
@@ -20,6 +21,7 @@ import (
 	"fyne.io/fyne/v2/internal/driver/mobile/app"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/key"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/lifecycle"
+	"fyne.io/fyne/v2/internal/driver/mobile/event/mouse"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/paint"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/size"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/touch"
@@ -109,7 +111,7 @@ func (d *driver) DoFromGoroutine(fn func(), wait bool) {
 func (d *driver) CreateWindow(title string) fyne.Window {
 	c, _ := newCanvas(fyne.CurrentDevice()).(*canvas)
 	ret := &window{title: title, canvas: c, isChild: len(d.windows) > 0}
-	c.setContent(&fynecanvas.Rectangle{FillColor: theme.Color(theme.ColorNameBackground)})
+	c.applyContent(&fynecanvas.Rectangle{FillColor: theme.Color(theme.ColorNameBackground)})
 	c.SetPainter(pgl.NewPainter(c, ret))
 	d.windows = append(d.windows, ret)
 	return ret
@@ -266,6 +268,8 @@ func (d *driver) Run() {
 					case touch.TypeEnd:
 						d.tapUpCanvas(current, e.X, e.Y, e.Sequence)
 					}
+				case mouse.ScrollEvent:
+					d.scrollCanvas(current, e)
 				case key.Event:
 					if runtime.GOOS == goos.Android && e.Code == key.CodeDeleteBackspace && e.Rune < 0 && d.device.keyboardShown {
 						break // we are getting release/press on backspace during soft backspace
@@ -392,7 +396,7 @@ func (d *driver) paintWindow(window fyne.Window, s fyne.Size) {
 
 	draw := func(node *common.RenderCacheNode, pos fyne.Position) {
 		obj := node.Obj()
-		if intdriver.IsClip(obj) {
+		if node.IsClip() {
 			inner := clips.Push(pos, obj.Size())
 			c.Painter().StartClipping(inner.Rect())
 		}
@@ -403,7 +407,7 @@ func (d *driver) paintWindow(window fyne.Window, s fyne.Size) {
 		c.Painter().Paint(obj, pos, s, clips.Top())
 	}
 	afterDraw := func(node *common.RenderCacheNode, pos fyne.Position) {
-		if intdriver.IsClip(node.Obj()) {
+		if node.IsClip() {
 			c.Painter().StopClipping()
 			clips.Pop()
 			if top := clips.Top(); top != nil {
@@ -417,6 +421,11 @@ func (d *driver) paintWindow(window fyne.Window, s fyne.Size) {
 	}
 
 	c.WalkTrees(draw, afterDraw)
+	// The painter batches text and plain rectangles, so the tail of the tree can
+	// still be sitting in a queue when the walk ends.
+	if p, ok := c.Painter().(interface{ FlushGlyphs() }); ok {
+		p.FlushGlyphs()
+	}
 }
 
 func (d *driver) sendPaintEvent() {
@@ -511,6 +520,32 @@ func (d *driver) tapUpCanvas(w *window, x, y float32, tapID touch.Sequence) {
 
 			d.DoFromGoroutine(wid.DragEnd, false)
 		}()
+	})
+}
+
+// scrollCanvas sends a vertical mouse wheel scroll from the simulator to the
+// scrollable object under the mouse, if there is one at that position. It
+// uses the shared scroll speed, without the desktop driver's acceleration.
+func (*driver) scrollCanvas(w *window, e mouse.ScrollEvent) {
+	pos := fyne.NewPos(scale.ToFyneCoordinate(w.canvas, int(e.X)),
+		scale.ToFyneCoordinate(w.canvas, int(e.Y))+tapYOffset)
+
+	co, objPos, _ := w.canvas.findObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {
+		_, ok := object.(fyne.Scrollable)
+		return ok
+	})
+
+	wid, ok := co.(fyne.Scrollable)
+	if !ok {
+		return
+	}
+
+	wid.Scrolled(&fyne.ScrollEvent{
+		PointEvent: fyne.PointEvent{
+			Position:         objPos,
+			AbsolutePosition: pos,
+		},
+		Scrolled: fyne.NewDelta(0, e.ScrollY*common.ScrollSpeed),
 	})
 }
 
@@ -612,6 +647,15 @@ var keyCodeMap = map[key.Code]fyne.KeyName{
 	key.CodeGraveAccent:        fyne.KeyBackTick,
 
 	key.CodeBackButton: mobile.KeyBack,
+
+	key.CodeLeftShift:    desktop.KeyShiftLeft,
+	key.CodeRightShift:   desktop.KeyShiftRight,
+	key.CodeLeftControl:  desktop.KeyControlLeft,
+	key.CodeRightControl: desktop.KeyControlRight,
+	key.CodeLeftAlt:      desktop.KeyAltLeft,
+	key.CodeRightAlt:     desktop.KeyAltRight,
+	key.CodeLeftGUI:      desktop.KeySuperLeft,
+	key.CodeRightGUI:     desktop.KeySuperRight,
 }
 
 func keyToName(code key.Code) fyne.KeyName {
@@ -621,6 +665,89 @@ func keyToName(code key.Code) fyne.KeyName {
 	}
 
 	return ret
+}
+
+func keyModifiers(mod key.Modifiers) fyne.KeyModifier {
+	var ret fyne.KeyModifier
+	if mod&key.ModShift != 0 {
+		ret |= fyne.KeyModifierShift
+	}
+	if mod&key.ModControl != 0 {
+		ret |= fyne.KeyModifierControl
+	}
+	if mod&key.ModAlt != 0 {
+		ret |= fyne.KeyModifierAlt
+	}
+	if mod&key.ModMeta != 0 {
+		ret |= fyne.KeyModifierSuper
+	}
+
+	return ret
+}
+
+func isKeyModifier(keyName fyne.KeyName) bool {
+	return keyName == desktop.KeyShiftLeft || keyName == desktop.KeyShiftRight ||
+		keyName == desktop.KeyControlLeft || keyName == desktop.KeyControlRight ||
+		keyName == desktop.KeyAltLeft || keyName == desktop.KeyAltRight ||
+		keyName == desktop.KeySuperLeft || keyName == desktop.KeySuperRight
+}
+
+// shortcutForKey mirrors the built-in shortcut detection of the desktop driver.
+// All other combinations of a modifier and a key become a desktop.CustomShortcut,
+// which widgets such as Entry use for behaviours like word selection or deletion.
+func shortcutForKey(keyName fyne.KeyName, modifier fyne.KeyModifier) fyne.Shortcut {
+	var shortcut fyne.Shortcut
+	if modifier == fyne.KeyModifierShortcutDefault {
+		switch keyName {
+		case fyne.KeyZ: // detect undo shortcut
+			shortcut = &fyne.ShortcutUndo{}
+		case fyne.KeyY: // detect redo shortcut
+			shortcut = &fyne.ShortcutRedo{}
+		case fyne.KeyV: // detect paste shortcut
+			shortcut = &fyne.ShortcutPaste{
+				Clipboard: NewClipboard(),
+			}
+		case fyne.KeyC: // detect copy shortcut
+			shortcut = &fyne.ShortcutCopy{
+				Clipboard: NewClipboard(),
+			}
+		case fyne.KeyInsert: // detect copy shortcut (alternative)
+			shortcut = &fyne.ShortcutCopy{
+				Clipboard: NewClipboard(),
+				Secondary: true,
+			}
+		case fyne.KeyX: // detect cut shortcut
+			shortcut = &fyne.ShortcutCut{
+				Clipboard: NewClipboard(),
+			}
+		case fyne.KeyA: // detect selectAll shortcut
+			shortcut = &fyne.ShortcutSelectAll{}
+		}
+	}
+
+	if modifier == fyne.KeyModifierShift {
+		switch keyName {
+		case fyne.KeyInsert: // detect paste shortcut (alternative)
+			shortcut = &fyne.ShortcutPaste{
+				Clipboard: NewClipboard(),
+				Secondary: true,
+			}
+		case fyne.KeyDelete: // detect cut shortcut (alternative)
+			shortcut = &fyne.ShortcutCut{
+				Clipboard: NewClipboard(),
+				Secondary: true,
+			}
+		}
+	}
+
+	if shortcut == nil && modifier != 0 && !isKeyModifier(keyName) && modifier != fyne.KeyModifierShift {
+		shortcut = &desktop.CustomShortcut{
+			KeyName:  keyName,
+			Modifier: modifier,
+		}
+	}
+
+	return shortcut
 }
 
 func runeToPrintable(r rune) rune {
@@ -650,10 +777,22 @@ func (d *driver) typeDownCanvas(canvas *canvas, r rune, code key.Code, mod key.M
 		}
 	}
 
+	modifier := keyModifiers(mod)
 	r = runeToPrintable(r)
 	keyEvent := &fyne.KeyEvent{Name: keyName}
 
 	if canvas.Focused() != nil {
+		if keyable, ok := canvas.Focused().(desktop.Keyable); ok {
+			keyable.KeyDown(keyEvent)
+		}
+
+		if shortcut := shortcutForKey(keyName, modifier); shortcut != nil {
+			if focusable, ok := canvas.Focused().(fyne.Shortcutable); ok {
+				focusable.TypedShortcut(shortcut)
+				return
+			}
+		}
+
 		if keyName != "" {
 			canvas.Focused().TypedKey(keyEvent)
 		}
@@ -674,7 +813,15 @@ func (d *driver) typeDownCanvas(canvas *canvas, r rune, code key.Code, mod key.M
 	}
 }
 
-func (*driver) typeUpCanvas(_ *canvas, _ rune, _ key.Code, _ key.Modifiers) {
+func (*driver) typeUpCanvas(canvas *canvas, _ rune, code key.Code, _ key.Modifiers) {
+	if canvas.Focused() == nil {
+		return
+	}
+
+	keyEvent := &fyne.KeyEvent{Name: keyToName(code)}
+	if keyable, ok := canvas.Focused().(desktop.Keyable); ok {
+		keyable.KeyUp(keyEvent)
+	}
 }
 
 func (d *driver) Device() fyne.Device {
@@ -698,4 +845,9 @@ func NewGoMobileDriver() fyne.Driver {
 
 	registerRepository(d)
 	return d
+}
+
+// RenderedTextSizeFor measures text in the fonts of the theme scope o is in.
+func (*driver) RenderedTextSizeFor(o fyne.CanvasObject, text string, textSize float32, style fyne.TextStyle, source fyne.Resource) (fyne.Size, float32) {
+	return painter.RenderedTextSizeFor(o, text, textSize, style, source)
 }

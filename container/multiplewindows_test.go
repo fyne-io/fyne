@@ -58,3 +58,14 @@ func TestMultipleWindows_Top(t *testing.T) {
 	m.Add(w1)
 	assert.Equal(t, w1, m.Top())
 }
+
+func TestMultipleWindows_TapContentRaises(t *testing.T) {
+	w1 := NewInnerWindow("1", widget.NewLabel("Content"))
+	w2 := NewInnerWindow("2", widget.NewLabel("Content"))
+	m := NewMultipleWindows(w1, w2)
+	test.NewTempWindow(t, m)
+	assert.Equal(t, w2, m.Top())
+
+	w1.Tapped(&fyne.PointEvent{})
+	assert.Equal(t, w1, m.Top())
+}

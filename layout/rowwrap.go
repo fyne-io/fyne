@@ -57,8 +57,8 @@ func (l *rowWrapLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 		}
 		objCount++
 		s := o.MinSize()
-		maxW = fyne.Max(maxW, s.Width)
-		maxH = fyne.Max(maxH, s.Height)
+		maxW = max(maxW, s.Width)
+		maxH = max(maxH, s.Height)
 	}
 	return fyne.NewSize(maxW, l.minHeight(maxH, objCount))
 }
@@ -79,7 +79,7 @@ func (l *rowWrapLayout) Layout(objects []fyne.CanvasObject, containerSize fyne.S
 		if !o.Visible() {
 			continue
 		}
-		maxH = fyne.Max(maxH, o.MinSize().Height)
+		maxH = max(maxH, o.MinSize().Height)
 	}
 	var minSize fyne.Size
 	pos := fyne.NewPos(0, 0)
@@ -97,7 +97,7 @@ func (l *rowWrapLayout) Layout(objects []fyne.CanvasObject, containerSize fyne.S
 			rows++
 		}
 		isFirst = false
-		minSize.Width = fyne.Max(minSize.Width, pos.X+size.Width)
+		minSize.Width = max(minSize.Width, pos.X+size.Width)
 		minSize.Height = l.minHeight(maxH, rows)
 		o.Move(pos)
 		pos = pos.Add(fyne.NewPos(size.Width+l.horizontalPadding, 0))

@@ -105,7 +105,7 @@ func (i *menuBarItem) MouseOut() {
 // Tapped toggles the activation state of the menu bar.
 // It shows the item’s menu if the bar is activated and hides it if the bar is deactivated.
 func (i *menuBarItem) Tapped(*fyne.PointEvent) {
-	i.Parent.toggle(i)
+	i.Parent.toggleItem(i)
 }
 
 func (i *menuBarItem) TypedKey(event *fyne.KeyEvent) {

@@ -81,6 +81,7 @@ func CleanCanvas(canvas fyne.Canvas) {
 			return true
 		}
 
+		cinfo.replaced.Store(true)
 		canvases.Delete(obj)
 
 		wid, ok := obj.(fyne.Widget)
@@ -91,6 +92,7 @@ func CleanCanvas(canvas fyne.Canvas) {
 		if !ok {
 			return true
 		}
+		rinfo.destroyed.Store(true)
 		rinfo.renderer.Destroy()
 		overrides.Delete(wid)
 		return true
@@ -100,13 +102,14 @@ func CleanCanvas(canvas fyne.Canvas) {
 // ResetThemeCaches clears all the svg and text size cache maps
 func ResetThemeCaches() {
 	svgs.Clear()
-	fontSizeCache.Clear()
+	ClearFontMetrics()
 }
 
 // destroyExpiredCanvases deletes objects from the canvases cache.
 func destroyExpiredCanvases(now time.Time) {
 	canvases.Range(func(obj fyne.CanvasObject, cinfo *canvasInfo) bool {
 		if cinfo.isExpired(now) {
+			cinfo.replaced.Store(true)
 			canvases.Delete(obj)
 		}
 		return true
@@ -118,6 +121,7 @@ func destroyExpiredCanvases(now time.Time) {
 func destroyExpiredRenderers(now time.Time) {
 	renderers.Range(func(wid fyne.Widget, rinfo *rendererInfo) bool {
 		if rinfo.isExpired(now) {
+			rinfo.destroyed.Store(true)
 			rinfo.renderer.Destroy()
 			overrides.Delete(wid)
 			renderers.Delete(wid)
@@ -127,15 +131,15 @@ func destroyExpiredRenderers(now time.Time) {
 }
 
 type expiringCache struct {
-	expires int64 // unix nanos, so setAlive is a load and an add
+	expires atomic.Int64 // unix nanos, so setAlive is a load and an add
 }
 
 // isExpired check if the cache data is expired.
 func (c *expiringCache) isExpired(now time.Time) bool {
-	return c.expires < now.UnixNano()
+	return c.expires.Load() < now.UnixNano()
 }
 
 // setAlive updates expiration time.
 func (c *expiringCache) setAlive() {
-	c.expires = cachedNow.Load() + ValidDuration.Nanoseconds()
+	c.expires.Store(cachedNow.Load() + ValidDuration.Nanoseconds())
 }

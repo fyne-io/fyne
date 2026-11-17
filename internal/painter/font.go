@@ -5,9 +5,11 @@ import (
 	"image/color"
 	"image/draw"
 	"math"
+	"reflect"
 	"slices"
 	"strings"
 	"sync"
+	"unicode"
 
 	"github.com/go-text/render"
 	"github.com/go-text/typesetting/di"
@@ -114,6 +116,7 @@ func lookupFaces(t, fallback fyne.Resource, additional []fyne.Resource, family s
 	if local != nil {
 		faces.addFace(local)
 	}
+	faces.fixed = len(faces.faces)
 
 	return faces
 }
@@ -127,7 +130,7 @@ func CachedFontFace(style fyne.TextStyle, source fyne.Resource, o fyne.CanvasObj
 			if face == nil {
 				face = loadMeasureFont(theme.TextFont())
 			}
-			faces := &dynamicFontMap{family: source.Name(), faces: []*font.Face{face}}
+			faces := &dynamicFontMap{family: source.Name(), faces: []*font.Face{face}, fixed: 1}
 
 			val = &FontCacheItem{Fonts: faces}
 			fontCustomCache.Store(source, val)
@@ -135,17 +138,22 @@ func CachedFontFace(style fyne.TextStyle, source fyne.Resource, o fyne.CanvasObj
 		return val
 	}
 
-	scope := ""
-	if o != nil { // for overridden themes get the cache key right
-		scope = cache.WidgetScopeID(o)
+	th := theme.CurrentForWidget(o)
+	font1 := th.Font(style)
+	// A scope's faces differ from the app's only by its theme's font, and every
+	// ThemeOverride makes a new scope on each Refresh. Key by that font so that
+	// scopes share an entry rather than each adding one that is never freed.
+	id := cacheID{style: style, font: font1}
+	if !hashable(font1) {
+		id = cacheID{style: style}
+		if o != nil { // for overridden themes get the cache key right
+			id.scope = cache.WidgetScopeID(o)
+		}
 	}
 
-	val, ok := fontCache.Load(cacheID{style: style, scope: scope})
+	val, ok := fontCache.Load(id)
 	if !ok {
 		var faces *dynamicFontMap
-
-		th := theme.CurrentForWidget(o)
-		font1 := th.Font(style)
 
 		// Skip any nil fallback fonts — they can be nil when built with
 		// -tags no_emoji, and the lookupFaces loop expects non-nil entries.
@@ -171,17 +179,17 @@ func CachedFontFace(style fyne.TextStyle, source fyne.Resource, o fyne.CanvasObj
 			f1 := loadMeasureFont(th)
 
 			if th == fallback {
-				faces = &dynamicFontMap{family: fontscan.SansSerif, faces: []*font.Face{f1}}
+				faces = &dynamicFontMap{family: fontscan.SansSerif, faces: []*font.Face{f1}, fixed: 1}
 			} else {
 				f2 := loadMeasureFont(fallback)
-				faces = &dynamicFontMap{family: fontscan.SansSerif, faces: []*font.Face{f1, f2}}
+				faces = &dynamicFontMap{family: fontscan.SansSerif, faces: []*font.Face{f1, f2}, fixed: 2}
 			}
 		default:
 			faces = lookupFaces(font1, theme.DefaultTextFont(), fallbacks, fontscan.SansSerif, style)
 		}
 
 		val = &FontCacheItem{Fonts: faces}
-		fontCache.Store(cacheID{style: style, scope: scope}, val)
+		fontCache.Store(id, val)
 	}
 
 	return val
@@ -191,6 +199,11 @@ func CachedFontFace(style fyne.TextStyle, source fyne.Resource, o fyne.CanvasObj
 func ClearFontCache() {
 	fontCache.Clear()
 	fontCustomCache.Clear()
+	parsedFonts.Clear()
+
+	runBufferMut.Lock()
+	clear(shapeCache)
+	runBufferMut.Unlock()
 }
 
 // DrawString draws a string into an image.
@@ -220,13 +233,81 @@ func DrawStringOffset(dst draw.Image, s string, c color.Color, f shaping.Fontmap
 	})
 }
 
+// PlacedGlyph is one shaped glyph together with the position DrawString would
+// have rasterised it at, in destination pixels.
+type PlacedGlyph struct {
+	Glyph shaping.Glyph
+	Face  *font.Face
+	// X is the pen position, Y the baseline shared by every glyph in the string.
+	X, Y float32
+}
+
+// WalkGlyphs shapes s exactly as DrawString does and reports each glyph with the
+// position it would be drawn at, so a caller can rasterise and cache glyphs
+// individually instead of taking a bitmap of the whole run.
+//
+// Glyph ID 0 is reported as-is. DrawString substitutes the replacement character
+// from another face for those, which this deliberately does not do: a caller that
+// cannot draw a notdef should fall back to DrawString for the whole string rather
+// than have this grow a second shaping path.
+func WalkGlyphs(f shaping.Fontmap, s string, fontSize, scale float32, style fyne.TextStyle, cb func(PlacedGlyph)) {
+	advance := float32(0)
+	walkString(f, s, float32ToFixed266(fontSize), style, &advance, scale, func(run shaping.Output, x, y float32) {
+		// The truncation of x and the ceiling of y mirror DrawStringOffset and
+		// DrawShapedRunAt; glyphs have to land on the same pixels either way or
+		// the two paths would disagree about where a string sits.
+		penX := float32(int(x))
+		baseline := float32(math.Ceil(float64(y)))
+		for _, g := range run.Glyphs {
+			cb(PlacedGlyph{
+				Glyph: g,
+				Face:  run.Face,
+				X:     penX + fixed266ToFloat32(g.XOffset)*scale,
+				Y:     baseline - fixed266ToFloat32(g.YOffset)*scale,
+			})
+			penX += fixed266ToFloat32(g.Advance) * scale
+		}
+	})
+}
+
+// RasteriseGlyph draws a single glyph into dst at the given pen position and
+// baseline, using the same renderer settings as DrawString. subX shifts the
+// glyph a fraction of a pixel right of x, which is how a cached bitmap carries
+// the sub-pixel part of a pen position that its quad cannot.
+func RasteriseGlyph(dst draw.Image, g PlacedGlyph, c color.Color, fontSize, scale float32, x, y int, subX float32) {
+	r := render.Renderer{FontSize: fontSize, PixScale: scale, Color: c}
+	run := shaping.Output{Face: g.Face, Glyphs: []shaping.Glyph{g.Glyph}}
+	// The shaped XOffset/YOffset are already folded into the caller's x/y, so
+	// they are replaced rather than applied a second time. DrawShapedRunAt scales
+	// XOffset by the pixel scale, hence the division.
+	run.Glyphs[0].XOffset, run.Glyphs[0].YOffset = float32ToFixed266(subX/scale), 0
+	r.DrawShapedRunAt(run, dst, x, y)
+}
+
+// hashable reports whether res can be used as a map key.
+func hashable(res fyne.Resource) bool {
+	return res != nil && reflect.ValueOf(res).Comparable()
+}
+
+// loadMeasureFont returns a new face for the font, which callers may use
+// without locking. Faces are not safe for concurrent use, but the parsed Font
+// they share is, so the parse is reused.
 func loadMeasureFont(data fyne.Resource) *font.Face {
+	// a theme may return a resource that cannot be a map key; parse it each time
+	shared := hashable(data)
+	if shared {
+		if ft, ok := parsedFonts.Load(data); ok {
+			return font.NewFace(ft)
+		}
+	}
 	loaded, err := font.ParseTTF(bytes.NewReader(data.Content()))
 	if err != nil {
 		fyne.LogError("font load error", err)
 		return nil
 	}
-
+	if shared {
+		parsedFonts.Store(data, loaded.Font)
+	}
 	return loaded
 }
 
@@ -241,13 +322,22 @@ func MeasureString(f shaping.Fontmap, s string, textSize float32, style fyne.Tex
 // RenderedTextSize looks up how big a string would be if drawn on screen.
 // It also returns the distance from top to the text baseline.
 func RenderedTextSize(text string, fontSize float32, style fyne.TextStyle, source fyne.Resource) (size fyne.Size, baseline float32) {
-	size, base := cache.GetFontMetrics(text, fontSize, style, source)
+	return RenderedTextSizeFor(nil, text, fontSize, style, source)
+}
+
+// RenderedTextSizeFor measures text in the fonts of the theme scope o is in.
+func RenderedTextSizeFor(o fyne.CanvasObject, text string, fontSize float32, style fyne.TextStyle, source fyne.Resource) (size fyne.Size, baseline float32) {
+	scope := ""
+	if o != nil {
+		scope = cache.WidgetScopeID(o)
+	}
+	size, base := cache.GetFontMetrics(text, fontSize, style, source, scope)
 	if base != 0 {
 		return size, base
 	}
 
-	size, base = measureText(text, fontSize, style, source)
-	cache.SetFontMetrics(text, fontSize, style, source, size, base)
+	size, base = measureText(text, fontSize, style, source, o)
+	cache.SetFontMetrics(text, fontSize, style, source, scope, size, base)
 	return size, base
 }
 
@@ -259,8 +349,8 @@ func float32ToFixed266(f float32) fixed.Int26_6 {
 	return fixed.Int26_6(float64(f) * (1 << 6))
 }
 
-func measureText(text string, fontSize float32, style fyne.TextStyle, source fyne.Resource) (fyne.Size, float32) {
-	face := CachedFontFace(style, source, nil)
+func measureText(text string, fontSize float32, style fyne.TextStyle, source fyne.Resource, o fyne.CanvasObject) (fyne.Size, float32) {
+	face := CachedFontFace(style, source, o)
 	return MeasureString(face.Fonts, text, fontSize, style)
 }
 
@@ -279,8 +369,39 @@ type shapedRun struct {
 	x   float32
 }
 
+// shapedString is what the shaper made of one string: a space, which sets the
+// tab width and line metrics, then the string's runs in order with the tab
+// stops between them. Shaping depends on the font size alone, not the scale, so
+// measuring a string and drawing it share one.
+type shapedString struct {
+	space shaping.Output
+	steps []shapeStep
+}
+
+// shapeStep is one shaped run, or a tab stop when tab is set.
+type shapeStep struct {
+	out shaping.Output
+	tab bool
+}
+
+type shapeKey struct {
+	text  string
+	faces *dynamicFontMap
+	size  fixed.Int26_6
+}
+
+// shapeCacheMax caps the shaped string cache. A string is needed only until it
+// has been measured and drawn, and labels that churn make new ones without end,
+// so past the cap the cache is emptied and refills from the strings in use.
+// 4096 strings of a dozen glyphs is about 4MB.
+const shapeCacheMax = 4096
+
 var (
-	runBuffer    []shapedRun
+	runBuffer []shapedRun
+	// shapeCache holds strings shaped for measuring until they are drawn, and
+	// the other way round.
+	shapeCache = make(map[shapeKey]*shapedString)
+	// runBufferMut guards runBuffer, shapeCache and the shared shaper.
 	runBufferMut async.Mutex
 )
 
@@ -293,26 +414,14 @@ func walkString(faces shaping.Fontmap, s string, textSize fixed.Int26_6, style f
 ) (size fyne.Size, base float32) {
 	s = strings.ReplaceAll(s, "\r", "")
 
-	runes := []rune(s)
-	in := shaping.Input{
-		Text:      []rune{' '},
-		RunStart:  0,
-		RunEnd:    1,
-		Direction: di.DirectionLTR,
-		Face:      faces.ResolveFace(' '),
-		Size:      textSize,
-	}
-	segmenter := &shaping.Segmenter{}
-	out := shaper.Shape(in)
-
-	in.Text = runes
-	in.RunStart = 0
-	in.RunEnd = len(runes)
+	runBufferMut.Lock()
+	defer runBufferMut.Unlock()
+	shaped := shapeString(faces, s, textSize)
 
 	x := float32(0)
 	spacew := scale * fontTabSpaceSize
 	if style.Monospace {
-		spacew = scale * fixed266ToFloat32(out.Advance)
+		spacew = scale * fixed266ToFloat32(shaped.space.Advance)
 	}
 
 	maxAscent := fixed.Int26_6(0)
@@ -322,10 +431,58 @@ func walkString(faces shaping.Fontmap, s string, textSize fixed.Int26_6, style f
 		}
 		runBuffer = append(runBuffer, shapedRun{out: run, x: runX})
 	}
+	for _, step := range shaped.steps {
+		if step.tab {
+			x = tabStop(spacew, x, style.TabWidth)
+		} else {
+			x = layoutRun(step.out, x, scale, collect)
+		}
+	}
 
-	ins := splitEmojiSequences(in, faces, segmenter)
-	runBufferMut.Lock()
-	for _, in := range ins {
+	y := fixed266ToFloat32(maxAscent) * scale
+	for _, run := range runBuffer {
+		cb(run.out, run.x, y)
+	}
+	clear(runBuffer)
+	runBuffer = runBuffer[:0]
+
+	*advance = x
+	return fyne.NewSize(*advance, fixed266ToFloat32(shaped.space.LineBounds.LineThickness())),
+		fixed266ToFloat32(shaped.space.LineBounds.Ascent)
+}
+
+// shapeString returns s shaped in faces at textSize, from the cache when it has
+// been shaped already. Only the painter's own font maps are cached: they are
+// what every caller but tests pass, and comparable.
+func shapeString(faces shaping.Fontmap, s string, textSize fixed.Int26_6) *shapedString {
+	key := shapeKey{text: s, size: textSize}
+	key.faces, _ = faces.(*dynamicFontMap)
+	if key.faces != nil {
+		if shaped, ok := shapeCache[key]; ok {
+			return shaped
+		}
+	}
+
+	runes := []rune(s)
+	if key.faces != nil {
+		faces = key.faces.pinCJK(runes)
+	}
+
+	in := shaping.Input{
+		Text:      []rune{' '},
+		RunStart:  0,
+		RunEnd:    1,
+		Direction: di.DirectionLTR,
+		Face:      faces.ResolveFace(' '),
+		Size:      textSize,
+	}
+	shaped := &shapedString{space: shaper.Shape(in)}
+
+	in.Text = runes
+	in.RunStart = 0
+	in.RunEnd = len(runes)
+	segmenter := &shaping.Segmenter{}
+	for _, in := range splitEmojiSequences(in, faces, segmenter) {
 		inEnd := in.RunEnd
 
 		pending := false
@@ -333,9 +490,9 @@ func walkString(faces shaping.Fontmap, s string, textSize fixed.Int26_6, style f
 			if r == '\t' {
 				if pending {
 					in.RunEnd = i
-					x = shapeCallback(in, x, scale, collect)
+					shaped.steps = append(shaped.steps, shapeStep{out: shaper.Shape(in)})
 				}
-				x = tabStop(spacew, x, style.TabWidth)
+				shaped.steps = append(shaped.steps, shapeStep{tab: true})
 
 				in.RunStart = i + 1
 				in.RunEnd = inEnd
@@ -345,24 +502,22 @@ func walkString(faces shaping.Fontmap, s string, textSize fixed.Int26_6, style f
 			}
 		}
 
-		x = shapeCallback(in, x, scale, collect)
+		shaped.steps = append(shaped.steps, shapeStep{out: shaper.Shape(in)})
 	}
 
-	y := fixed266ToFloat32(maxAscent) * scale
-	for _, run := range runBuffer {
-		cb(run.out, run.x, y)
+	if key.faces != nil {
+		if len(shapeCache) >= shapeCacheMax {
+			clear(shapeCache)
+		}
+		shapeCache[key] = shaped
 	}
-	clear(runBuffer)
-	runBuffer = runBuffer[:0]
-	runBufferMut.Unlock()
-
-	*advance = x
-	return fyne.NewSize(*advance, fixed266ToFloat32(out.LineBounds.LineThickness())),
-		fixed266ToFloat32(out.LineBounds.Ascent)
+	return shaped
 }
 
-func shapeCallback(in shaping.Input, x, scale float32, cb func(shaping.Output, float32)) float32 {
-	out := shaper.Shape(in)
+// layoutRun places one shaped run with its pen at x, splitting out glyphs the
+// font did not have so each can be drawn on its own, and returns the pen
+// position after it.
+func layoutRun(out shaping.Output, x, scale float32, cb func(shaping.Output, float32)) float32 {
 	glyphs := out.Glyphs
 	start := 0
 	adv := fixed.I(0)
@@ -498,18 +653,54 @@ func (f fixedFontMap) ResolveFace(rune) *font.Face {
 	return f.face
 }
 
+// cjkFontMap is a [shaping.Fontmap] that draws CJK runes in one face.
+type cjkFontMap struct {
+	*dynamicFontMap
+	cjk *font.Face
+}
+
+func (c cjkFontMap) ResolveFace(r rune) *font.Face {
+	if isCJK(r) {
+		return c.cjk
+	}
+	return c.dynamicFontMap.ResolveFace(r)
+}
+
+const (
+	hangulJamoStart   = 0x1100 // the first CJK block, Hangul Jamo
+	cjkSymbolsStart   = 0x3000
+	cjkSymbolsEnd     = 0x303f
+	fullwidthFormsLow = 0xff00
+	fullwidthFormsHi  = 0xffef
+)
+
+// isCJK reports whether r is a Han, Hiragana, Katakana or Hangul letter, or CJK punctuation.
+func isCJK(r rune) bool {
+	if r < hangulJamoStart {
+		return false
+	}
+	return unicode.In(r, unicode.Han, unicode.Hiragana, unicode.Katakana, unicode.Hangul) ||
+		r >= cjkSymbolsStart && r <= cjkSymbolsEnd || r >= fullwidthFormsLow && r <= fullwidthFormsHi
+}
+
 type FontCacheItem struct {
 	Fonts shaping.Fontmap
 }
 
 type cacheID struct {
 	style fyne.TextStyle
+	font  fyne.Resource
 	scope string
 }
 
 var (
 	fontCache       async.Map[cacheID, *FontCacheItem]
 	fontCustomCache async.Map[fyne.Resource, *FontCacheItem] // for custom resources
+
+	// parsedFonts holds each font resource parsed once. Every style's face list
+	// includes the fallback and emoji fonts, and parsing the emoji font alone
+	// takes several MB, so parsing per style multiplied that.
+	parsedFonts async.Map[fyne.Resource, *font.Font]
 )
 
 type noopLogger struct{}
@@ -519,6 +710,7 @@ func (noopLogger) Printf(string, ...any) {}
 type dynamicFontMap struct {
 	faces  []*font.Face
 	family string
+	fixed  int // how many of faces were set up with the map, before lookups added any
 }
 
 func (d *dynamicFontMap) ResolveFace(r rune) *font.Face {
@@ -535,6 +727,46 @@ func (d *dynamicFontMap) ResolveFace(r rune) *font.Face {
 	}
 
 	return d.faces[0]
+}
+
+// pinCJK returns the font map to shape text with. The CJK runes of text are
+// resolved to a font each. If that gives more than one font, the map returned
+// draws all of them with the first of those fonts that has every one of them,
+// so a string is not split between fonts of different regional forms.
+//
+// d itself is returned, and each rune keeps the font it resolves to, if the
+// runes come from one font, if one of them is drawn by a font set up with the
+// map, or if no single font has them all. Runes that no font has are ignored.
+func (d *dynamicFontMap) pinCJK(text []rune) shaping.Fontmap {
+	var used []*font.Face
+	var cjk []rune
+	for _, r := range text {
+		if !isCJK(r) {
+			continue
+		}
+
+		face := d.ResolveFace(r)
+		if _, ok := face.NominalGlyph(r); !ok {
+			continue // no font draws it
+		}
+		if slices.Index(d.faces, face) < d.fixed {
+			return d
+		}
+		if !slices.Contains(used, face) {
+			used = append(used, face)
+		}
+		cjk = append(cjk, r)
+	}
+	if len(used) < 2 {
+		return d
+	}
+
+	for _, face := range d.faces {
+		if slices.Contains(used, face) && coversSequence(face, cjk) {
+			return cjkFontMap{dynamicFontMap: d, cjk: face}
+		}
+	}
+	return d
 }
 
 func (d *dynamicFontMap) addFace(f *font.Face) {

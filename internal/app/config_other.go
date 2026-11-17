@@ -7,6 +7,6 @@ import (
 	"path/filepath"
 )
 
-func rootConfigDir() string {
+func RootConfigDir() string {
 	return filepath.Join(os.TempDir(), "fyne-test")
 }

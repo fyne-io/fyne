@@ -53,8 +53,9 @@ func (a *fyneApp) showNotification(data *fyne.Notification, notification *js.Val
 	mimeType := http.DetectContentType(icon)
 	base64Img := fmt.Sprintf("data:%s;base64,%s", mimeType, base64Str)
 	notification.New(data.Title, map[string]any{
-		"body": data.Content,
-		"icon": base64Img,
+		"body":   data.Content,
+		"icon":   base64Img,
+		"silent": data.Silent,
 	})
 }
 

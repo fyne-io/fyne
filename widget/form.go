@@ -455,6 +455,9 @@ func (f *Form) setValidationError(err error) {
 		for _, item := range f.Items {
 			if item.invalid {
 				err = item.validationError
+				if v, ok := item.Widget.(fyne.Validatable); ok && err == nil {
+					err = v.Validate()
+				}
 				break
 			}
 		}
@@ -607,7 +610,7 @@ func (f formItemLayout) MinSize(objs []fyne.CanvasObject) fyne.Size {
 	min0 := objs[0].MinSize()
 	min1 := objs[1].MinSize()
 
-	minWidth := fyne.Max(min0.Width, min1.Width)
+	minWidth := max(min0.Width, min1.Width)
 	height := min0.Height
 
 	items := objs[1].(*fyne.Container).Objects

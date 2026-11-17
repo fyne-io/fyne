@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/async"
+	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
@@ -78,8 +79,8 @@ type TextGrid struct {
 	BaseWidget
 	Rows []TextGridRow
 
-	scroll  *widget.Scroll
-	content *textGridContent
+	scroller *widget.Scroll
+	content  *textGridContent
 
 	ShowLineNumbers bool
 	ShowWhitespace  bool
@@ -111,9 +112,9 @@ func (t *TextGrid) CursorLocationForPosition(p fyne.Position) (row, col int) {
 	y := p.Y
 	x := p.X
 
-	if t.scroll != nil && t.scroll.Visible() {
-		y += t.scroll.Offset.Y
-		x += t.scroll.Offset.X
+	if t.scroller != nil && t.scroller.Visible() {
+		y += t.scroller.Offset.Y
+		x += t.scroller.Offset.X
 	}
 
 	row = int(y / t.content.cellSize.Height)
@@ -125,16 +126,23 @@ func (t *TextGrid) CursorLocationForPosition(p fyne.Position) (row, col int) {
 //
 // Since: 2.7
 func (t *TextGrid) ScrollToTop() {
-	t.scroll.ScrollToTop()
-	t.Refresh()
+	if t.scroller.Offset.IsZero() {
+		return
+	}
+
+	t.scroller.ScrollToTop()
+	// setting the offset directly does not notify the scroller's listener, so update the rows ourselves
+	if f := t.scroller.OnScrolled; f != nil {
+		f(t.scroller.Offset)
+	}
 }
 
 // ScrollToBottom will scroll content to container bottom - to show latest info which end user just added
 //
 // Since: 2.7
 func (t *TextGrid) ScrollToBottom() {
-	t.scroll.ScrollToBottom()
-	t.Refresh()
+	t.Refresh() // make sure any new rows have been measured before we look for the bottom
+	t.scroller.ScrollToBottom()
 }
 
 // PositionForCursorLocation returns the relative position in this TextGrid for the cell at position row, col.
@@ -146,9 +154,9 @@ func (t *TextGrid) PositionForCursorLocation(row, col int) fyne.Position {
 	y := float32(row) * t.content.cellSize.Height
 	x := float32(col) * t.content.cellSize.Width
 
-	if t.scroll != nil && t.scroll.Visible() {
-		y -= t.scroll.Offset.Y
-		x -= t.scroll.Offset.X
+	if t.scroller != nil && t.scroller.Visible() {
+		y -= t.scroller.Offset.Y
+		x -= t.scroller.Offset.X
 	}
 
 	return fyne.NewPos(x, y)
@@ -178,10 +186,10 @@ func (t *TextGrid) SetText(text string) {
 
 	// If we don't update the scroll offset when the text is shorter,
 	// we may end up with no text displayed or text appearing partially cut off
-	if t.scroll != nil && t.Scroll != fyne.ScrollNone && len(rows) < oldRowsLen && t.scroll.Content != nil {
+	if t.scroller != nil && t.Scroll != fyne.ScrollNone && len(rows) < oldRowsLen && t.scroller.Content != nil {
 		offset := t.PositionForCursorLocation(len(rows), 0)
-		t.scroll.ScrollToOffset(fyne.NewPos(offset.X, t.scroll.Offset.Y))
-		t.scroll.Refresh()
+		t.scroller.ScrollToOffset(fyne.NewPos(offset.X, t.scroller.Offset.Y))
+		t.scroller.Refresh()
 	}
 
 	t.Refresh()
@@ -381,7 +389,7 @@ func (t *TextGrid) CreateRenderer() fyne.WidgetRenderer {
 		scroll.Direction = t.Scroll
 		objs[0] = scroll
 	}
-	t.scroll = scroll
+	t.scroller = scroll
 	t.content = content
 	r := &textGridRenderer{text: content, scroll: scroll}
 	r.SetObjects(objs)
@@ -490,7 +498,13 @@ func (t *textGridRenderer) Refresh() {
 	}
 
 	canvas.Refresh(t.text.text.super())
-	t.text.Refresh()
+	if t.text.text.Scroll == widget.ScrollNone {
+		t.text.Refresh()
+		return
+	}
+
+	// the scroller will resize our content if the rows have changed, then refresh it
+	t.scroll.Refresh()
 }
 
 type textGridContent struct {
@@ -518,7 +532,7 @@ func (t *textGridContent) CreateRenderer() fyne.WidgetRenderer {
 	r := &textGridContentRenderer{text: t}
 
 	r.updateCellSize()
-	t.text.scroll.OnScrolled = func(_ fyne.Position) {
+	t.text.scroller.OnScrolled = func(_ fyne.Position) {
 		r.addRowsIfRequired()
 		r.Layout(t.Size())
 	}
@@ -567,7 +581,7 @@ func (t *textGridContentRenderer) Layout(s fyne.Size) {
 func (t *textGridContentRenderer) MinSize() fyne.Size {
 	longestRow := float32(0)
 	for _, row := range t.text.text.Rows {
-		longestRow = fyne.Max(longestRow, float32(len(row.Cells)))
+		longestRow = max(longestRow, float32(len(row.Cells)))
 	}
 
 	if t.text.text.ShowLineNumbers {
@@ -596,7 +610,7 @@ func (t *textGridContentRenderer) addRowsIfRequired() {
 	start := 0
 	end := t.text.rows
 	if t.text.text.Scroll == widget.ScrollBoth || t.text.text.Scroll == widget.ScrollVerticalOnly {
-		off := t.text.text.scroll.Offset.Y
+		off := t.text.text.scroller.Offset.Y
 		start = int(math.Floor(float64(off / t.text.cellSize.Height)))
 
 		off += t.text.text.Size().Height
@@ -694,6 +708,7 @@ func (t *textGridRow) appendTextCell(str rune) {
 
 	bg := canvas.NewRectangle(color.Transparent)
 
+	cache.OverrideThemeMatchingScope(text, t.text.text)
 	t.objects = append(t.objects, bg, text)
 }
 

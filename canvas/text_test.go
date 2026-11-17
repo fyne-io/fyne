@@ -10,6 +10,8 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 
@@ -47,6 +49,21 @@ func TestText_MinSize(t *testing.T) {
 	text = canvas.NewText("Test2", color.NRGBA{0, 0, 0, 0xff})
 	min2 := text.MinSize()
 	assert.Greater(t, min2.Width, minSize.Width)
+}
+
+func TestText_MinSize_FollowsChanges(t *testing.T) {
+	test.NewTempApp(t)
+	text := canvas.NewText("a", color.Black)
+	one := text.MinSize()
+	assert.Equal(t, one, text.MinSize(), "asked again, the same")
+	text.Text = "aaaa"
+	assert.Greater(t, text.MinSize().Width, one.Width)
+	text.TextSize *= 2
+	assert.Greater(t, text.MinSize().Height, one.Height)
+	text.TextStyle.Bold = true
+	bold := text.MinSize()
+	text.TextStyle.Bold = false
+	assert.NotEqual(t, bold, text.MinSize())
 }
 
 func TestText_MinSize_NoMultiLine(t *testing.T) {
@@ -215,4 +232,33 @@ func TestText_CarriageReturn(t *testing.T) {
 			test.AssertObjectRendersToImage(t, "text/layout_"+name+".png", text)
 		})
 	}
+}
+
+type monoFontTheme struct {
+	fyne.Theme
+	mono fyne.Resource
+}
+
+func (m *monoFontTheme) Font(s fyne.TextStyle) fyne.Resource {
+	if s.Monospace {
+		return m.mono
+	}
+	return m.Theme.Font(s)
+}
+
+func TestText_MinSize_ThemeOverrideFont(t *testing.T) {
+	test.NewTempApp(t)
+	th := &monoFontTheme{Theme: test.Theme(), mono: theme.DefaultTextFont()}
+	style := fyne.TextStyle{Monospace: true}
+	want, _ := painter.RenderedTextSize("ABCDEFG", 21, style, th.mono)
+
+	plain := &canvas.Text{Text: "ABCDEFG", TextSize: 21, TextStyle: style}
+	assert.NotEqual(t, want, plain.MinSize(), "the fonts must measure differently for this test")
+
+	under := &canvas.Text{Text: "ABCDEFG", TextSize: 21, TextStyle: style}
+	cache.OverrideTheme(under, th)
+	assert.Equal(t, want, under.MinSize())
+
+	cache.OverrideTheme(plain, th)
+	assert.Equal(t, want, plain.MinSize(), "a measured text follows its new theme scope")
 }

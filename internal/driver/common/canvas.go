@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/async"
+	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/painter/gl"
@@ -89,6 +90,8 @@ func (c *Canvas) EnsureMinSize() bool {
 	}
 	windowNeedsMinSizeUpdate := false
 	csize := c.impl.Size()
+	cache.BeginMinSizePass()
+	defer cache.EndMinSizePass()
 	minSize := c.impl.MinSize()
 
 	var parentNeedingUpdate *RenderCacheNode
@@ -103,7 +106,7 @@ func (c *Canvas) EnsureMinSize() bool {
 	}
 	ensureMinSize := func(node *RenderCacheNode, _ fyne.Position) {
 		obj := node.obj
-		cache.SetCanvasForObject(obj, c.impl, func() {
+		cache.SetCanvasForObjectRef(&node.canvas, obj, c.impl, func() {
 			if img, ok := obj.(*canvas.Image); ok {
 				img.Refresh() // this may now have a different texScale
 			}
@@ -281,6 +284,12 @@ func (c *Canvas) Painter() gl.Painter {
 // Refresh refreshes a canvas object.
 func (c *Canvas) Refresh(obj fyne.CanvasObject) {
 	c.refreshQueue.In(obj)
+	// EnsureMain's own check, done here because handing it the c.SetDirty
+	// method value allocates, and this runs for every refreshed object.
+	if build.MigratedToFyneDo() || async.IsMainGoroutine() {
+		c.SetDirty()
+		return
+	}
 	async.EnsureMain(c.SetDirty)
 }
 
@@ -422,7 +431,8 @@ func (*Canvas) walkTree(
 	var node, parent, prev *RenderCacheNode
 	node = tree.root
 
-	bc := func(obj fyne.CanvasObject, pos fyne.Position, _ fyne.Position, _ fyne.Size) bool {
+	// a widget's renderer is asked for just before bc, so both match the same node
+	match := func(obj fyne.CanvasObject) *RenderCacheNode {
 		if node != nil && node.obj != obj {
 			if parent.firstChild == node {
 				parent.firstChild = nil
@@ -437,6 +447,13 @@ func (*Canvas) walkTree(
 				prev.nextSibling = node
 			}
 		}
+		return node
+	}
+	rendererOf := func(wid fyne.Widget) fyne.WidgetRenderer {
+		return cache.RendererFor(&match(wid).renderer, wid)
+	}
+	bc := func(obj fyne.CanvasObject, pos fyne.Position, _ fyne.Position, _ fyne.Size) bool {
+		match(obj)
 		if prev != nil && prev.parent != parent {
 			prev = nil
 		}
@@ -463,7 +480,7 @@ func (*Canvas) walkTree(
 		prev = node
 		node = node.nextSibling
 	}
-	driver.WalkVisibleObjectTree(tree.root.obj, bc, ac)
+	driver.WalkVisibleObjectTreeRenderers(tree.root.obj, bc, ac, rendererOf)
 }
 
 type activatableMenu interface {

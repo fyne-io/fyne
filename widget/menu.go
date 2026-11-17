@@ -313,9 +313,9 @@ func (r *menuRenderer) layoutActiveChild() {
 		// Move the submenu up if it would extend below the canvas, but never above its top.
 		// Whatever still does not fit is scrolled, just like for the menu itself.
 		_, areaSize := c.InteractiveArea()
-		top := fyne.Max(0, fyne.Min(absPos.Y, areaSize.Height-childSize.Height))
+		top := max(0, min(absPos.Y, areaSize.Height-childSize.Height))
 		cp.Y -= absPos.Y - top
-		childSize.Height = fyne.Min(childSize.Height, areaSize.Height-top)
+		childSize.Height = min(childSize.Height, areaSize.Height-top)
 	}
 	child.Move(cp)
 	child.Resize(childSize)

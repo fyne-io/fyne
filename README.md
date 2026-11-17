@@ -179,8 +179,8 @@ It is recommended that you install the following additional apps:
 
 These are optional applications but can help to create a more complete desktop experience.
 
-## FyneDesk (Linux / BSD)
+## Tyde (Linux / BSD)
 
-To go all the way with Fyne on your desktop / laptop computer you could install [FyneDesk](https://github.com/fyshos/fynedesk) as well :)
+To go all the way with Fyne on your desktop / laptop computer you could install [Tyde](https://github.com/FyshOS/tyde) as well :)
 
-![FyneDesk screenshot in dark mode](https://fyshos.com/img/desktop.png)
+![Tyde screenshot in dark mode](https://fyshos.com/img/desktop.png)

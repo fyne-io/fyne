@@ -15,6 +15,7 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal/build"
+	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/scale"
 	internalTest "fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/layout"
@@ -105,6 +106,22 @@ func TestWindow_MinSize_Fixed(t *testing.T) {
 	w.SetFixedSize(true)
 	w.SetContent(r)
 	assertCanvasSize(t, w, minSizePlusPadding)
+}
+
+func TestWindow_MinSize_Oversized(t *testing.T) {
+	assert.Equal(t, 16384, maxWindowSize(0, 1))
+	assert.Equal(t, 8192, maxWindowSize(8192, 1))
+	assert.Equal(t, 32767, maxWindowSize(65536, 1))
+	assert.Equal(t, 8192, maxWindowSize(16384, 2))
+
+	w := createWindow("Test")
+	r := canvas.NewRectangle(color.White)
+	r.SetMinSize(fyne.NewSize(100_000, 100))
+	w.SetContent(r)
+
+	width, height := w.minSizeOnScreen()
+	assert.LessOrEqual(t, width, 32767)
+	assert.Less(t, height, 1000)
 }
 
 func TestWindow_ToggleMainMenuByKeyboard(t *testing.T) {
@@ -264,6 +281,19 @@ func TestWindow_Cursor(t *testing.T) {
 		w.moveMouse(10, float64(b.Position().Y+10))
 		defaultCursor := desktop.DefaultCursor
 		assert.Equal(t, defaultCursor, w.cursor)
+	})
+}
+
+func TestWindow_CursorUnderInnerWindow(t *testing.T) {
+	w := createWindow("Test")
+	e := widget.NewEntry()
+	iw := container.NewInnerWindow("Inner", widget.NewLabel("Content"))
+
+	w.SetContent(container.NewStack(e, iw))
+	repaintWindow(w)
+	runOnMain(func() {
+		w.moveMouse(float64(iw.Size().Width/2), float64(iw.Size().Height/2))
+		assert.Equal(t, desktop.Cursor(desktop.DefaultCursor), w.cursor)
 	})
 }
 
@@ -587,6 +617,29 @@ func TestWindow_DragIntoNewObjectKeepingFocus(t *testing.T) {
 
 		// we should have no mouse events on d2
 		assert.Nil(t, d2.popMouseEvent())
+	})
+}
+
+func TestWindow_NoDragAfterPressOutsideObject(t *testing.T) {
+	w := createWindow("Test")
+	r := canvas.NewRectangle(color.Black)
+	r.SetMinSize(fyne.NewSize(20, 20))
+	d := &draggableObject{Rectangle: canvas.NewRectangle(color.White)}
+	d.SetMinSize(fyne.NewSize(20, 20))
+	w.SetContent(container.NewHBox(r, d))
+
+	repaintWindow(w)
+	runOnMain(func() {
+		require.Equal(t, fyne.NewPos(24, 0), d.Position())
+
+		w.moveMouse(10, 10)
+		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+		w.moveMouse(32, 10)
+		w.moveMouse(34, 10)
+		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+
+		assert.Nil(t, d.popDragEvent())
+		assert.Nil(t, d.popDragEndEvent())
 	})
 }
 
@@ -1211,6 +1264,26 @@ func TestWindow_TouchScreenTappedWithMouseMovePending(t *testing.T) {
 
 		assert.Nil(t, left.popTapEvent(), "the tap did not land where the pointer had been")
 		assert.NotNil(t, right.popTapEvent(), "the object under the tap was tapped")
+	})
+}
+
+func TestWindow_DroppedWithMouseMovePending(t *testing.T) {
+	w := createWindow("Test")
+	w.Resize(fyne.NewSize(200, 100))
+
+	runOnMain(func() {
+		var droppedAt fyne.Position
+		w.SetOnDropped(func(pos fyne.Position, _ []fyne.URI) {
+			droppedAt = pos
+		})
+		w.moveMouse(20, 50)
+
+		// On macOS and Windows, GLFW reports the drop point just before the drop callback
+		w.mouseMoved(w.viewport, 150, 50)
+		dropped := w.viewport.SetDropCallback(nil)
+		dropped(w.viewport, []string{"file.txt"})
+
+		assert.Equal(t, fyne.NewPos(150, 50), droppedAt)
 	})
 }
 
@@ -1979,6 +2052,19 @@ func TestWindow_CloseInterception(t *testing.T) {
 		}
 		w.destroy(d)
 	})
+}
+
+func TestWindow_Close_ReleasesTextTextures(t *testing.T) {
+	w := createWindow("test")
+	ent := cache.FontCacheEntry{Canvas: w.canvas}
+	freed := false
+	cache.SetTextTexture(ent, cache.NoTexture, w.canvas, func() { freed = true })
+
+	w.Close()
+
+	_, ok := cache.GetTextTexture(ent)
+	assert.False(t, ok, "text textures of a closed window should be released")
+	assert.True(t, freed)
 }
 
 func TestWindow_ClosedBeforeShow(t *testing.T) {

@@ -198,3 +198,45 @@ func TestNavigation_ForwardRefresh(t *testing.T) {
 	nav.Forward()
 	assert.Equal(t, thrTit, r.title.Text)
 }
+
+func TestNavigation_RendererRecreated(t *testing.T) {
+	root := widget.NewLabel("root")
+	nav := NewNavigationWithTitle(root, "Title")
+	_ = test.TempWidgetRenderer(t, nav)
+
+	a := widget.NewLabel("a")
+	nav.PushWithTitle(a, "A")
+
+	// A renderer is made again when the last was destroyed, as happens once a
+	// widget has been off screen for a while. The stack must be as it was.
+	r := nav.CreateRenderer().(*navigatorRenderer)
+	r.Refresh()
+
+	assert.Equal(t, 2, len(nav.stack.Objects))
+	assert.Equal(t, 2, nav.level)
+	assert.Equal(t, "A", r.title.Text)
+	assert.False(t, r.back.Disabled())
+	assert.True(t, a.Visible())
+	assert.False(t, root.Visible())
+
+	assert.Equal(t, a, nav.Back())
+	assert.True(t, root.Visible())
+}
+
+func TestNavigation_PushBeforeRenderer(t *testing.T) {
+	root := widget.NewLabel("root")
+	nav := NewNavigationWithTitle(root, "Title")
+
+	a := widget.NewLabel("a")
+	nav.PushWithTitle(a, "A")
+
+	tr := test.TempWidgetRenderer(t, nav)
+	r := tr.(*navigatorRenderer)
+	r.Refresh()
+
+	assert.Equal(t, 2, len(nav.stack.Objects))
+	assert.Equal(t, 2, nav.level)
+	assert.Equal(t, "A", r.title.Text)
+	assert.False(t, r.back.Disabled())
+	assert.False(t, root.Visible())
+}

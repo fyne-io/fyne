@@ -8,10 +8,9 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/lang"
 	"fyne.io/fyne/v2/theme"
 )
-
-const defaultPlaceHolder string = "(Select one)"
 
 var (
 	_ fyne.Widget       = (*Select)(nil)
@@ -20,6 +19,10 @@ var (
 	_ fyne.Focusable    = (*Select)(nil)
 	_ fyne.Disableable  = (*Select)(nil)
 )
+
+func defaultPlaceHolder() string {
+	return lang.L("(Select one)")
+}
 
 // Select widget has a list of options, with the current one shown, and triggers an event func when clicked
 type Select struct {
@@ -47,7 +50,7 @@ func NewSelect(options []string, changed func(string)) *Select {
 	s := &Select{
 		OnChanged:   changed,
 		Options:     options,
-		PlaceHolder: defaultPlaceHolder,
+		PlaceHolder: defaultPlaceHolder(),
 	}
 	s.ExtendBaseWidget(s)
 	return s
@@ -92,10 +95,10 @@ func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 
 	icon := NewIcon(th.Icon(theme.IconNameArrowDropDown))
 	if s.PlaceHolder == "" {
-		s.PlaceHolder = defaultPlaceHolder
+		s.PlaceHolder = defaultPlaceHolder()
 	}
 	txtProv := NewRichTextWithText(s.Selected)
-	txtProv.inset = fyne.NewSquareSize(th.Size(theme.SizeNamePadding))
+	txtProv.inset = fyne.NewSquareSize(th.Size(theme.SizeNameInnerPadding) / 2)
 	txtProv.ExtendBaseWidget(txtProv)
 	txtProv.Truncation = fyne.TextTruncateEllipsis
 	if s.Disabled() {
@@ -375,7 +378,7 @@ func (*selectRenderer) Destroy() {}
 // Layout the components of the button widget
 func (s *selectRenderer) Layout(size fyne.Size) {
 	th := s.combo.Theme()
-	pad := th.Size(theme.SizeNamePadding)
+	pad := th.Size(theme.SizeNameInnerPadding) / 2
 	iconSize := th.Size(theme.SizeNameInlineIcon)
 	innerPad := th.Size(theme.SizeNameInnerPadding)
 	s.background.Resize(fyne.NewSize(size.Width, size.Height))
@@ -449,7 +452,7 @@ func (s *selectRenderer) updateIcon(th fyne.Theme) {
 
 func (s *selectRenderer) updateLabel() {
 	if s.combo.PlaceHolder == "" {
-		s.combo.PlaceHolder = defaultPlaceHolder
+		s.combo.PlaceHolder = defaultPlaceHolder()
 	}
 
 	segment, _ := s.label.Segments[0].(*TextSegment)

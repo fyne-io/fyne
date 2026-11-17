@@ -111,14 +111,20 @@ func TestRichTextMarkdown_Code(t *testing.T) {
 	}
 }
 
-func TestRichTextMarkdown_CodeBlockScrolls(t *testing.T) {
-	long := strings.Repeat("abcdefghij", 50) // one ~500-char line
-	cb := newRichCodeBlock(long)
-	test.TempWidgetRenderer(t, cb)
-	minSize := cb.MinSize()
+func TestRichTextMarkdown_CodeBlockWraps(t *testing.T) {
+	test.NewTempApp(t)
 
-	assert.Less(t, minSize.Width, float32(200)) // scrolls rather than demanding full width
-	assert.Greater(t, minSize.Height, float32(10))
+	long := strings.Repeat("abcdefghij", 50) // one ~500-char line
+	r := NewRichTextFromMarkdown("```\n" + long + "\n```")
+	r.Wrapping = fyne.TextWrapBreak
+	w := test.NewTempWindow(t, r)
+	w.Resize(fyne.NewSize(200, 300))
+	r.Refresh()
+
+	assert.Greater(t, r.rows(), 2) // the long line wraps into rows on the panel
+	for i := 0; i < r.rows(); i++ {
+		assert.NotNil(t, r.rowBounds[i].panel, "row %d should sit on the code panel", i)
+	}
 }
 
 func TestRichTextMarkdown_Table(t *testing.T) {
@@ -491,6 +497,61 @@ func TestRichTextMarkdown_Lines(t *testing.T) {
 	}
 }
 
+func TestRichTextMarkdown_HardLineBreakSpaces(t *testing.T) {
+	r := NewRichTextFromMarkdown("line1  \nline2")
+
+	assert.Len(t, r.Segments, 3)
+	if text, ok := r.Segments[0].(*TextSegment); ok {
+		assert.Equal(t, "line1\n", text.Text)
+		assert.True(t, text.Inline())
+	} else {
+		t.Error("Segment should be Text")
+	}
+	if text, ok := r.Segments[1].(*TextSegment); ok {
+		assert.Equal(t, "line2", text.Text)
+	} else {
+		t.Error("Segment should be Text")
+	}
+	assert.Equal(t, "line1\nline2", r.String())
+}
+
+func TestRichTextMarkdown_HardLineBreakBackslash(t *testing.T) {
+	r := NewRichTextFromMarkdown("line1\\\nline2")
+
+	assert.Len(t, r.Segments, 3)
+	if text, ok := r.Segments[0].(*TextSegment); ok {
+		assert.Equal(t, "line1\n", text.Text)
+		assert.True(t, text.Inline())
+	} else {
+		t.Error("Segment should be Text")
+	}
+	if text, ok := r.Segments[1].(*TextSegment); ok {
+		assert.Equal(t, "line2", text.Text)
+	} else {
+		t.Error("Segment should be Text")
+	}
+	assert.Equal(t, "line1\nline2", r.String())
+}
+
+func TestRichTextMarkdown_HardLineBreakAfterEmphasis(t *testing.T) {
+	r := NewRichTextFromMarkdown("*a*  \nb")
+
+	texts := make([]string, len(r.Segments))
+	for i, seg := range r.Segments {
+		texts[i] = seg.Textual()
+	}
+	assert.Equal(t, []string{"a", "\n", "b", ""}, texts)
+	assert.Equal(t, "a\nb", r.String())
+
+	r.ParseMarkdown("*a*\nb") // a soft break must stay a space
+	assert.Equal(t, "a b", r.String())
+}
+
+func TestRichTextMarkdown_HardLineBreakInBlockquote(t *testing.T) {
+	r := NewRichTextFromMarkdown("> a  \n> b")
+	assert.Equal(t, "a\nb", r.String())
+}
+
 func TestRichTextMarkdown_TrailingExclamationMark(t *testing.T) {
 	r := NewRichTextFromMarkdown("Hello! Hi!")
 
@@ -531,6 +592,92 @@ func TestRichTextMarkdown_List(t *testing.T) {
 	} else {
 		t.Error("Segment should be a List")
 	}
+}
+
+func TestRichTextMarkdown_TaskList_PlainLabel(t *testing.T) {
+	r := NewRichTextFromMarkdown("- [ ] buy milk")
+
+	list, ok := r.Segments[0].(*ListSegment)
+	if !ok {
+		t.Fatal("Segment should be a List")
+	}
+	texts := list.Items[0].(*ParagraphSegment).Texts
+	assert.Len(t, texts, 1)
+
+	checkbox, ok := texts[0].(*CheckBoxSegment)
+	if !ok {
+		t.Fatal("Item should start with a checkbox")
+	}
+	assert.False(t, checkbox.Checked)
+	assert.Equal(t, "buy milk", checkbox.Text)
+}
+
+func TestRichTextMarkdown_TaskList_EmphasisLabel(t *testing.T) {
+	r := NewRichTextFromMarkdown("- [x] **buy milk**")
+
+	list, ok := r.Segments[0].(*ListSegment)
+	if !ok {
+		t.Fatal("Segment should be a List")
+	}
+	texts := list.Items[0].(*ParagraphSegment).Texts
+	assert.Len(t, texts, 2)
+
+	checkbox, ok := texts[0].(*CheckBoxSegment)
+	if !ok {
+		t.Fatal("Item should start with a checkbox")
+	}
+	assert.True(t, checkbox.Checked)
+	assert.Empty(t, checkbox.Text)
+
+	label, ok := texts[1].(*TextSegment)
+	if !ok {
+		t.Fatal("Label should be text")
+	}
+	assert.Equal(t, "buy milk", label.Text)
+	assert.True(t, label.Style.TextStyle.Bold)
+}
+
+func TestRichTextMarkdown_TaskList_LinkLabel(t *testing.T) {
+	r := NewRichTextFromMarkdown("- [x] [docs](https://fyne.io/)")
+
+	list, ok := r.Segments[0].(*ListSegment)
+	if !ok {
+		t.Fatal("Segment should be a List")
+	}
+	texts := list.Items[0].(*ParagraphSegment).Texts
+	assert.Len(t, texts, 2)
+
+	checkbox, ok := texts[0].(*CheckBoxSegment)
+	if !ok {
+		t.Fatal("Item should start with a checkbox")
+	}
+	assert.True(t, checkbox.Checked)
+
+	label, ok := texts[1].(*HyperlinkSegment)
+	if !ok {
+		t.Fatal("Label should be a hyperlink")
+	}
+	assert.Equal(t, "docs", label.Text)
+	assert.Equal(t, "https://fyne.io/", label.URL.String())
+}
+
+func TestRichTextMarkdown_TaskList_MixedLabel(t *testing.T) {
+	r := NewRichTextFromMarkdown("- [ ] buy **milk** and *more*")
+
+	list, ok := r.Segments[0].(*ListSegment)
+	if !ok {
+		t.Fatal("Segment should be a List")
+	}
+	texts := list.Items[0].(*ParagraphSegment).Texts
+	assert.Len(t, texts, 5)
+
+	assert.IsType(t, &CheckBoxSegment{}, texts[0])
+	assert.Equal(t, "buy ", texts[1].(*TextSegment).Text)
+	assert.Equal(t, "milk", texts[2].(*TextSegment).Text)
+	assert.True(t, texts[2].(*TextSegment).Style.TextStyle.Bold)
+	assert.Equal(t, " and ", texts[3].(*TextSegment).Text)
+	assert.Equal(t, "more", texts[4].(*TextSegment).Text)
+	assert.True(t, texts[4].(*TextSegment).Style.TextStyle.Italic)
 }
 
 func TestRichTextMarkdown_ListWithDifferentStartingIndex(t *testing.T) {
@@ -654,6 +801,14 @@ func TestRichTextMarkdown_NewlineInHyperlink(t *testing.T) {
 	assert.Equal(t, "foo bar", r.String())
 }
 
+func TestRichTextMarkdown_UnderscoreInHyperlink(t *testing.T) {
+	r := NewRichTextFromMarkdown("[under_score](https://fyne.io/)")
+	assert.Equal(t, "under_score", r.String())
+
+	r.ParseMarkdown("[foo _bar_ baz](https://fyne.io/)")
+	assert.Equal(t, "foo bar baz", r.String())
+}
+
 func BenchmarkMarkdownParsing(b *testing.B) {
 	md := `# Test heading
 This is some test markdown. It contains some different markdown
@@ -671,4 +826,36 @@ Moreover, we've got a list:
 	for i := 0; i < b.N; i++ {
 		NewRichTextFromMarkdown(md)
 	}
+}
+
+func TestRichTextMarkdown_ListBulletsAreNotContent(t *testing.T) {
+	test.NewTempApp(t)
+
+	r := NewRichTextFromMarkdown("- one\n- two")
+	w := test.NewTempWindow(t, r)
+	w.Resize(fyne.NewSize(200, 100))
+	r.Refresh()
+
+	// the bullets are drawn beside the items rather than being part of them
+	assert.Equal(t, "onetwo", r.String())
+	assert.Equal(t, 2, r.rows())
+	assert.Equal(t, "one", string(r.row(0)))
+	assert.Equal(t, "two", string(r.row(1)))
+}
+
+func TestRichTextMarkdown_CodeBlockRowsOnPanel(t *testing.T) {
+	test.NewTempApp(t)
+
+	r := NewRichTextFromMarkdown("intro\n\n```\none\ntwo\n```\n\nafter")
+	w := test.NewTempWindow(t, r)
+	w.Resize(fyne.NewSize(200, 200))
+	r.Refresh()
+
+	var onPanel []string
+	for i := 0; i < r.rows(); i++ {
+		if r.rowBounds[i].panel != nil {
+			onPanel = append(onPanel, string(r.row(i)))
+		}
+	}
+	assert.Equal(t, []string{"one", "two"}, onPanel)
 }

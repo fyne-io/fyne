@@ -2,6 +2,7 @@ package widget
 
 import (
 	"net/url"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -21,6 +22,21 @@ func richTextRenderTexts(rich fyne.Widget) []*canvas.Text {
 		texts[i] = obj.(*canvas.Text)
 	}
 	return texts
+}
+
+// richTextRowTexts returns the text shown on each row, including any ellipsis.
+func richTextRowTexts(rich *RichText) []string {
+	rows := make([]string, len(rich.rowBounds))
+	for i := range rich.rowBounds {
+		bound := &rich.rowBounds[i]
+		for j := range bound.segments {
+			rows[i] += string(rowSegmentRunes(bound, j))
+		}
+		if bound.ellipsis {
+			rows[i] += ellipsisChar
+		}
+	}
+	return rows
 }
 
 func trailingBoldErrorSegment() *TextSegment {
@@ -516,8 +532,8 @@ func TestText_splitLines(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got := splitLines(&TextSegment{Text: tt.text})
 			for i, wantRow := range tt.want {
-				assert.Equal(t, wantRow[0], got[i].begin)
-				assert.Equal(t, wantRow[1], got[i].end)
+				assert.Equal(t, wantRow[0], got[i].segBegin)
+				assert.Equal(t, wantRow[1], got[i].segEnd)
 			}
 		})
 	}
@@ -1073,8 +1089,8 @@ func TestText_lineBounds(t *testing.T) {
 			richText.Truncation = tt.trunc
 			got, _ := lineBounds(richText, richText.Segments[0], 76, fyne.NewSize(76, 64), measurer)
 			for i, wantRow := range tt.want {
-				assert.Equal(t, wantRow[0], got[i].begin)
-				assert.Equal(t, wantRow[1], got[i].end)
+				assert.Equal(t, wantRow[0], got[i].segBegin)
+				assert.Equal(t, wantRow[1], got[i].segEnd)
 
 				if got[i].ellipsis {
 					ellipses++
@@ -1151,8 +1167,8 @@ func TestText_lineBounds_hyperlinks(t *testing.T) {
 			richText.Truncation = tt.trunc
 			got, _ := lineBounds(richText, richText.Segments[0], 50, fyne.NewSize(50, 64), measurer)
 			for i, wantRow := range tt.want {
-				assert.Equal(t, wantRow[0], got[i].begin)
-				assert.Equal(t, wantRow[1], got[i].end)
+				assert.Equal(t, wantRow[0], got[i].segBegin)
+				assert.Equal(t, wantRow[1], got[i].segEnd)
 
 				if got[i].ellipsis {
 					ellipses++
@@ -1236,8 +1252,8 @@ func TestText_lineBounds_variable_char_width(t *testing.T) {
 			richText.Truncation = tt.trunc
 			got, _ := lineBounds(richText, richText.Segments[0], 46, fyne.NewSize(46, 184), measurer)
 			for i, wantRow := range tt.want {
-				assert.Equal(t, wantRow[0], got[i].begin)
-				assert.Equal(t, wantRow[1], got[i].end)
+				assert.Equal(t, wantRow[0], got[i].segBegin)
+				assert.Equal(t, wantRow[1], got[i].segEnd)
 			}
 		})
 	}
@@ -1251,10 +1267,93 @@ func TestText_lineBounds_small_firstWidth(t *testing.T) {
 	richText.Wrapping = fyne.TextWrapWord
 	richText.Truncation = fyne.TextTruncateOff
 	got, _ := lineBounds(richText, richText.Segments[0], 0.1, fyne.NewSize(64, 20), measurer)
-	assert.Equal(t, 0, got[0].begin)
-	assert.Equal(t, 0, got[0].end)
-	assert.Equal(t, 0, got[1].begin)
-	assert.Equal(t, 6, got[1].end)
+	assert.Equal(t, 0, got[0].segBegin)
+	assert.Equal(t, 0, got[0].segEnd)
+	assert.Equal(t, 0, got[1].segBegin)
+	assert.Equal(t, 6, got[1].segEnd)
+}
+
+func TestText_Truncate_Segments(t *testing.T) {
+	for name, tt := range map[string]struct {
+		trunc fyne.TextTruncation
+		width float32
+		want  []string
+	}{
+		"Clip":                     {fyne.TextTruncateClip, 120, []string{"Normal ", "Bold", " a", "second line of t"}},
+		"ClipInEarlierSegment":     {fyne.TextTruncateClip, 93, []string{"Normal ", "Bol", "second line"}},
+		"Ellipsis":                 {fyne.TextTruncateEllipsis, 120, []string{"Normal ", "Bold", " …", "second line of …"}},
+		"EllipsisNoRoomLeft":       {fyne.TextTruncateEllipsis, 105, []string{"Normal ", "Bol…", "second line …"}},
+		"EllipsisInEarlierSegment": {fyne.TextTruncateEllipsis, 93, []string{"Normal ", "B…", "second li…"}},
+	} {
+		t.Run(name, func(t *testing.T) {
+			text := NewRichText(
+				&TextSegment{Text: "Normal ", Style: RichTextStyleInline},
+				&TextSegment{Text: "Bold", Style: RichTextStyleStrong},
+				&TextSegment{Text: " and more\nsecond line of text", Style: RichTextStyleInline},
+			)
+			text.Truncation = tt.trunc
+			text.Resize(fyne.NewSize(tt.width, 100))
+
+			var got []string
+			for _, obj := range richTextRenderTexts(text) {
+				got = append(got, obj.Text)
+			}
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestText_Truncate_ParagraphSpacing(t *testing.T) {
+	md := "Normal **Bold** and some text, which is long enough to be truncated.\n\n> A quote"
+	for _, trunc := range []fyne.TextTruncation{fyne.TextTruncateClip, fyne.TextTruncateEllipsis} {
+		full := NewRichTextFromMarkdown(md)
+		full.Truncation = trunc
+		full.Resize(fyne.NewSize(1000, 100))
+		text := NewRichTextFromMarkdown(md)
+		text.Truncation = trunc
+		text.Resize(fyne.NewSize(200, 100))
+
+		// the quote should not move up when the paragraph above it is truncated
+		assert.Len(t, text.rowBounds, len(full.rowBounds))
+		wantY, _ := full.rowGeometry(1)
+		gotY, _ := text.rowGeometry(1)
+		assert.Equal(t, wantY, gotY, "truncation %d", trunc)
+		assert.Equal(t, full.MinSize().Height, text.MinSize().Height, "truncation %d", trunc)
+	}
+}
+
+func TestText_WrapTruncate_Segments(t *testing.T) {
+	md := "Normal **Bold** *Italic* [Link](https://fyne.io/) and some `Code`.\n" +
+		"This styled row should also wrap as expected, but only *when required*."
+	full := NewRichTextFromMarkdown(md)
+	full.Wrapping = fyne.TextWrapWord
+	full.Resize(fyne.NewSize(200, 1000))
+	want := richTextRowTexts(full)
+
+	for _, trunc := range []fyne.TextTruncation{fyne.TextTruncateClip, fyne.TextTruncateEllipsis} {
+		for height := float32(0); height <= 160; height += 5 {
+			text := NewRichTextFromMarkdown(md)
+			text.Wrapping = fyne.TextWrapWord
+			text.Truncation = trunc
+			if height < text.MinSize().Height {
+				continue // too short to show any of the text
+			}
+			text.Resize(fyne.NewSize(200, height))
+
+			// the rows shown should be the start of the full text, ending where it was truncated
+			got := richTextRowTexts(text)
+			last := len(got) - 1
+			if !assert.Positive(t, len(got)) || !assert.LessOrEqual(t, len(got), len(want)) {
+				continue
+			}
+			assert.Equal(t, want[:last], got[:last], "truncation %d at height %v", trunc, height)
+			assert.True(t, strings.HasPrefix(want[last], strings.TrimSuffix(got[last], ellipsisChar)),
+				"truncation %d at height %v: %q is not the start of %q", trunc, height, got[last], want[last])
+			if trunc == fyne.TextTruncateEllipsis && len(got) < len(want) {
+				assert.True(t, strings.HasSuffix(got[last], ellipsisChar), "truncation %d at height %v", trunc, height)
+			}
+		}
+	}
 }
 
 func TestText_howManyRunesFit(t *testing.T) {
@@ -1311,6 +1410,80 @@ func TestText_howManyRunesFit(t *testing.T) {
 	})
 	t.Run("Negative width", func(t *testing.T) {
 		assert.Equal(t, 0, howManyRunesFit([]rune("foo"), -1, charWidth, measurer))
+	})
+}
+
+func TestText_lineBounds_truncateMiddle(t *testing.T) {
+	measurer := func(text []rune) fyne.Size {
+		return fyne.MeasureText(string(text), 14, fyne.TextStyle{})
+	}
+
+	t.Run("short_no_truncation", func(t *testing.T) {
+		richText := NewRichTextWithText("foobar")
+		richText.Truncation = fyne.TextTruncateMiddle
+		got, _ := lineBounds(richText, richText.Segments[0], 200, fyne.NewSize(200, 64), measurer)
+		assert.Equal(t, 1, len(got))
+		assert.Empty(t, got[0].displayText)
+		assert.False(t, got[0].ellipsis)
+	})
+
+	t.Run("long_truncates_in_middle", func(t *testing.T) {
+		richText := NewRichTextWithText("/home/user/projects/fyne/file.txt")
+		richText.Truncation = fyne.TextTruncateMiddle
+		got, _ := lineBounds(richText, richText.Segments[0], 76, fyne.NewSize(76, 64), measurer)
+		assert.Equal(t, 1, len(got))
+		assert.Contains(t, got[0].displayText, "…")
+		// displayText starts with original prefix and ends with original suffix
+		assert.Equal(t, byte('/'), got[0].displayText[0])
+		assert.Equal(t, byte('t'), got[0].displayText[len(got[0].displayText)-1])
+	})
+}
+
+func TestText_truncateMiddle(t *testing.T) {
+	textSize := float32(10)
+	textStyle := fyne.TextStyle{}
+	measurer := func(text []rune) fyne.Size {
+		return fyne.MeasureText(string(text), textSize, textStyle)
+	}
+	ellipsisWidth := measurer([]rune("…")).Width
+
+	t.Run("empty", func(t *testing.T) {
+		prefix, suffix, full := truncateMiddle(nil, 100, measurer)
+		assert.Equal(t, 0, prefix)
+		assert.Equal(t, 0, suffix)
+		assert.True(t, full)
+	})
+
+	t.Run("fits_whole", func(t *testing.T) {
+		runes := []rune("hello")
+		full := measurer(runes).Width
+		prefix, suffix, fullOK := truncateMiddle(runes, full+10, measurer)
+		assert.True(t, fullOK)
+		assert.Equal(t, len(runes), prefix)
+		assert.Equal(t, 0, suffix)
+	})
+
+	t.Run("does_not_fit_ellipsis", func(t *testing.T) {
+		runes := []rune("hello world")
+		prefix, suffix, fullOK := truncateMiddle(runes, ellipsisWidth-1, measurer)
+		assert.False(t, fullOK)
+		assert.Equal(t, 0, prefix)
+		assert.Equal(t, 0, suffix)
+	})
+
+	t.Run("balanced_split", func(t *testing.T) {
+		runes := []rune("aaaaaaaaaa") // 10 a's
+		full := measurer(runes).Width
+		// allow enough room for roughly half the characters plus ellipsis
+		prefix, suffix, fullOK := truncateMiddle(runes, full/2+ellipsisWidth, measurer)
+		assert.False(t, fullOK)
+		// prefix should be the larger or equal half
+		assert.GreaterOrEqual(t, prefix, suffix)
+		// resulting candidate must actually fit
+		out := append([]rune{}, runes[:prefix]...)
+		out = append(out, '…')
+		out = append(out, runes[len(runes)-suffix:]...)
+		assert.LessOrEqual(t, measurer(out).Width, full/2+ellipsisWidth)
 	})
 }
 

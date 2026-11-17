@@ -141,7 +141,7 @@ func (l *GridWrap) MinSize() fyne.Size {
 	return l.BaseWidget.MinSize()
 }
 
-func (l *GridWrap) scrollTo(id GridWrapItemID) {
+func (l *GridWrap) scrollWithoutItemCheckTo(id GridWrapItemID) {
 	if l.scroller == nil {
 		return
 	}
@@ -209,7 +209,7 @@ func (l *GridWrap) Highlight(id GridWrapItemID) {
 		newID = l.Length() - 1
 	}
 
-	l.scrollTo(newID)
+	l.scrollWithoutItemCheckTo(newID)
 	l.currentHighlight = newID
 	if l.OnHighlighted != nil {
 		l.OnHighlighted(newID)
@@ -239,7 +239,7 @@ func (l *GridWrap) Select(id GridWrapItemID) {
 			f(id)
 		}
 	}()
-	l.scrollTo(id)
+	l.scrollWithoutItemCheckTo(id)
 	l.Refresh()
 }
 
@@ -252,7 +252,7 @@ func (l *GridWrap) ScrollTo(id GridWrapItemID) {
 	if id < 0 || id >= length {
 		return
 	}
-	l.scrollTo(id)
+	l.scrollWithoutItemCheckTo(id)
 	l.Refresh()
 }
 
@@ -304,7 +304,7 @@ func (l *GridWrap) TypedKey(event *fyne.KeyEvent) {
 		if l.currentHighlight >= count-1 {
 			l.currentHighlight = count - 1
 		}
-		l.scrollTo(l.currentHighlight)
+		l.scrollWithoutItemCheckTo(l.currentHighlight)
 		l.RefreshItem(l.currentHighlight)
 	case fyne.KeyLeft:
 		if l.currentHighlight <= 0 {
@@ -313,7 +313,7 @@ func (l *GridWrap) TypedKey(event *fyne.KeyEvent) {
 
 		l.RefreshItem(l.currentHighlight)
 		l.currentHighlight--
-		l.scrollTo(l.currentHighlight)
+		l.scrollWithoutItemCheckTo(l.currentHighlight)
 		l.RefreshItem(l.currentHighlight)
 	case fyne.KeyRight:
 		if f := l.Length; f != nil && l.currentHighlight >= f()-1 {
@@ -322,7 +322,7 @@ func (l *GridWrap) TypedKey(event *fyne.KeyEvent) {
 
 		l.RefreshItem(l.currentHighlight)
 		l.currentHighlight++
-		l.scrollTo(l.currentHighlight)
+		l.scrollWithoutItemCheckTo(l.currentHighlight)
 		l.RefreshItem(l.currentHighlight)
 	case fyne.KeyUp:
 		if l.currentHighlight <= 0 {
@@ -333,7 +333,7 @@ func (l *GridWrap) TypedKey(event *fyne.KeyEvent) {
 		if l.currentHighlight < 0 {
 			l.currentHighlight = 0
 		}
-		l.scrollTo(l.currentHighlight)
+		l.scrollWithoutItemCheckTo(l.currentHighlight)
 		l.RefreshItem(l.currentHighlight)
 	}
 

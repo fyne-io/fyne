@@ -83,7 +83,7 @@ void openURL(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx, char *url) {
 	(*env)->CallVoidMethod(env, (jobject)ctx, start, intent);
 }
 
-void sendNotification(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx, char *title, char *body) {
+void sendNotification(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx, char *title, char *body, bool silent) {
 	JNIEnv *env = (JNIEnv*)jni_env;
 	jstring titleStr = (*env)->NewStringUTF(env, title);
 	jstring bodyStr = (*env)->NewStringUTF(env, body);
@@ -96,19 +96,28 @@ void sendNotification(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx, char 
 	jobject mgr = getSystemService((uintptr_t)env, ctx, "notification");
 
 	if (isOreoOrLater(env)) {
-		jstring channelId = (*env)->NewStringUTF(env, "fyne-notif");
-		jstring name = (*env)->NewStringUTF(env, "Fyne Notification");
+		// the sound is a property of the channel, so silent notifications have their own
+		jstring channelId = (*env)->NewStringUTF(env, silent ? "fyne-notif-silent" : "fyne-notif");
+		jstring name = (*env)->NewStringUTF(env, silent ? "Fyne Silent Notification" : "Fyne Notification");
         int importance = 4; // IMPORTANCE_HIGH
 
 		jclass chanCls = find_class(env, "android/app/NotificationChannel");
 		jmethodID constructor = find_method(env, chanCls, "<init>", "(Ljava/lang/String;Ljava/lang/CharSequence;I)V");
 		jobject channel = (*env)->NewObject(env, chanCls, constructor, channelId, name, importance);
+		if (silent) {
+			jmethodID setSound = find_method(env, chanCls, "setSound", "(Landroid/net/Uri;Landroid/media/AudioAttributes;)V");
+			(*env)->CallVoidMethod(env, channel, setSound, NULL, NULL);
+		}
 
 		jmethodID createChannel = find_method(env, mgrCls, "createNotificationChannel", "(Landroid/app/NotificationChannel;)V");
 		(*env)->CallVoidMethod(env, mgr, createChannel, channel);
 
 		jmethodID setChannelId = find_method(env, cls, "setChannelId", "(Ljava/lang/String;)Landroid/app/Notification$Builder;");
 		(*env)->CallObjectMethod(env, builder, setChannelId, channelId);
+	} else if (!silent) {
+		int defaultSound = 1; // Notification.DEFAULT_SOUND
+		jmethodID setDefaults = find_method(env, cls, "setDefaults", "(I)Landroid/app/Notification$Builder;");
+		(*env)->CallObjectMethod(env, builder, setDefaults, defaultSound);
 	}
 
 	jmethodID setContentTitle = find_method(env, cls, "setContentTitle", "(Ljava/lang/CharSequence;)Landroid/app/Notification$Builder;");
@@ -135,12 +144,12 @@ void sendNotification(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx, char 
 // itself - GetObjectClass returns the right jclass without going through
 // FindClass / the activity's ClassLoader.
 bool scheduleNotification(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx,
-		char *id, char *title, char *body, long long deliveryMillis) {
+		char *id, char *title, char *body, bool silent, long long deliveryMillis) {
 	JNIEnv *env = (JNIEnv*)jni_env;
 
 	jclass cls = (*env)->GetObjectClass(env, (jobject)ctx);
 	jmethodID mid = find_static_method(env, cls, "scheduleNotification",
-		"(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;J)Z");
+		"(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZJ)Z");
 	if (cls == NULL || mid == 0) {
 		return false;
 	}
@@ -150,7 +159,7 @@ bool scheduleNotification(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx,
 	jstring bodyStr = (*env)->NewStringUTF(env, body);
 
 	jboolean ok = (*env)->CallStaticBooleanMethod(env, cls, mid,
-		idStr, titleStr, bodyStr, (jlong)deliveryMillis);
+		idStr, titleStr, bodyStr, (jboolean)silent, (jlong)deliveryMillis);
 	return (bool)ok;
 }
 

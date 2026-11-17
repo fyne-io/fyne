@@ -22,7 +22,7 @@ func setupSystemTheme(fallback fyne.Theme) fyne.Theme {
 	}
 	defer f.Close()
 
-	th, err := fromJSONWithFallback(bufio.NewReader(f), fallback)
+	th, err := FromJSONReaderWithFallback(bufio.NewReader(f), fallback)
 	if err != nil {
 		fyne.LogError("Failed to parse user theme file: "+path, err)
 		return nil

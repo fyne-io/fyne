@@ -693,7 +693,7 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 	pad := th.Size(theme.SizeNamePadding)
 	offsetY := r.treeContent.tree.offset.Y
 	viewport := r.treeContent.viewport
-	width := fyne.Max(size.Width, viewport.Width)
+	width := max(size.Width, viewport.Width)
 	separatorCount := 0
 	separatorThickness := th.Size(theme.SizeNameSeparatorThickness)
 	separatorSize := fyne.NewSize(width, separatorThickness)
@@ -833,7 +833,7 @@ func (r *treeContentRenderer) MinSize() fyne.Size {
 			m = r.treeContent.tree.branchMinSize
 		}
 		m.Width += float32(depth) * (iconSize + pad)
-		minSize.Width = fyne.Max(minSize.Width, m.Width)
+		minSize.Width = max(minSize.Width, m.Width)
 		minSize.Height += m.Height
 	})
 
@@ -1030,7 +1030,7 @@ func (r *treeNodeRenderer) MinSize() fyne.Size {
 	iconSize := th.Size(theme.SizeNameInlineIcon)
 
 	minSize.Width += th.Size(theme.SizeNameInnerPadding) + r.treeNode.Indent() + iconSize
-	minSize.Height = fyne.Max(minSize.Height, iconSize)
+	minSize.Height = max(minSize.Height, iconSize)
 	return minSize
 }
 

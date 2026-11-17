@@ -35,7 +35,7 @@ type ExternalList[T any] interface {
 //
 // Since: 2.7
 func NewList[T any](comparator func(T, T) bool) List[T] {
-	return newList[T](comparator)
+	return newBoundList(nil, comparator)
 }
 
 // BindList returns a bound list of values with type T, based on the contents of the passed slice.
@@ -43,7 +43,7 @@ func NewList[T any](comparator func(T, T) bool) List[T] {
 //
 // Since: 2.7
 func BindList[T any](v *[]T, comparator func(T, T) bool) ExternalList[T] {
-	return bindList(v, comparator)
+	return bindListWithComparator(v, comparator)
 }
 
 // DataList is the base interface for all bindable data lists.
@@ -94,7 +94,7 @@ type ExternalBytesList = ExternalList[[]byte]
 //
 // Since: 2.2
 func NewBytesList() List[[]byte] {
-	return newList(bytes.Equal)
+	return NewList(bytes.Equal)
 }
 
 // BindBytesList returns a bound list of []byte values, based on the contents of the passed slice.
@@ -102,7 +102,7 @@ func NewBytesList() List[[]byte] {
 //
 // Since: 2.2
 func BindBytesList(v *[][]byte) ExternalList[[]byte] {
-	return bindList(v, bytes.Equal)
+	return bindListWithComparator(v, bytes.Equal)
 }
 
 // FloatList supports binding a list of float64 values.
@@ -219,7 +219,7 @@ type ExternalUntypedList = ExternalList[any]
 //
 // Since: 2.1
 func NewUntypedList() List[any] {
-	return newList(func(t1, t2 any) bool { return t1 == t2 })
+	return NewList(func(t1, t2 any) bool { return t1 == t2 })
 }
 
 // BindUntypedList returns a bound list of any values, based on the contents of the passed slice.
@@ -227,7 +227,7 @@ func NewUntypedList() List[any] {
 //
 // Since: 2.1
 func BindUntypedList(v *[]any) ExternalList[any] {
-	return bindList(v, func(t1, t2 any) bool { return t1 == t2 })
+	return bindListWithComparator(v, func(t1, t2 any) bool { return t1 == t2 })
 }
 
 // URIList supports binding a list of fyne.URI values.
@@ -244,7 +244,7 @@ type ExternalURIList = ExternalList[fyne.URI]
 //
 // Since: 2.1
 func NewURIList() List[fyne.URI] {
-	return newList(storage.EqualURI)
+	return NewList(storage.EqualURI)
 }
 
 // BindURIList returns a bound list of fyne.URI values, based on the contents of the passed slice.
@@ -252,7 +252,7 @@ func NewURIList() List[fyne.URI] {
 //
 // Since: 2.1
 func BindURIList(v *[]fyne.URI) ExternalList[fyne.URI] {
-	return bindList(v, storage.EqualURI)
+	return bindListWithComparator(v, storage.EqualURI)
 }
 
 type listBase struct {
@@ -288,24 +288,24 @@ func (b *listBase) deleteItem(i int) {
 	b.items = append(b.items[:i], b.items[i+1:]...)
 }
 
-func newList[T any](comparator func(T, T) bool) *boundList[T] {
-	return &boundList[T]{val: new([]T), comparator: comparator}
+func newBoundList[T any](v *[]T, comparator func(T, T) bool) *boundList[T] {
+	val := v
+	if val == nil {
+		val = new([]T)
+	}
+	return &boundList[T]{val: val, comparator: comparator, updateExternal: v != nil}
 }
 
-func newListComparable[T comparable]() *boundList[T] {
-	return newList(func(t1, t2 T) bool { return t1 == t2 })
+func newListComparable[T comparable]() List[T] {
+	return NewList(func(t1, t2 T) bool { return t1 == t2 })
 }
 
-func newExternalList[T any](v *[]T, comparator func(T, T) bool) *boundList[T] {
-	return &boundList[T]{val: v, comparator: comparator, updateExternal: true}
-}
-
-func bindList[T any](v *[]T, comparator func(T, T) bool) *boundList[T] {
+func bindListWithComparator[T any](v *[]T, comparator func(T, T) bool) *boundList[T] {
 	if v == nil {
-		return newList(comparator)
+		return newBoundList(nil, comparator)
 	}
 
-	l := newExternalList(v, comparator)
+	l := newBoundList(v, comparator)
 	for i := range *v {
 		l.appendItem(bindListItem(v, i, l.updateExternal, comparator))
 	}
@@ -314,7 +314,7 @@ func bindList[T any](v *[]T, comparator func(T, T) bool) *boundList[T] {
 }
 
 func bindListComparable[T comparable](v *[]T) *boundList[T] {
-	return bindList(v, func(t1, t2 T) bool { return t1 == t2 })
+	return bindListWithComparator(v, func(t1, t2 T) bool { return t1 == t2 })
 }
 
 type boundList[T any] struct {

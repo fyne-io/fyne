@@ -155,7 +155,7 @@ func (t *DocTabs) Selected() *TabItem {
 
 // SelectedIndex returns the index of the currently selected TabItem.
 func (t *DocTabs) SelectedIndex() int {
-	return t.selected()
+	return t.getCurrent()
 }
 
 // SetItems sets the containers items and refreshes.
@@ -176,6 +176,10 @@ func (t *DocTabs) Show() {
 	t.SelectIndex(t.current)
 }
 
+func (t *DocTabs) applyItems(items []*TabItem) {
+	t.Items = items
+}
+
 func (t *DocTabs) close(item *TabItem) {
 	if f := t.CloseIntercept; f != nil {
 		f(item)
@@ -187,31 +191,27 @@ func (t *DocTabs) close(item *TabItem) {
 	}
 }
 
-func (t *DocTabs) onUnselected() func(*TabItem) {
-	return t.OnUnselected
-}
-
-func (t *DocTabs) onSelected() func(*TabItem) {
-	return t.OnSelected
-}
-
-func (t *DocTabs) items() []*TabItem {
-	return t.Items
-}
-
-func (t *DocTabs) selected() int {
+func (t *DocTabs) getCurrent() int {
 	if len(t.Items) == 0 {
 		return -1
 	}
 	return t.current
 }
 
-func (t *DocTabs) setItems(items []*TabItem) {
-	t.Items = items
+func (t *DocTabs) items() []*TabItem {
+	return t.Items
 }
 
-func (t *DocTabs) setSelected(selected int) {
-	t.current = selected
+func (t *DocTabs) onSelected() func(*TabItem) {
+	return t.OnSelected
+}
+
+func (t *DocTabs) onUnselected() func(*TabItem) {
+	return t.OnUnselected
+}
+
+func (t *DocTabs) setCurrent(current int) {
+	t.current = current
 }
 
 func (t *DocTabs) setTransitioning(transitioning bool) {
@@ -284,7 +284,6 @@ func (r *docTabsRenderer) buildAllTabsButton() (all *widget.Button) {
 		items := make([]*fyne.MenuItem, len(r.docTabs.Items))
 		for i := 0; i < len(r.docTabs.Items); i++ {
 			index := i // capture
-			// FIXME MenuItem doesn't support icons (#1752)
 			items[i] = fyne.NewMenuItem(r.docTabs.Items[i].Text, func() {
 				r.docTabs.SelectIndex(index)
 				if r.docTabs.popUpMenu != nil {
@@ -292,6 +291,7 @@ func (r *docTabsRenderer) buildAllTabsButton() (all *widget.Button) {
 					r.docTabs.popUpMenu = nil
 				}
 			})
+			items[i].Icon = r.docTabs.Items[i].Icon
 			items[i].Checked = index == r.docTabs.current
 		}
 
@@ -427,16 +427,16 @@ func (r *docTabsRenderer) updateIndicator(animate bool) {
 	switch r.docTabs.location {
 	case TabLocationTop:
 		indicatorPos = fyne.NewPos(selectedPos.X-scrollOffset.X, r.bar.MinSize().Height)
-		indicatorSize = fyne.NewSize(fyne.Min(selectedSize.Width, scrollSize.Width-indicatorPos.X), dividerWidth)
+		indicatorSize = fyne.NewSize(min(selectedSize.Width, scrollSize.Width-indicatorPos.X), dividerWidth)
 	case TabLocationLeading:
 		indicatorPos = fyne.NewPos(r.bar.MinSize().Width, selectedPos.Y-scrollOffset.Y)
-		indicatorSize = fyne.NewSize(dividerWidth, fyne.Min(selectedSize.Height, scrollSize.Height-indicatorPos.Y))
+		indicatorSize = fyne.NewSize(dividerWidth, min(selectedSize.Height, scrollSize.Height-indicatorPos.Y))
 	case TabLocationBottom:
 		indicatorPos = fyne.NewPos(selectedPos.X-scrollOffset.X, r.bar.Position().Y-pad)
-		indicatorSize = fyne.NewSize(fyne.Min(selectedSize.Width, scrollSize.Width-indicatorPos.X), dividerWidth)
+		indicatorSize = fyne.NewSize(min(selectedSize.Width, scrollSize.Width-indicatorPos.X), dividerWidth)
 	case TabLocationTrailing:
 		indicatorPos = fyne.NewPos(r.bar.Position().X-pad, selectedPos.Y-scrollOffset.Y)
-		indicatorSize = fyne.NewSize(dividerWidth, fyne.Min(selectedSize.Height, scrollSize.Height-indicatorPos.Y))
+		indicatorSize = fyne.NewSize(dividerWidth, min(selectedSize.Height, scrollSize.Height-indicatorPos.Y))
 	}
 
 	if indicatorPos.X < 0 {

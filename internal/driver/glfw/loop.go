@@ -243,10 +243,14 @@ func updateGLContext(w *window) {
 	canvas := w.canvas
 	size := canvas.Size()
 
-	// w.width and w.height are not correct if we are maximised, so figure from canvas
-	winWidth := float32(scale.ToScreenCoordinate(canvas, size.Width)) * canvas.texScale
-	winHeight := float32(scale.ToScreenCoordinate(canvas, size.Height)) * canvas.texScale
+	// On X11 the framebuffer size is a live query and may differ from the canvas
+	// until the resize callback has run, so pass the real drawable size.
+	fbWidth, fbHeight := w.viewport.GetFramebufferSize()
+	if fbWidth <= 0 || fbHeight <= 0 {
+		fbWidth = int(float32(scale.ToScreenCoordinate(canvas, size.Width)) * canvas.texScale)
+		fbHeight = int(float32(scale.ToScreenCoordinate(canvas, size.Height)) * canvas.texScale)
+	}
 
 	canvas.Painter().SetFrameBufferScale(canvas.texScale)
-	canvas.Painter().SetOutputSize(int(winWidth), int(winHeight))
+	canvas.Painter().SetOutputSize(fbWidth, fbHeight)
 }

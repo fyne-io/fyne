@@ -753,6 +753,53 @@ func TestEntry_OnKeyDown_BackspaceBeyondText(t *testing.T) {
 	assert.Equal(t, "", entry.Text)
 }
 
+func TestEntry_Backspace_AfterMiddleEdit(t *testing.T) {
+	test.NewApp()
+	t.Cleanup(func() { test.NewApp() })
+
+	entry := widget.NewEntry()
+	w := test.NewTempWindow(t, entry)
+	w.Canvas().Focus(entry)
+	assert.Equal(t, entry, w.Canvas().Focused())
+
+	test.Type(entry, "Hello")
+	assert.Equal(t, "Hello", entry.Text)
+	assert.Equal(t, 0, entry.CursorRow)
+	assert.Equal(t, 5, entry.CursorColumn)
+
+	// Edit earlier in the value, then return to the end and hold backspace.
+	typeKeys(entry, fyne.KeyLeft, fyne.KeyLeft, fyne.KeyLeft)
+	assert.Equal(t, 0, entry.CursorRow)
+	assert.Equal(t, 2, entry.CursorColumn)
+
+	test.Type(entry, "XY")
+	assert.Equal(t, "HeXYllo", entry.Text)
+	assert.Equal(t, 4, entry.CursorColumn)
+
+	typeKeys(entry, fyne.KeyBackspace)
+	assert.Equal(t, "HeXllo", entry.Text)
+	assert.Equal(t, 0, entry.CursorRow)
+	assert.Equal(t, 3, entry.CursorColumn)
+
+	typeKeys(entry, fyne.KeyEnd)
+	assert.Equal(t, 0, entry.CursorRow)
+	assert.Equal(t, 6, entry.CursorColumn)
+
+	want := []string{"HeXll", "HeXl", "HeX", "He", "H", ""}
+	for _, text := range want {
+		typeKeys(entry, fyne.KeyBackspace)
+		assert.Equal(t, text, entry.Text)
+		assert.Equal(t, 0, entry.CursorRow)
+		assert.Equal(t, len(text), entry.CursorColumn)
+	}
+
+	// Extra deletion once the entry is empty does not move the cursor.
+	typeKeys(entry, fyne.KeyBackspace, fyne.KeyBackspace)
+	assert.Equal(t, "", entry.Text)
+	assert.Equal(t, 0, entry.CursorRow)
+	assert.Equal(t, 0, entry.CursorColumn)
+}
+
 func TestEntry_OnKeyDown_BackspaceBeyondTextAndNewLine(t *testing.T) {
 	entry := widget.NewMultiLineEntry()
 	entry.SetText("H\ni")

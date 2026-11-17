@@ -1,6 +1,8 @@
 package cache
 
 import (
+	"image"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/async"
 )
@@ -85,6 +87,27 @@ func DeleteTextTexturesFor(canvas fyne.Canvas) {
 	})
 }
 
+// SetTextureDirty notes that the pixels in region r of the image that the texture
+// of obj was uploaded from have changed, adding to any region noted before.
+// An object without a texture needs no note: creating one uploads every pixel.
+func SetTextureDirty(obj fyne.CanvasObject, r image.Rectangle) {
+	if texInfo, ok := objectTextures.Load(obj); ok && texInfo != nil {
+		texInfo.dirty = texInfo.dirty.Union(r)
+	}
+}
+
+// TakeTextureDirty returns the region noted by SetTextureDirty for the texture
+// of obj, and forgets it.
+func TakeTextureDirty(obj fyne.CanvasObject) image.Rectangle {
+	texInfo, ok := objectTextures.Load(obj)
+	if texInfo == nil || !ok {
+		return image.Rectangle{}
+	}
+	dirty := texInfo.dirty
+	texInfo.dirty = image.Rectangle{}
+	return dirty
+}
+
 // SetTextTexture sets cached texture for a text run.
 func SetTextTexture(ent FontCacheEntry, texture TextureType, canvas fyne.Canvas, free func()) {
 	tinfo := prepareTexture(texture, canvas, free)
@@ -108,4 +131,5 @@ func prepareTexture(texture TextureType, canvas fyne.Canvas, free func()) *textu
 type textureCacheBase struct {
 	expiringCache
 	canvas fyne.Canvas
+	dirty  image.Rectangle // pixels changed since the texture was uploaded
 }

@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 )
 
-func rootConfigDir() string {
+func RootConfigDir() string {
 	desktopConfig, _ := os.UserConfigDir()
 	return filepath.Join(desktopConfig, "fyne")
 }

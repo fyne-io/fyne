@@ -246,7 +246,7 @@ func (t *Table) MouseIn(ev *desktop.MouseEvent) {
 
 // MouseDown response to desktop mouse event
 func (t *Table) MouseDown(e *desktop.MouseEvent) {
-	t.tapped(e.Position)
+	t.startDrag(e.Position)
 }
 
 // MouseMoved implements the [desktop.Hoverable] interface.
@@ -350,7 +350,7 @@ func (t *Table) SetRowHeight(id int, height float32) {
 
 // TouchDown response to mobile touch event
 func (t *Table) TouchDown(e *mobile.TouchEvent) {
-	t.tapped(e.Position)
+	t.startDrag(e.Position)
 }
 
 // TouchUp response to mobile touch event
@@ -501,24 +501,26 @@ func (t *Table) ScrollTo(id TableCellID) {
 	rows, cols := t.Length()
 	if id.Row >= rows {
 		id.Row = rows - 1
+	} else if id.Row < 0 {
+		id.Row = 0
 	}
 
 	if id.Col >= cols {
 		id.Col = cols - 1
+	} else if id.Col < 0 {
+		id.Col = 0
 	}
 
 	scrollPos := t.offset
 
+	// the scroll offset is measured in cell space, where the first cell starts at zero.
+	// Any header is outside the scrolling content, so it must not be added here, but the
+	// sticky cells cover the leading edge of the viewport so they do have to be allowed for.
 	cellX, cellWidth := t.findX(id.Col)
-	stickCols := t.StickyColumnCount
-	if stickCols > 0 {
-		cellX -= t.stuckXOff + t.stuckWidth
+	if t.StickyColumnCount > 0 {
+		cellX -= t.stuckWidth
 	}
-	if t.ShowHeaderColumn {
-		cellX += t.headerSize.Width
-		stickCols--
-	}
-	if stickCols == 0 || id.Col > stickCols {
+	if id.Col >= t.StickyColumnCount {
 		if cellX < scrollPos.X {
 			scrollPos.X = cellX
 		} else if cellX+cellWidth > scrollPos.X+t.content.Size().Width {
@@ -527,15 +529,10 @@ func (t *Table) ScrollTo(id TableCellID) {
 	}
 
 	cellY, cellHeight := t.findY(id.Row)
-	stickRows := t.StickyRowCount
-	if stickRows > 0 {
-		cellY -= t.stuckYOff + t.stuckHeight
+	if t.StickyRowCount > 0 {
+		cellY -= t.stuckHeight
 	}
-	if t.ShowHeaderRow {
-		cellY += t.headerSize.Height
-		stickRows--
-	}
-	if stickRows == 0 || id.Row >= stickRows {
+	if id.Row >= t.StickyRowCount {
 		if cellY < scrollPos.Y {
 			scrollPos.Y = cellY
 		} else if cellY+cellHeight > scrollPos.Y+t.content.Size().Height {
@@ -832,11 +829,10 @@ func (t *Table) rowAt(pos fyne.Position) int {
 	return noCellMatch
 }
 
-func (t *Table) tapped(pos fyne.Position) {
+func (t *Table) startDrag(pos fyne.Position) {
 	if t.dragCol == noCellMatch && t.dragRow == noCellMatch {
 		t.dragStartPos = pos
 		if t.hoverHeaderRow != noCellMatch {
-			t.dragCol = noCellMatch
 			t.dragRow = t.hoverHeaderRow
 			size, ok := t.rowHeights[t.hoverHeaderRow]
 			if !ok {
@@ -845,7 +841,6 @@ func (t *Table) tapped(pos fyne.Position) {
 			t.dragStartSize = size
 		} else if t.hoverHeaderCol != noCellMatch {
 			t.dragCol = t.hoverHeaderCol
-			t.dragRow = noCellMatch
 			size, ok := t.columnWidths[t.hoverHeaderCol]
 			if !ok {
 				size = t.cellSize.Width
@@ -928,7 +923,7 @@ func (t *Table) visibleColumnWidths(colWidth float32, cols int) (visible map[int
 	visible = make(map[int]float32)
 
 	if t.content.Size().Width <= 0 {
-		return visible, offX, minCol, maxCol
+		return visible, offX, minCol, 0
 	}
 
 	padding := t.Theme().Size(theme.SizeNamePadding)
@@ -1025,7 +1020,7 @@ func (t *Table) visibleRowHeights(rowHeight float32, rows int) (visible map[int]
 	visible = make(map[int]float32)
 
 	if t.content.Size().Height <= 0 {
-		return visible, offY, minRow, maxRow
+		return visible, offY, minRow, 0
 	}
 
 	padding := t.Theme().Size(theme.SizeNamePadding)
@@ -1476,6 +1471,9 @@ func (r *tableCellsRenderer) updateCells(toDraw TableCellID, visible, wasVisible
 }
 
 func (r *tableCellsRenderer) moveIndicators() {
+	if s := r.cells.t.content.Size(); s.Width <= 0 || s.Height <= 0 {
+		return // nothing is visible until the table has a size
+	}
 	rows, cols := 0, 0
 	if f := r.cells.t.Length; f != nil {
 		rows, cols = r.cells.t.Length()
@@ -1645,11 +1643,11 @@ func (r *tableCellsRenderer) moveMarker(marker fyne.CanvasObject, row, col int, 
 	} else {
 		left := x1
 		if col >= stickCols { // clip X
-			left = fyne.Max(r.cells.t.stuckXOff+r.cells.t.stuckWidth, x1)
+			left = max(r.cells.t.stuckXOff+r.cells.t.stuckWidth, x1)
 		}
 		top := y1
 		if row >= stickRows { // clip Y
-			top = fyne.Max(r.cells.t.stuckYOff+r.cells.t.stuckHeight, y1)
+			top = max(r.cells.t.stuckYOff+r.cells.t.stuckHeight, y1)
 		}
 		marker.Move(fyne.NewPos(left, top))
 		marker.Resize(fyne.NewSize(x2-left, y2-top))

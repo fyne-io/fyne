@@ -3,7 +3,7 @@ package gl
 import (
 	"image/color"
 	"math"
-	"sort"
+	"slices"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -22,11 +22,10 @@ const (
 	attrColor                    = "color"
 	attrDirection                = "direction"
 	attrEdgeSoftness             = "edgeSoftness"
-	attrFeather                  = "feather"
 	attrFillColor                = "fillColor"
 	attrFrame                    = "frame"
 	attrInset                    = "inset"
-	attrLineWidth                = "lineWidth"
+	attrLineStyle                = "lineStyle"
 	attrNormal                   = "normal"
 	attrPointControlCount        = "numControlPoints"
 	attrPointControl1            = "controlPoint1"
@@ -53,6 +52,7 @@ const (
 	attrTexture                  = "tex"
 	attrTextureKernel            = "kernelTex"
 	attrVertex                   = "vert"
+	attrVertexColor              = "vertColor"
 	attrVertexCount              = "vertexCount"
 	attrVertexTextureCoordinates = "vertTexCoord"
 	attrVertices                 = "vertices"
@@ -94,6 +94,8 @@ func (p *painter) drawBlur(b *canvas.Blur, pos fyne.Position, frame fyne.Size) {
 	if bw <= 0 || bh <= 0 {
 		return
 	}
+	// The snapshot below reads the framebuffer, so queued quads have to be in it.
+	p.FlushGlyphs()
 
 	// Ensure blurSnap.tex exists at the correct size; reallocate only when dimensions change.
 	if !p.blurSnap.texValid || p.blurSnap.width != bw || p.blurSnap.height != bh {
@@ -157,7 +159,7 @@ func (p *painter) drawBlur(b *canvas.Blur, pos fyne.Position, frame fyne.Size) {
 	points[coordinateSize2DWithTexture-1], points[2*coordinateSize2DWithTexture-1] = points[2*coordinateSize2DWithTexture-1], points[coordinateSize2DWithTexture-1]
 	points[3*coordinateSize2DWithTexture-1], points[4*coordinateSize2DWithTexture-1] = points[4*coordinateSize2DWithTexture-1], points[3*coordinateSize2DWithTexture-1]
 
-	p.ctx.UseProgram(p.programs.blur.ref)
+	p.useProgram(p.programs.blur.ref)
 	p.updateBuffer(p.programs.blur.buff, points[:])
 	p.UpdateVertexArray(p.programs.blur, attrVertex, coordinateSize2D, coordinateSize2DWithTexture, 0)
 	p.UpdateVertexArray(p.programs.blur, attrVertexTextureCoordinates, coordinateSize2D, coordinateSize2DWithTexture, coordinateSize2D)
@@ -165,7 +167,7 @@ func (p *painter) drawBlur(b *canvas.Blur, pos fyne.Position, frame fyne.Size) {
 	p.ctx.BlendFunc(one, oneMinusSrcAlpha)
 	p.logError()
 
-	cornerRadius := fyne.Min(paint.GetMaximumRadius(b.Size()), b.CornerRadius)
+	cornerRadius := min(paint.GetMaximumRadius(b.Size()), b.CornerRadius)
 	p.SetUniform1f(p.programs.blur, attrRadiusCorner, roundToPixel(cornerRadius*p.pixScale, 1.0))
 	p.SetUniform2f(p.programs.blur, attrSize, float32(bw), float32(bh))
 
@@ -210,7 +212,7 @@ func (p *painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyn
 
 	// Vertex: BEG
 	points, bounds := p.vecSquareCoords(pos, circle, frame, circle.Shadow)
-	p.ctx.UseProgram(program.ref)
+	p.useProgram(program.ref)
 	p.updateBuffer(program.buff, points[:])
 	p.UpdateVertexArray(program, attrVertex, coordinateSize2D, coordinateSize2D, 0)
 
@@ -219,7 +221,7 @@ func (p *painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyn
 	// Vertex: END
 
 	// Fragment: BEG
-	frameWidthScaled, frameHeightScaled := p.scaleFrameSize(frame)
+	frameWidthScaled, frameHeightScaled := p.shaderFrameSize(frame)
 	p.SetUniform2f(program, attrFrame, frameWidthScaled, frameHeightScaled)
 
 	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(bounds[0], bounds[2], bounds[1], bounds[3])
@@ -272,6 +274,9 @@ func (p *painter) drawGradient(o fyne.CanvasObject, texCreator func(fyne.CanvasO
 }
 
 func (p *painter) drawImage(img *canvas.Image, pos fyne.Position, frame fyne.Size) {
+	if dirty := cache.TakeTextureDirty(img); !dirty.Empty() && !p.updateImageTexture(img, dirty) {
+		p.freeTexture(img) // so that all of its pixels are uploaded again
+	}
 	p.drawTextureWithDetails(img, p.newGlImageTexture, pos, img.Size(), frame, img.FillMode, float32(img.Alpha()), 0)
 }
 
@@ -280,23 +285,12 @@ func (p *painter) drawLine(line *canvas.Line, pos fyne.Position, frame fyne.Size
 		return
 	}
 	points, halfWidth, feather := p.lineCoords(pos, line.Position1, line.Position2, line.StrokeWidth, 0.5, frame)
-	p.ctx.UseProgram(p.programs.line.ref)
-	p.updateBuffer(p.programs.line.buff, points[:])
-	p.UpdateVertexArray(p.programs.line, attrVertex, coordinateSize2D, coordinateSize2DWithNormal, 0)
-	p.UpdateVertexArray(p.programs.line, attrNormal, coordinateSize2D, coordinateSize2DWithNormal, coordinateSize2D)
-
-	p.ctx.BlendFunc(srcAlpha, oneMinusSrcAlpha)
-	p.logError()
-
 	r, g, b, a := getFragmentColor(line.StrokeColor)
-	p.SetUniform4f(p.programs.line, attrColor, r, g, b, a)
-
-	p.SetUniform1f(p.programs.line, attrLineWidth, halfWidth)
-
-	p.SetUniform1f(p.programs.line, attrFeather, feather)
-
-	p.ctx.DrawArrays(triangles, 0, vertexCountLine)
-	p.logError()
+	p.flushQuads() // quads queued before this line belong under it
+	for v := range vertexCountLine {
+		pt := points[v*coordinateSize2DWithNormal:]
+		p.linePending = append(p.linePending, pt[0], pt[1], pt[2], pt[3], r, g, b, a, halfWidth, feather)
+	}
 }
 
 func (p *painter) drawBezierCurve(bezierCurve *canvas.BezierCurve, pos fyne.Position, frame fyne.Size) {
@@ -307,7 +301,7 @@ func (p *painter) drawBezierCurve(bezierCurve *canvas.BezierCurve, pos fyne.Posi
 	// Vertex: BEG
 	points, bounds := p.vecRectCoords(pos, bezierCurve, frame, 0.0, canvas.Shadow{})
 	program := p.programs.bezierCurve
-	p.ctx.UseProgram(program.ref)
+	p.useProgram(program.ref)
 	p.updateBuffer(program.buff, points[:])
 	p.UpdateVertexArray(program, attrVertex, coordinateSize2D, coordinateSize2D, 0)
 
@@ -316,7 +310,7 @@ func (p *painter) drawBezierCurve(bezierCurve *canvas.BezierCurve, pos fyne.Posi
 	// Vertex: END
 
 	// Fragment: BEG
-	frameWidthScaled, frameHeightScaled := p.scaleFrameSize(frame)
+	frameWidthScaled, frameHeightScaled := p.shaderFrameSize(frame)
 	p.SetUniform2f(program, attrFrame, frameWidthScaled, frameHeightScaled)
 
 	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(bounds[0], bounds[2], bounds[1], bounds[3])
@@ -326,7 +320,7 @@ func (p *painter) drawBezierCurve(bezierCurve *canvas.BezierCurve, pos fyne.Posi
 	p.SetUniform1f(program, attrEdgeSoftness, edgeSoftnessScaled)
 
 	// ensure stroke width is not larger than the size of the object
-	strokeWidth := fyne.Min(bezierCurve.StrokeWidth, fyne.Min(bezierCurve.Size().Width, bezierCurve.Size().Height))
+	strokeWidth := min(bezierCurve.StrokeWidth, min(bezierCurve.Size().Width, bezierCurve.Size().Height))
 	if strokeWidth < 1 {
 		strokeWidth = 1
 	}
@@ -348,7 +342,7 @@ func (p *painter) drawBezierCurve(bezierCurve *canvas.BezierCurve, pos fyne.Posi
 		cp2XScaled, cp2YScaled := roundToPixel(cp[1].X*p.pixScale, 1.0), roundToPixel(cp[1].Y*p.pixScale, 1.0)
 		p.SetUniform2f(program, attrPointControl2, cp2XScaled, cp2YScaled)
 	}
-	p.SetUniform1f(program, attrPointControlCount, fyne.Min(float32(len(cp)), 2))
+	p.SetUniform1f(program, attrPointControlCount, min(float32(len(cp)), 2))
 
 	strokeWidthScaled := roundToPixel(strokeWidth*p.pixScale, 1.0)
 	p.SetUniform1f(program, attrStrokeWidthHalf, strokeWidthScaled*0.5)
@@ -371,7 +365,7 @@ func (p *painter) drawArbitraryPolygon(polygon *canvas.ArbitraryPolygon, pos fyn
 	// Vertex: BEG
 	points, bounds := p.vecRectCoords(pos, polygon, frame, 0.0, canvas.Shadow{})
 	program := p.programs.arbitraryPolygon
-	p.ctx.UseProgram(program.ref)
+	p.useProgram(program.ref)
 	p.updateBuffer(program.buff, points[:])
 	p.UpdateVertexArray(program, attrVertex, coordinateSize2D, coordinateSize2D, 0)
 
@@ -380,7 +374,7 @@ func (p *painter) drawArbitraryPolygon(polygon *canvas.ArbitraryPolygon, pos fyn
 	// Vertex: END
 
 	// Fragment: BEG
-	frameWidthScaled, frameHeightScaled := p.scaleFrameSize(frame)
+	frameWidthScaled, frameHeightScaled := p.shaderFrameSize(frame)
 	p.SetUniform2f(program, attrFrame, frameWidthScaled, frameHeightScaled)
 
 	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(bounds[0], bounds[2], bounds[1], bounds[3])
@@ -389,12 +383,12 @@ func (p *painter) drawArbitraryPolygon(polygon *canvas.ArbitraryPolygon, pos fyn
 	edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
 	p.SetUniform1f(program, attrEdgeSoftness, edgeSoftnessScaled)
 
-	numPoints := int(fyne.Min(paint.ArbitraryPolygonVerticesMaximum, float32(len(polygon.Points))))
+	numPoints := int(min(paint.ArbitraryPolygonVerticesMaximum, float32(len(polygon.Points))))
 	p.SetUniform1f(program, attrVertexCount, float32(numPoints))
 
 	size := polygon.Size()
 	clampPoint := func(p fyne.Position) (float32, float32) {
-		return fyne.Min(fyne.Max(p.X, 0), fyne.Max(size.Width, 0)), fyne.Min(fyne.Max(p.Y, 0), fyne.Max(size.Height, 0))
+		return min(max(p.X, 0), max(size.Width, 0)), min(max(p.Y, 0), max(size.Height, 0))
 	}
 
 	fixedPoints := make([]fyne.Position, numPoints)
@@ -523,7 +517,7 @@ func (p *painter) drawShader(shader *canvas.Shader, pos fyne.Position, frame fyn
 
 	// Vertex: BEG
 	points, bounds := p.vecRectCoords(pos, shader, frame, 0.0, canvas.Shadow{})
-	p.ctx.UseProgram(program.ref)
+	p.useProgram(program.ref)
 	p.updateBuffer(program.buff, points[:])
 	p.UpdateVertexArray(program, attrVertex, coordinateSize2D, coordinateSize2D, 0)
 
@@ -532,7 +526,7 @@ func (p *painter) drawShader(shader *canvas.Shader, pos fyne.Position, frame fyn
 	// Vertex: END
 
 	// Fragment: BEG - the standard uniform contract shared with the built in vector shaders
-	frameWidthScaled, frameHeightScaled := p.scaleFrameSize(frame)
+	frameWidthScaled, frameHeightScaled := p.shaderFrameSize(frame)
 	p.SetUniform2f(program, attrFrame, frameWidthScaled, frameHeightScaled)
 
 	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(bounds[0], bounds[2], bounds[1], bounds[3])
@@ -573,7 +567,7 @@ func (p *painter) bindShaderTextures(state *shaderState, shader *canvas.Shader) 
 			state.textures[name] = &shaderTexture{tex: p.imgToTexture(img, canvas.ImageScaleSmooth), src: img}
 		}
 	}
-	sort.Strings(names)
+	slices.Sort(names)
 
 	for i, name := range names {
 		p.ctx.ActiveTexture(texture0 + uint32(i))
@@ -592,6 +586,10 @@ func (p *painter) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame
 	topLeftRadius := paint.GetCornerRadius(rect.TopLeftCornerRadius, rect.CornerRadius)
 	bottomRightRadius := paint.GetCornerRadius(rect.BottomRightCornerRadius, rect.CornerRadius)
 	bottomLeftRadius := paint.GetCornerRadius(rect.BottomLeftCornerRadius, rect.CornerRadius)
+	if topRightRadius == 0 && topLeftRadius == 0 && bottomRightRadius == 0 && bottomLeftRadius == 0 &&
+		p.pushSolidRect(rect, pos, frame) {
+		return
+	}
 	p.drawOblong(rect, rect.FillColor, rect.StrokeColor, rect.StrokeWidth, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius, rect.Aspect, rect.Shadow, pos, frame)
 }
 
@@ -610,7 +608,7 @@ func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, st
 
 	// Vertex: BEG
 	points, bounds := p.vecRectCoords(pos, obj, frame, aspect, shadow)
-	p.ctx.UseProgram(program.ref)
+	p.useProgram(program.ref)
 	p.updateBuffer(program.buff, points[:])
 	p.UpdateVertexArray(program, attrVertex, coordinateSize2D, coordinateSize2D, 0)
 
@@ -619,7 +617,7 @@ func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, st
 	// Vertex: END
 
 	// Fragment: BEG
-	frameWidthScaled, frameHeightScaled := p.scaleFrameSize(frame)
+	frameWidthScaled, frameHeightScaled := p.shaderFrameSize(frame)
 	p.SetUniform2f(program, attrFrame, frameWidthScaled, frameHeightScaled)
 
 	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(bounds[0], bounds[2], bounds[1], bounds[3])
@@ -697,7 +695,7 @@ func (p *painter) drawPolygon(polygon *canvas.RegularPolygon, pos fyne.Position,
 	// Vertex: BEG
 	points, bounds := p.vecRectCoords(pos, polygon, frame, 0.0, canvas.Shadow{})
 	program := p.programs.polygon
-	p.ctx.UseProgram(program.ref)
+	p.useProgram(program.ref)
 	p.updateBuffer(program.buff, points[:])
 	p.UpdateVertexArray(program, attrVertex, coordinateSize2D, coordinateSize2D, 0)
 
@@ -706,7 +704,7 @@ func (p *painter) drawPolygon(polygon *canvas.RegularPolygon, pos fyne.Position,
 	// Vertex: END
 
 	// Fragment: BEG
-	frameWidthScaled, frameHeightScaled := p.scaleFrameSize(frame)
+	frameWidthScaled, frameHeightScaled := p.shaderFrameSize(frame)
 	p.SetUniform2f(program, attrFrame, frameWidthScaled, frameHeightScaled)
 
 	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(bounds[0], bounds[2], bounds[1], bounds[3])
@@ -715,14 +713,14 @@ func (p *painter) drawPolygon(polygon *canvas.RegularPolygon, pos fyne.Position,
 	edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
 	p.SetUniform1f(program, attrEdgeSoftness, edgeSoftnessScaled)
 
-	outerRadius := fyne.Min(size.Width, size.Height) / 2
+	outerRadius := min(size.Width, size.Height) / 2
 	outerRadiusScaled := roundToPixel(outerRadius*p.pixScale, 1.0)
 	p.SetUniform1f(program, attrRadiusOuter, outerRadiusScaled)
 
 	p.SetUniform1f(program, attrAngle, polygon.Angle)
 	p.SetUniform1f(program, attrSides, float32(polygon.Sides))
 
-	cornerRadius := fyne.Min(paint.GetMaximumRadius(size), polygon.CornerRadius)
+	cornerRadius := min(paint.GetMaximumRadius(size), polygon.CornerRadius)
 	cornerRadiusScaled := roundToPixel(cornerRadius*p.pixScale, 1.0)
 	p.SetUniform1f(program, attrRadiusCorner, cornerRadiusScaled)
 
@@ -754,7 +752,7 @@ func (p *painter) drawArc(arc *canvas.Arc, pos fyne.Position, frame fyne.Size) {
 	// Vertex: BEG
 	points, bounds := p.vecRectCoords(pos, arc, frame, 0.0, canvas.Shadow{})
 	program := p.programs.arc
-	p.ctx.UseProgram(program.ref)
+	p.useProgram(program.ref)
 	p.updateBuffer(program.buff, points[:])
 	p.UpdateVertexArray(program, attrVertex, coordinateSize2D, coordinateSize2D, 0)
 
@@ -763,7 +761,7 @@ func (p *painter) drawArc(arc *canvas.Arc, pos fyne.Position, frame fyne.Size) {
 	// Vertex: END
 
 	// Fragment: BEG
-	frameWidthScaled, frameHeightScaled := p.scaleFrameSize(frame)
+	frameWidthScaled, frameHeightScaled := p.shaderFrameSize(frame)
 	p.SetUniform2f(program, attrFrame, frameWidthScaled, frameHeightScaled)
 
 	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(bounds[0], bounds[2], bounds[1], bounds[3])
@@ -772,7 +770,7 @@ func (p *painter) drawArc(arc *canvas.Arc, pos fyne.Position, frame fyne.Size) {
 	edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
 	p.SetUniform1f(program, attrEdgeSoftness, edgeSoftnessScaled)
 
-	outerRadius := fyne.Min(arc.Size().Width, arc.Size().Height) / 2
+	outerRadius := min(arc.Size().Width, arc.Size().Height) / 2
 	outerRadiusScaled := roundToPixel(outerRadius*p.pixScale, 1.0)
 	p.SetUniform1f(program, attrRadiusOuter, outerRadiusScaled)
 
@@ -784,7 +782,7 @@ func (p *painter) drawArc(arc *canvas.Arc, pos fyne.Position, frame fyne.Size) {
 	p.SetUniform1f(program, attrAngleStart, startAngle)
 	p.SetUniform1f(program, attrAngleEnd, endAngle)
 
-	cornerRadius := fyne.Min(paint.GetMaximumRadiusArc(outerRadius, innerRadius, arc.EndAngle-arc.StartAngle), arc.CornerRadius)
+	cornerRadius := min(paint.GetMaximumRadiusArc(outerRadius, innerRadius, arc.EndAngle-arc.StartAngle), arc.CornerRadius)
 	cornerRadiusScaled := roundToPixel(cornerRadius*p.pixScale, 1.0)
 	p.SetUniform1f(program, attrRadiusCorner, cornerRadiusScaled)
 
@@ -828,7 +826,7 @@ func (p *painter) drawEllipse(ellipse *canvas.Ellipse, pos fyne.Position, frame 
 
 	// Vertex: BEG
 	points, bounds := p.vecRectCoordsWithPad(pos, ellipse, frame, -xPad, -yPad, ellipse.Shadow)
-	p.ctx.UseProgram(program.ref)
+	p.useProgram(program.ref)
 	p.updateBuffer(program.buff, points[:])
 	p.UpdateVertexArray(program, attrVertex, coordinateSize2D, coordinateSize2D, 0)
 
@@ -837,7 +835,7 @@ func (p *painter) drawEllipse(ellipse *canvas.Ellipse, pos fyne.Position, frame 
 	// Vertex: END
 
 	// Fragment: BEG
-	frameWidthScaled, frameHeightScaled := p.scaleFrameSize(frame)
+	frameWidthScaled, frameHeightScaled := p.shaderFrameSize(frame)
 	p.SetUniform2f(program, attrFrame, frameWidthScaled, frameHeightScaled)
 
 	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(bounds[0], bounds[2], bounds[1], bounds[3])
@@ -911,8 +909,14 @@ func (p *painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size
 	size.Height = roundToPixel(size.Height, p.pixScale)
 	size.Width += roundToPixel(paint.VectorPad(text), p.pixScale) // italic overspill to the right
 	size.Height += roundToPixel(paint.TextVectorPad, p.pixScale)  // space below for descenders / underline
-	fullWidth := int(math.Ceil(float64(size.Width * p.pixScale)))
-	if fullWidth <= p.maxTextureSize || p.maxTextureSize <= 0 {
+	// The atlas draws a quad per glyph out of one shared texture, so it needs no
+	// texture of its own and no width limit - both paths after it exist only for
+	// strings it cannot represent.
+	if p.drawTextFromAtlas(text, pos, frame, clip) {
+		// A run that used to be too wide for one texture may have a windowed
+		// texture parked from before; with no width limit here, it is dead.
+		p.freeClippedTextTexture(text)
+	} else if fullWidth := int(math.Ceil(float64(size.Width * p.pixScale))); fullWidth <= p.maxTextureSize || p.maxTextureSize <= 0 {
 		p.freeClippedTextTexture(text)
 		p.drawTextureWithDetails(text, p.newGlTextTexture, pos, size, frame, canvas.ImageFillStretch, 1.0, 0)
 	} else {
@@ -927,7 +931,7 @@ func (p *painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size
 	}
 
 	if decorated {
-		_, baseline := cache.GetFontMetrics(text.Text, text.TextSize, text.TextStyle, text.FontSource)
+		_, baseline := cache.GetFontMetrics(text.Text, text.TextSize, text.TextStyle, text.FontSource, cache.WidgetScopeID(text))
 		line := canvas.NewLine(text.Color)
 		line.Resize(fyne.NewSize(size.Width, 0))
 		if text.TextStyle.Underline {
@@ -948,8 +952,8 @@ func visibleTextPixels(pos fyne.Position, size, frame fyne.Size, clip *internal.
 		clipPos, clipSize = clip.Rect()
 	}
 
-	left := fyne.Max(pos.X, clipPos.X)
-	right := fyne.Min(pos.X+size.Width, clipPos.X+clipSize.Width)
+	left := max(pos.X, clipPos.X)
+	right := min(pos.X+size.Width, clipPos.X+clipSize.Width)
 	if right <= left {
 		return 0, 0
 	}
@@ -962,14 +966,14 @@ func visibleTextPixels(pos fyne.Position, size, frame fyne.Size, clip *internal.
 func (p *painter) drawTextureRegion(texture Texture, pos fyne.Position, size, frame fyne.Size, fill canvas.ImageFill, alpha, aspect, cornerRadius, pad float32) {
 	points, insets, inner := p.rectCoords(size, pos, frame, fill, aspect, pad)
 
-	p.ctx.UseProgram(p.programs.simple.ref)
+	p.useProgram(p.programs.simple.ref)
 	p.updateBuffer(p.programs.simple.buff, points[:])
 	p.UpdateVertexArray(p.programs.simple, attrVertex, coordinateSize2D, coordinateSize2DWithTexture, 0)
 	p.UpdateVertexArray(p.programs.simple, attrVertexTextureCoordinates, coordinateSize2D, coordinateSize2DWithTexture, coordinateSize2D)
 
 	// Set corner radius and texture size in pixels
 	if cornerRadius != 0 {
-		cornerRadius = fyne.Min(paint.GetMaximumRadius(size), cornerRadius) * p.pixScale
+		cornerRadius = min(paint.GetMaximumRadius(size), cornerRadius) * p.pixScale
 	}
 	p.SetUniform1f(p.programs.simple, attrRadiusCorner, cornerRadius)
 	p.SetUniform2f(p.programs.simple, attrSize, inner.Width*p.pixScale, inner.Height*p.pixScale)
@@ -1012,8 +1016,8 @@ func (p *painter) drawTextureWithDetails(o fyne.CanvasObject, creator func(canva
 
 func (p *painter) lineCoords(pos, pos1, pos2 fyne.Position, lineWidth, feather float32, frame fyne.Size) (points [coordinatesSizeLine]float32, halfWidth, featherWidth float32) {
 	// Shift line coordinates so that they match the target position.
-	xPosDiff := pos.X - fyne.Min(pos1.X, pos2.X)
-	yPosDiff := pos.Y - fyne.Min(pos1.Y, pos2.Y)
+	xPosDiff := pos.X - min(pos1.X, pos2.X)
+	yPosDiff := pos.Y - min(pos1.Y, pos2.Y)
 	pos1.X = roundToPixel(pos1.X+xPosDiff, p.pixScale)
 	pos1.Y = roundToPixel(pos1.Y+yPosDiff, p.pixScale)
 	pos2.X = roundToPixel(pos2.X+xPosDiff, p.pixScale)
@@ -1152,15 +1156,13 @@ func (p *painter) vecRectCoords(pos fyne.Position, rect fyne.CanvasObject, frame
 }
 
 func (p *painter) vecRectCoordsWithPad(pos fyne.Position, rect fyne.CanvasObject, frame fyne.Size, xPad, yPad float32, shadow canvas.Shadow) ([coordinatesSizeRectangle]float32, [4]float32) {
+	// align each edge to a pixel so that objects sharing an edge do not overlap or leave a gap
 	size := rect.Size()
-	pos1 := rect.Position()
-
-	xPosDiff := pos.X - pos1.X + xPad
-	yPosDiff := pos.Y - pos1.Y + yPad
-	pos1.X = roundToPixel(pos1.X+xPosDiff, p.pixScale)
-	pos1.Y = roundToPixel(pos1.Y+yPosDiff, p.pixScale)
-	size.Width = roundToPixel(size.Width-2*xPad, p.pixScale)
-	size.Height = roundToPixel(size.Height-2*yPad, p.pixScale)
+	left, top := pos.X+xPad, pos.Y+yPad
+	x1Pos := roundToPixel(left, p.pixScale)
+	y1Pos := roundToPixel(top, p.pixScale)
+	x2Pos := roundToPixel(left+size.Width-2*xPad, p.pixScale)
+	y2Pos := roundToPixel(top+size.Height-2*yPad, p.pixScale)
 
 	shadowPads := paint.GetShadowPaddings(shadow)
 	shadowPadLeft := roundToPixel(shadowPads[0], p.pixScale)
@@ -1170,13 +1172,9 @@ func (p *painter) vecRectCoordsWithPad(pos fyne.Position, rect fyne.CanvasObject
 
 	// without edge softness adjustment the rectangle has cropped edges
 	edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
-	x1Pos := pos1.X
 	x1Norm := -1 + (x1Pos-edgeSoftnessScaled-shadowPadLeft)*2/frame.Width
-	x2Pos := pos1.X + size.Width
 	x2Norm := -1 + (x2Pos+edgeSoftnessScaled+shadowPadRight)*2/frame.Width
-	y1Pos := pos1.Y
 	y1Norm := 1 - (y1Pos-edgeSoftnessScaled-shadowPadTop)*2/frame.Height
-	y2Pos := pos1.Y + size.Height
 	y2Norm := 1 - (y2Pos+edgeSoftnessScaled+shadowPadBottom)*2/frame.Height
 
 	// output a norm for the fill
@@ -1231,6 +1229,18 @@ func (p *painter) scaleFrameSize(frame fyne.Size) (width, height float32) {
 	frameWidthScaled := roundToPixel(frame.Width*p.pixScale, 1.0)
 	frameHeightScaled := roundToPixel(frame.Height*p.pixScale, 1.0)
 	return frameWidthScaled, frameHeightScaled
+}
+
+// shaderFrameSize returns the frame size passed to the shapes' fragment
+// shaders. They position fragments from gl_FragCoord, which is relative to the
+// drawable, so the height has to be the drawable height - the canvas height
+// only matches when the viewport fills the drawable.
+func (p *painter) shaderFrameSize(frame fyne.Size) (width, height float32) {
+	width = roundToPixel(frame.Width*p.pixScale, 1.0)
+	if p.fbHeight > 0 {
+		return width, float32(p.fbHeight)
+	}
+	return width, roundToPixel(frame.Height*p.pixScale, 1.0)
 }
 
 // Returns scaled RectCoords(x1,x2,y1,y2) in same order
