@@ -37,7 +37,7 @@ type Driver interface {
 	StopAnimation(*Animation)
 
 	// DoubleTapDelay returns the maximum duration where a second tap after a first one
-	// will be considered a [DoubleTap] instead of two distinct [Tap] events.
+	// will be considered a double tap ([DoubleTappable]) instead of two distinct taps ([Tappable]).
 	//
 	// Since: 2.5
 	DoubleTapDelay() time.Duration

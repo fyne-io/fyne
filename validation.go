@@ -12,7 +12,7 @@ type Validatable interface {
 }
 
 // Requireable is implemented by any widgets that want to support the
-// [Required] field of a [FormItem]
+// [fyne.io/fyne/v2/widget.FormItem.Required] field.
 //
 // Since: 2.8
 type Requireable interface {
