@@ -130,15 +130,3 @@ func (*themedApp) Cache() fyne.Cache {
 func (*themedApp) Clipboard() fyne.Clipboard {
 	return nil
 }
-
-func (*themedApp) StopForegroundService() {
-	return
-}
-
-func (*themedApp) StartForegroundService(_, _ string) {
-	return
-}
-
-func (*themedApp) RequestNotificationPermission() {
-	return
-}

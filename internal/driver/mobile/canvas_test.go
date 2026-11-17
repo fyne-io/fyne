@@ -964,18 +964,6 @@ type mobileApp struct {
 	driver fyne.Driver
 }
 
-func (a *mobileApp) StopForegroundService() {
-	// no-op in test app
-}
-
-func (a *mobileApp) StartForegroundService(_, _ string) {
-	// no-op in test app
-}
-
-func (a *mobileApp) RequestNotificationPermission() {
-	// no-op in test app
-}
-
 func (a *mobileApp) Driver() fyne.Driver {
 	return a.driver
 }

@@ -13,7 +13,7 @@ void sendNotification(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx, char 
 bool scheduleNotification(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx,
 	char *id, char *title, char *body, bool silent, long long deliveryMillis);
 void cancelScheduledNotification(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx, char *id);
-void startForegroundService(uintptr_t jni_env, uintptr_t ctx, char *title, char *content);
+char *startForegroundService(uintptr_t jni_env, uintptr_t ctx, char *title, char *content);
 void stopForegroundService(uintptr_t jni_env, uintptr_t ctx);
 void requestNotificationPermission(uintptr_t jni_env, uintptr_t ctx);
 */
@@ -26,6 +26,7 @@ import (
 	"unsafe"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/driver/mobile"
 	"fyne.io/fyne/v2/internal/driver/mobile/app"
 	"fyne.io/fyne/v2/internal/scheduler"
 )
@@ -41,18 +42,29 @@ func (a *fyneApp) OpenURL(url *url.URL) error {
 	return nil
 }
 
-func (a *fyneApp) StartForegroundService(title, content string) {
-	app.RunOnJVM(func(vm, env, ctx uintptr) error {
-		cTitle := C.CString(title)
-		cContent := C.CString(content)
-		defer C.free(unsafe.Pointer(cTitle))
-		defer C.free(unsafe.Pointer(cContent))
+var (
+	_ mobile.ForegroundService      = (*fyneApp)(nil)
+	_ mobile.NotificationPermission = (*fyneApp)(nil)
+)
 
-		C.startForegroundService(C.uintptr_t(env), C.uintptr_t(ctx), cTitle, cContent)
-		return nil
+// StartForegroundService implements [mobile.ForegroundService].
+func (a *fyneApp) StartForegroundService(title, content string) error {
+	cTitle := C.CString(title)
+	defer C.free(unsafe.Pointer(cTitle))
+	cContent := C.CString(content)
+	defer C.free(unsafe.Pointer(cContent))
+
+	return app.RunOnJVM(func(vm, env, ctx uintptr) error {
+		cErr := C.startForegroundService(C.uintptr_t(env), C.uintptr_t(ctx), cTitle, cContent)
+		if cErr == nil {
+			return nil
+		}
+		defer C.free(unsafe.Pointer(cErr))
+		return errors.New(C.GoString(cErr))
 	})
 }
 
+// StopForegroundService implements [mobile.ForegroundService].
 func (a *fyneApp) StopForegroundService() {
 	app.RunOnJVM(func(vm, env, ctx uintptr) error {
 		C.stopForegroundService(C.uintptr_t(env), C.uintptr_t(ctx))
@@ -60,15 +72,7 @@ func (a *fyneApp) StopForegroundService() {
 	})
 }
 
-// RequestNotificationPermission asks the user to allow this app to post
-// notifications, which Android 13+ requires before any notification is
-// shown. The system dialog is skipped when the permission is already granted
-// or the device runs an older Android version.
-//
-// The request is only issued when the app targets SDK 33 or later, which
-// for Fyne means a release build. Apps with a lower target SDK cannot request
-// this permission themselves; Android prompts on its own when the app first
-// creates a notification channel, so this call is a no-op for them.
+// RequestNotificationPermission implements [mobile.NotificationPermission].
 func (a *fyneApp) RequestNotificationPermission() {
 	app.RunOnJVM(func(vm, env, ctx uintptr) error {
 		C.requestNotificationPermission(C.uintptr_t(env), C.uintptr_t(ctx))

@@ -90,15 +90,6 @@ func (dummyApp) Clipboard() Clipboard {
 	return nil
 }
 
-func (dummyApp) StartForegroundService(_, _ string) {
-}
-
-func (dummyApp) StopForegroundService() {
-}
-
-func (dummyApp) RequestNotificationPermission() {
-}
-
 func TestSetCurrentApp(t *testing.T) {
 	a := &dummyApp{}
 	SetCurrentApp(a)
