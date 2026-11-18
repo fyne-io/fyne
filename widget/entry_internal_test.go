@@ -184,16 +184,16 @@ func TestEntry_FocusKeepsScrollOffset(t *testing.T) {
 	w.Resize(fyne.NewSize(150, 100))
 
 	w.Canvas().Focus(e)
-	e.scroller.ScrollToOffset(fyne.NewPos(0, 200))
-	assert.Equal(t, float32(200), e.scroller.Offset.Y)
+	e.scroll.ScrollToOffset(fyne.NewPos(0, 200))
+	assert.Equal(t, float32(200), e.scroll.Offset.Y)
 
 	w.Canvas().Unfocus()
-	assert.Equal(t, float32(200), e.scroller.Offset.Y)
+	assert.Equal(t, float32(200), e.scroll.Offset.Y)
 	w.Canvas().Focus(e)
-	assert.Equal(t, float32(200), e.scroller.Offset.Y)
+	assert.Equal(t, float32(200), e.scroll.Offset.Y)
 
 	e.TypedRune('a')
-	assert.Zero(t, e.scroller.Offset.Y)
+	assert.Zero(t, e.scroll.Offset.Y)
 }
 
 func TestEntry_CallbackLocking(t *testing.T) {
@@ -330,13 +330,13 @@ func TestEntry_ClickAfterScroll(t *testing.T) {
 	w := test.NewTempWindow(t, e)
 	w.Resize(fyne.NewSize(150, 100))
 
-	e.scroller.ScrollToOffset(fyne.NewPos(0, 200))
+	e.scroll.ScrollToOffset(fyne.NewPos(0, 200))
 	clickPrimary(e, getClickPosition("li", 2))
 
-	assert.Equal(t, float32(200), e.scroller.Offset.Y)
+	assert.Equal(t, float32(200), e.scroll.Offset.Y)
 	cursorY := e.CursorPosition().Y
-	assert.GreaterOrEqual(t, cursorY, e.scroller.Offset.Y)
-	assert.Less(t, cursorY, e.scroller.Offset.Y+e.scroller.Size().Height)
+	assert.GreaterOrEqual(t, cursorY, e.scroll.Offset.Y)
+	assert.Less(t, cursorY, e.scroll.Offset.Y+e.scroll.Size().Height)
 }
 
 func TestEntry_Tab(t *testing.T) {

@@ -1193,12 +1193,6 @@ func getFragmentColor(col color.Color) (float32, float32, float32, float32) {
 	return float32(r) / alpha, float32(g) / alpha, float32(b) / alpha, alpha / 0xffff
 }
 
-func (p *painter) scaleFrameSize(frame fyne.Size) (float32, float32) {
-	frameWidthScaled := roundToPixel(frame.Width*p.pixScale, 1.0)
-	frameHeightScaled := roundToPixel(frame.Height*p.pixScale, 1.0)
-	return frameWidthScaled, frameHeightScaled
-}
-
 // shaderFrameSize returns the frame size passed to the shapes' fragment
 // shaders. They position fragments from gl_FragCoord, which is relative to the
 // drawable, so the height has to be the drawable height - the canvas height
