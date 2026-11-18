@@ -232,6 +232,49 @@ func (c *canvas) sizeContent(size fyne.Size) {
 		c.content.Resize(areaSize)
 		c.content.Move(areaPos)
 	}
+	c.scrollFocusedEntry()
+}
+
+// scrollFocusedEntry reveals the focused input in its enclosing vertical scroll.
+// It walks the object tree because canvas objects do not expose their parent.
+func (c *canvas) scrollFocusedEntry() {
+	if c.device == nil || !c.device.keyboardShown {
+		return
+	}
+	focused, ok := c.Focused().(fyne.CanvasObject)
+	if !ok {
+		return
+	}
+
+	for _, tree := range c.ObjectTrees() {
+		var entryY float32
+		found := false
+		if intdriver.WalkVisibleObjectTree(tree, func(obj fyne.CanvasObject, pos, _ fyne.Position, _ fyne.Size) bool {
+			if obj != focused {
+				return false
+			}
+			entryY = pos.Y
+			found = true
+			return true
+		}, func(obj fyne.CanvasObject, pos fyne.Position, _ fyne.CanvasObject) {
+			scroll, ok := obj.(*container.Scroll)
+			if !found || !ok || (scroll.Direction != container.ScrollVerticalOnly && scroll.Direction != container.ScrollBoth) {
+				return
+			}
+			top := entryY - pos.Y
+			height := min(focused.Size().Height, scroll.Size().Height)
+			delta := max(0, top+height-scroll.Size().Height)
+			if top < 0 {
+				delta = top
+			}
+			if delta != 0 {
+				scroll.ScrollToOffset(scroll.Offset.AddXY(0, delta))
+			}
+			found = false
+		}) {
+			return
+		}
+	}
 }
 
 func matchesTapTarget(object fyne.CanvasObject) bool {
