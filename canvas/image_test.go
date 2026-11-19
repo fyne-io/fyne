@@ -1,6 +1,8 @@
 package canvas_test
 
 import (
+	"bytes"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -45,6 +47,36 @@ func TestImage_RefreshBlank(t *testing.T) {
 	img.Resource = nil
 	img.Refresh()
 	assert.Nil(t, img.Image)
+}
+
+func TestImage_RefreshMissingFileLogsOnce(t *testing.T) {
+	var buf bytes.Buffer
+	log.SetOutput(&buf)
+	t.Cleanup(func() { log.SetOutput(os.Stderr) })
+
+	img := canvas.NewImageFromFile(filepath.Join(t.TempDir(), "missing.png"))
+	for i := 0; i < 10; i++ {
+		img.Refresh()
+	}
+
+	assert.Equal(t, 1, strings.Count(buf.String(), "Failed to load image"), buf.String())
+}
+
+func TestImage_RefreshMissingFileLogsChangedPath(t *testing.T) {
+	var buf bytes.Buffer
+	log.SetOutput(&buf)
+	t.Cleanup(func() { log.SetOutput(os.Stderr) })
+
+	dir := t.TempDir()
+	img := canvas.NewImageFromFile(filepath.Join(dir, "first.png"))
+	img.Refresh()
+	img.Refresh()
+	assert.Equal(t, 1, strings.Count(buf.String(), "Failed to load image"), buf.String())
+
+	img.File = filepath.Join(dir, "second.png")
+	img.Refresh()
+	img.Refresh()
+	assert.Equal(t, 2, strings.Count(buf.String(), "Failed to load image"), buf.String())
 }
 
 func TestNewImageFromFile(t *testing.T) {

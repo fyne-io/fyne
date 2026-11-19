@@ -1,6 +1,9 @@
 package widget
 
 import (
+	"bytes"
+	"log"
+	"os"
 	"strings"
 	"testing"
 
@@ -463,6 +466,19 @@ func TestRichTextMarkdown_Image(t *testing.T) {
 	} else {
 		t.Error("Segment should be a Image")
 	}
+}
+
+func TestRichTextMarkdown_MissingImageLogsOnce(t *testing.T) {
+	var buf bytes.Buffer
+	log.SetOutput(&buf)
+	t.Cleanup(func() { log.SetOutput(os.Stderr) })
+
+	r := NewRichTextFromMarkdown("![title](missing-image.png)")
+	for i := 0; i < 10; i++ {
+		r.Refresh()
+	}
+
+	assert.Equal(t, 1, strings.Count(buf.String(), "Failed to load image"), buf.String())
 }
 
 func TestRichTextMarkdown_Lines(t *testing.T) {
