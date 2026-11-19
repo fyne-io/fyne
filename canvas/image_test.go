@@ -1,6 +1,8 @@
 package canvas_test
 
 import (
+	"bytes"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -45,6 +47,55 @@ func TestImage_RefreshBlank(t *testing.T) {
 	img.Resource = nil
 	img.Refresh()
 	assert.Nil(t, img.Image)
+}
+
+func TestImage_MinSizeLoadsSourceOnce(t *testing.T) {
+	var buf bytes.Buffer
+	log.SetOutput(&buf)
+	t.Cleanup(func() { log.SetOutput(os.Stderr) })
+
+	dir := t.TempDir()
+	img := canvas.NewImageFromFile(filepath.Join(dir, "missing.png"))
+	for i := 0; i < 10; i++ {
+		img.MinSize()
+	}
+	assert.Equal(t, 1, strings.Count(buf.String(), "Failed to load image"), buf.String())
+
+	img.File = filepath.Join(dir, "other.png")
+	for i := 0; i < 10; i++ {
+		img.MinSize()
+	}
+	assert.Equal(t, 2, strings.Count(buf.String(), "Failed to load image"), buf.String())
+}
+
+func TestImage_RefreshDoesNotRetryFailedLoad(t *testing.T) {
+	var buf bytes.Buffer
+	log.SetOutput(&buf)
+	t.Cleanup(func() { log.SetOutput(os.Stderr) })
+
+	img := canvas.NewImageFromFile(filepath.Join(t.TempDir(), "missing.png"))
+	for i := 0; i < 10; i++ {
+		img.Refresh()
+	}
+	assert.Equal(t, 1, strings.Count(buf.String(), "Failed to load image"), buf.String())
+
+	img.File = filepath.Join(t.TempDir(), "other.png")
+	img.Refresh()
+	assert.Equal(t, 2, strings.Count(buf.String(), "Failed to load image"), buf.String())
+}
+
+func TestImage_ResizeDoesNotRetryFailedLoad(t *testing.T) {
+	var buf bytes.Buffer
+	log.SetOutput(&buf)
+	t.Cleanup(func() { log.SetOutput(os.Stderr) })
+
+	img := canvas.NewImageFromFile(filepath.Join(t.TempDir(), "missing.png"))
+	img.Refresh()
+
+	for i := 1; i <= 10; i++ {
+		img.Resize(fyne.NewSize(float32(i), float32(i)))
+	}
+	assert.Equal(t, 1, strings.Count(buf.String(), "Failed to load image"), buf.String())
 }
 
 func TestNewImageFromFile(t *testing.T) {

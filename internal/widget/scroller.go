@@ -580,6 +580,11 @@ func (s *Scroll) Refresh() {
 	}
 }
 
+// RefreshBarsOnly updates the scroll bars without refreshing the content.
+func (s *Scroll) RefreshBarsOnly() {
+	s.refreshBars()
+}
+
 // Resize is called when this scroller should change size. We refresh to ensure the scroll bars are updated.
 func (s *Scroll) Resize(sz fyne.Size) {
 	if sz == s.Size() {
