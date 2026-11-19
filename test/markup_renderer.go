@@ -104,20 +104,21 @@ func (*markupRenderer) setFloatPosAttr(attrs map[string]*string, name string, x,
 	attrs[name] = &value
 }
 
-func (*markupRenderer) setSizeAttrWithDefault(attrs map[string]*string, name string, i float32, d float32) {
-	if int(i) == int(d) {
-		return
-	}
-	value := fmt.Sprintf("%d", int(i))
-	attrs[name] = &value
-}
-
 func (*markupRenderer) setPosAttr(attrs map[string]*string, name string, pos fyne.Position) {
 	if int(pos.X) == 0 && int(pos.Y) == 0 {
 		return
 	}
 	value := fmt.Sprintf("%d,%d", int(pos.X), int(pos.Y))
 	attrs[name] = &value
+}
+
+func (r *markupRenderer) setRadiusAttr(attrs map[string]*string, name string, radius float32) {
+	if radius == fynecanvas.RadiusMaximum {
+		r.setStringAttr(attrs, name, "maximum")
+		return
+	}
+
+	r.setFloatAttr(attrs, name, float64(radius))
 }
 
 func (r *markupRenderer) setResourceAttr(attrs map[string]*string, name string, rsc fyne.Resource) {
@@ -173,8 +174,24 @@ func (r *markupRenderer) setScaleModeAttr(attrs map[string]*string, name string,
 	r.setStringAttr(attrs, name, scaleMode)
 }
 
+func (r *markupRenderer) setShadowAttrs(attrs map[string]*string, s fynecanvas.Shadow) {
+	r.setColorAttr(attrs, "shadowColor", s.Color)
+	r.setFloatAttr(attrs, "shadowBlurRadius", float64(s.BlurRadius))
+	r.setFloatAttr(attrs, "shadowSpread", float64(s.Spread))
+	r.setPosAttr(attrs, "shadowOffset", s.Offset)
+	r.setFloatAttr(attrs, "shadowVariant", float64(s.Variant))
+}
+
 func (*markupRenderer) setSizeAttr(attrs map[string]*string, name string, size fyne.Size) {
 	value := fmt.Sprintf("%dx%d", int(size.Width), int(size.Height))
+	attrs[name] = &value
+}
+
+func (*markupRenderer) setSizeAttrWithDefault(attrs map[string]*string, name string, i float32, d float32) {
+	if int(i) == int(d) {
+		return
+	}
+	value := fmt.Sprintf("%d", int(i))
 	attrs[name] = &value
 }
 
@@ -183,6 +200,47 @@ func (*markupRenderer) setStringAttr(attrs map[string]*string, name string, s st
 		return
 	}
 	attrs[name] = &s
+}
+
+func (r *markupRenderer) writeArbitraryPolygon(p *fynecanvas.ArbitraryPolygon, attrs map[string]*string) {
+	r.setColorAttr(attrs, "fillColor", p.FillColor)
+	r.setColorAttr(attrs, "strokeColor", p.StrokeColor)
+	r.setFloatAttr(attrs, "strokeWidth", float64(p.StrokeWidth))
+	r.setBoolAttr(attrs, "normalizedPoints", p.NormalizedPoints)
+	for i, pt := range p.Points {
+		r.setFloatPosAttr(attrs, fmt.Sprintf("point%d", i), float64(pt.X), float64(pt.Y))
+	}
+	for i, radius := range p.CornerRadii {
+		r.setRadiusAttr(attrs, fmt.Sprintf("radius%d", i), radius)
+	}
+	r.writeTag("arbitraryPolygon", true, attrs)
+}
+
+func (r *markupRenderer) writeArc(a *fynecanvas.Arc, attrs map[string]*string) {
+	r.setColorAttr(attrs, "fillColor", a.FillColor)
+	r.setFloatAttr(attrs, "cutoutRatio", float64(a.CutoutRatio))
+	r.setFloatAttr(attrs, "startAngle", float64(a.StartAngle))
+	r.setFloatAttr(attrs, "endAngle", float64(a.EndAngle))
+	r.setRadiusAttr(attrs, "radius", a.CornerRadius)
+	r.setColorAttr(attrs, "strokeColor", a.StrokeColor)
+	r.setFloatAttr(attrs, "strokeWidth", float64(a.StrokeWidth))
+	r.writeTag("arc", true, attrs)
+}
+
+func (r *markupRenderer) writeBezierCurve(bc *fynecanvas.BezierCurve, attrs map[string]*string) {
+	r.setColorAttr(attrs, "strokeColor", bc.StrokeColor)
+	r.setFloatAttrWithDefault(attrs, "strokeWidth", float64(bc.StrokeWidth), 1)
+	r.setFloatPosAttr(attrs, "startPoint", float64(bc.StartPoint.X), float64(bc.StartPoint.Y))
+	r.setFloatPosAttr(attrs, "endPoint", float64(bc.EndPoint.X), float64(bc.EndPoint.Y))
+	for i, cp := range bc.ControlPoints {
+		r.setFloatPosAttr(attrs, fmt.Sprintf("controlPoint%d", i+1), float64(cp.X), float64(cp.Y))
+	}
+	r.writeTag("bezierCurve", true, attrs)
+}
+
+func (r *markupRenderer) writeBlur(b *fynecanvas.Blur, attrs map[string]*string) {
+	r.setRadiusAttr(attrs, "radius", b.Radius)
+	r.writeTag("blur", true, attrs)
 }
 
 func (r *markupRenderer) writeCanvas(c fyne.Canvas) {
@@ -261,22 +319,6 @@ func (r *markupRenderer) writeCanvasObject(obj fyne.CanvasObject, _, _ fyne.Posi
 	return false
 }
 
-func (r *markupRenderer) writeBlur(b *fynecanvas.Blur, attrs map[string]*string) {
-	r.setFloatAttr(attrs, "radius", float64(b.Radius))
-	r.writeTag("blur", true, attrs)
-}
-
-func (r *markupRenderer) writeArc(a *fynecanvas.Arc, attrs map[string]*string) {
-	r.setColorAttr(attrs, "fillColor", a.FillColor)
-	r.setFloatAttr(attrs, "cutoutRatio", float64(a.CutoutRatio))
-	r.setFloatAttr(attrs, "startAngle", float64(a.StartAngle))
-	r.setFloatAttr(attrs, "endAngle", float64(a.EndAngle))
-	r.setFloatAttr(attrs, "radius", float64(a.CornerRadius))
-	r.setColorAttr(attrs, "strokeColor", a.StrokeColor)
-	r.setFloatAttr(attrs, "strokeWidth", float64(a.StrokeWidth))
-	r.writeTag("arc", true, attrs)
-}
-
 func (r *markupRenderer) writeCircle(c *fynecanvas.Circle, attrs map[string]*string) {
 	r.setColorAttr(attrs, "fillColor", c.FillColor)
 	r.setColorAttr(attrs, "strokeColor", c.StrokeColor)
@@ -310,10 +352,11 @@ func (r *markupRenderer) writeContainer(_ *fyne.Container, attrs map[string]*str
 	r.indentation++
 }
 
-func (r *markupRenderer) writeIndent() {
-	for i := 0; i < r.indentation; i++ {
-		r.w.WriteRune('\t')
-	}
+func (r *markupRenderer) writeEllipse(e *fynecanvas.Ellipse, attrs map[string]*string) {
+	r.setColorAttr(attrs, "fillColor", e.FillColor)
+	r.setColorAttr(attrs, "strokeColor", e.StrokeColor)
+	r.setFloatAttr(attrs, "strokeWidth", float64(e.StrokeWidth))
+	r.writeTag("ellipse", true, attrs)
 }
 
 func (r *markupRenderer) writeImage(i *fynecanvas.Image, attrs map[string]*string) {
@@ -331,21 +374,16 @@ func (r *markupRenderer) writeImage(i *fynecanvas.Image, attrs map[string]*strin
 	r.writeTag("image", true, attrs)
 }
 
+func (r *markupRenderer) writeIndent() {
+	for i := 0; i < r.indentation; i++ {
+		r.w.WriteRune('\t')
+	}
+}
+
 func (r *markupRenderer) writeLine(l *fynecanvas.Line, attrs map[string]*string) {
 	r.setColorAttr(attrs, "strokeColor", l.StrokeColor)
 	r.setFloatAttrWithDefault(attrs, "strokeWidth", float64(l.StrokeWidth), 1)
 	r.writeTag("line", true, attrs)
-}
-
-func (r *markupRenderer) writeBezierCurve(bc *fynecanvas.BezierCurve, attrs map[string]*string) {
-	r.setColorAttr(attrs, "strokeColor", bc.StrokeColor)
-	r.setFloatAttrWithDefault(attrs, "strokeWidth", float64(bc.StrokeWidth), 1)
-	r.setFloatPosAttr(attrs, "startPoint", float64(bc.StartPoint.X), float64(bc.StartPoint.Y))
-	r.setFloatPosAttr(attrs, "endPoint", float64(bc.EndPoint.X), float64(bc.EndPoint.Y))
-	for i, cp := range bc.ControlPoints {
-		r.setFloatPosAttr(attrs, fmt.Sprintf("controlPoint%d", i+1), float64(cp.X), float64(cp.Y))
-	}
-	r.writeTag("bezierCurve", true, attrs)
 }
 
 func (r *markupRenderer) writeLinearGradient(g *fynecanvas.LinearGradient, attrs map[string]*string) {
@@ -353,6 +391,16 @@ func (r *markupRenderer) writeLinearGradient(g *fynecanvas.LinearGradient, attrs
 	r.setColorAttr(attrs, "endColor", g.EndColor)
 	r.setFloatAttr(attrs, "angle", g.Angle)
 	r.writeTag("linearGradient", true, attrs)
+}
+
+func (r *markupRenderer) writePolygon(rct *fynecanvas.RegularPolygon, attrs map[string]*string) {
+	r.setColorAttr(attrs, "fillColor", rct.FillColor)
+	r.setColorAttr(attrs, "strokeColor", rct.StrokeColor)
+	r.setFloatAttr(attrs, "strokeWidth", float64(rct.StrokeWidth))
+	r.setRadiusAttr(attrs, "radius", rct.CornerRadius)
+	r.setFloatAttr(attrs, "angle", float64(rct.Angle))
+	r.setFloatAttr(attrs, "sides", float64(rct.Sides))
+	r.writeTag("polygon", true, attrs)
 }
 
 func (r *markupRenderer) writeRadialGradient(g *fynecanvas.RadialGradient, attrs map[string]*string) {
@@ -367,35 +415,11 @@ func (r *markupRenderer) writeRaster(rst *fynecanvas.Raster, attrs map[string]*s
 	r.writeTag("raster", true, attrs)
 }
 
-func (r *markupRenderer) writePolygon(rct *fynecanvas.RegularPolygon, attrs map[string]*string) {
-	r.setColorAttr(attrs, "fillColor", rct.FillColor)
-	r.setColorAttr(attrs, "strokeColor", rct.StrokeColor)
-	r.setFloatAttr(attrs, "strokeWidth", float64(rct.StrokeWidth))
-	r.setFloatAttr(attrs, "radius", float64(rct.CornerRadius))
-	r.setFloatAttr(attrs, "angle", float64(rct.Angle))
-	r.setFloatAttr(attrs, "sides", float64(rct.Sides))
-	r.writeTag("polygon", true, attrs)
-}
-
-func (r *markupRenderer) writeArbitraryPolygon(p *fynecanvas.ArbitraryPolygon, attrs map[string]*string) {
-	r.setColorAttr(attrs, "fillColor", p.FillColor)
-	r.setColorAttr(attrs, "strokeColor", p.StrokeColor)
-	r.setFloatAttr(attrs, "strokeWidth", float64(p.StrokeWidth))
-	r.setBoolAttr(attrs, "normalizedPoints", p.NormalizedPoints)
-	for i, pt := range p.Points {
-		r.setFloatPosAttr(attrs, fmt.Sprintf("point%d", i), float64(pt.X), float64(pt.Y))
-	}
-	for i, radius := range p.CornerRadii {
-		r.setFloatAttr(attrs, fmt.Sprintf("radius%d", i), float64(radius))
-	}
-	r.writeTag("arbitraryPolygon", true, attrs)
-}
-
 func (r *markupRenderer) writeRectangle(rct *fynecanvas.Rectangle, attrs map[string]*string) {
 	r.setColorAttr(attrs, "fillColor", rct.FillColor)
 	r.setColorAttr(attrs, "strokeColor", rct.StrokeColor)
 	r.setFloatAttr(attrs, "strokeWidth", float64(rct.StrokeWidth))
-	r.setFloatAttr(attrs, "radius", float64(rct.CornerRadius))
+	r.setRadiusAttr(attrs, "radius", rct.CornerRadius)
 	r.setFloatAttr(attrs, "aspect", float64(rct.Aspect))
 	r.setFloatAttr(attrs, "topRightRadius", float64(rct.TopRightCornerRadius))
 	r.setFloatAttr(attrs, "topLeftRadius", float64(rct.TopLeftCornerRadius))
@@ -403,21 +427,6 @@ func (r *markupRenderer) writeRectangle(rct *fynecanvas.Rectangle, attrs map[str
 	r.setFloatAttr(attrs, "bottomLeftRadius", float64(rct.BottomLeftCornerRadius))
 	r.setShadowAttrs(attrs, rct.Shadow)
 	r.writeTag("rectangle", true, attrs)
-}
-
-func (r *markupRenderer) writeEllipse(e *fynecanvas.Ellipse, attrs map[string]*string) {
-	r.setColorAttr(attrs, "fillColor", e.FillColor)
-	r.setColorAttr(attrs, "strokeColor", e.StrokeColor)
-	r.setFloatAttr(attrs, "strokeWidth", float64(e.StrokeWidth))
-	r.writeTag("ellipse", true, attrs)
-}
-
-func (r *markupRenderer) setShadowAttrs(attrs map[string]*string, s fynecanvas.Shadow) {
-	r.setColorAttr(attrs, "shadowColor", s.Color)
-	r.setFloatAttr(attrs, "shadowBlurRadius", float64(s.BlurRadius))
-	r.setFloatAttr(attrs, "shadowSpread", float64(s.Spread))
-	r.setPosAttr(attrs, "shadowOffset", s.Offset)
-	r.setFloatAttr(attrs, "shadowVariant", float64(s.Variant))
 }
 
 func (r *markupRenderer) writeSpacer(_ *layout.Spacer, attrs map[string]*string) {
