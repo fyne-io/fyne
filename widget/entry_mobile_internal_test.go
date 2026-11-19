@@ -43,7 +43,7 @@ func TestEntry_Drag_ScrollsOwnContent_Mobile(t *testing.T) {
 
 	test.Drag(w.Canvas(), fyne.NewPos(20, 20), 0, -20)
 	assert.Empty(t, e.SelectedText())
-	assert.Greater(t, e.scroller.Offset.Y, float32(0))
+	assert.Greater(t, e.scroll.Offset.Y, float32(0))
 }
 
 // An entry with no scroller of its own stays Draggable for API compatibility, so it
