@@ -50,6 +50,7 @@ static jmethodID find_static_method(JNIEnv *env, jclass clazz, const char *name,
 
 static jmethodID key_rune_method;
 static jmethodID show_keyboard_method;
+static jmethodID set_keyboard_text_method;
 static jmethodID hide_keyboard_method;
 static jmethodID show_file_open_method;
 static jmethodID show_file_save_method;
@@ -93,6 +94,7 @@ void ANativeActivity_onCreate(ANativeActivity *activity, void* savedState, size_
 		current_class = (*env)->NewGlobalRef(env, current_class);
 		key_rune_method = find_static_method(env, current_class, "getRune", "(III)I");
 		show_keyboard_method = find_static_method(env, current_class, "showKeyboard", "(I)V");
+		set_keyboard_text_method = find_static_method(env, current_class, "setKeyboardText", "(Ljava/lang/String;I)V");
 		hide_keyboard_method = find_static_method(env, current_class, "hideKeyboard", "()V");
 		show_file_open_method = find_static_method(env, current_class, "showFileOpen", "(Ljava/lang/String;)V");
 		show_file_save_method = find_static_method(env, current_class, "showFileSave", "(Ljava/lang/String;Ljava/lang/String;)V");
@@ -249,6 +251,18 @@ void showKeyboard(JNIEnv* env, int keyboardType) {
 		show_keyboard_method,
 		keyboardType
 	);
+}
+
+void setKeyboardText(JNIEnv* env, char* text, int cursor) {
+	jstring textJString = (*env)->NewStringUTF(env, text);
+	(*env)->CallStaticVoidMethod(
+		env,
+		current_class,
+		set_keyboard_text_method,
+		textJString,
+		cursor
+	);
+	(*env)->DeleteLocalRef(env, textJString);
 }
 
 void hideKeyboard(JNIEnv* env) {

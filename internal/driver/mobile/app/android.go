@@ -44,6 +44,7 @@ char* destroyEGLSurface();
 int32_t getKeyRune(JNIEnv* env, AInputEvent* e);
 
 void showKeyboard(JNIEnv* env, int keyboardType);
+void setKeyboardText(JNIEnv* env, char* text, int cursor);
 void hideKeyboard(JNIEnv* env);
 void showFileOpen(JNIEnv* env, char* mimes);
 void showFileSave(JNIEnv* env, char* mimes, char* filename);
@@ -328,6 +329,20 @@ func driverShowVirtualKeyboard(keyboard KeyboardType) {
 	err := mobileinit.RunOnJVM(func(vm, jniEnv, ctx uintptr) error {
 		env := (*C.JNIEnv)(unsafe.Pointer(jniEnv)) // not a Go heap pointer
 		C.showKeyboard(env, C.int(int32(keyboard)))
+		return nil
+	})
+	if err != nil {
+		log.Fatalf("app: %v", err)
+	}
+}
+
+// driverSetKeyboardText keeps the native keyboard proxy in sync with the focused entry.
+func driverSetKeyboardText(text string, cursor int) {
+	err := mobileinit.RunOnJVM(func(_, jniEnv, _ uintptr) error {
+		env := (*C.JNIEnv)(unsafe.Pointer(jniEnv))
+		cText := C.CString(text)
+		defer C.free(unsafe.Pointer(cText))
+		C.setKeyboardText(env, cText, C.int(cursor))
 		return nil
 	})
 	if err != nil {
