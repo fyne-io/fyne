@@ -232,12 +232,12 @@ func (c *canvas) sizeContent(size fyne.Size) {
 		c.content.Resize(areaSize)
 		c.content.Move(areaPos)
 	}
-	c.scrollFocusedEntry()
+	c.scrollFocusedObject()
 }
 
-// scrollFocusedEntry reveals the focused input in its enclosing vertical scroll.
+// scrollFocusedObject reveals the focused object in its enclosing vertical scroll.
 // It walks the object tree because canvas objects do not expose their parent.
-func (c *canvas) scrollFocusedEntry() {
+func (c *canvas) scrollFocusedObject() {
 	if c.device == nil || !c.device.keyboardShown {
 		return
 	}
@@ -247,13 +247,13 @@ func (c *canvas) scrollFocusedEntry() {
 	}
 
 	for _, tree := range c.ObjectTrees() {
-		var entryY float32
+		var focusedY float32
 		found := false
 		if intdriver.WalkVisibleObjectTree(tree, func(obj fyne.CanvasObject, pos, _ fyne.Position, _ fyne.Size) bool {
 			if obj != focused {
 				return false
 			}
-			entryY = pos.Y
+			focusedY = pos.Y
 			found = true
 			return true
 		}, func(obj fyne.CanvasObject, pos fyne.Position, _ fyne.CanvasObject) {
@@ -261,7 +261,7 @@ func (c *canvas) scrollFocusedEntry() {
 			if !found || !ok || (scroll.Direction != container.ScrollVerticalOnly && scroll.Direction != container.ScrollBoth) {
 				return
 			}
-			top := entryY - pos.Y
+			top := focusedY - pos.Y
 			height := min(focused.Size().Height, scroll.Size().Height)
 			delta := max(0, top+height-scroll.Size().Height)
 			if top < 0 {

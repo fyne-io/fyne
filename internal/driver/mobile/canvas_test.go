@@ -77,27 +77,27 @@ func Test_canvas_ChildMinSizeChangeAffectsAncestorsUpToRoot(t *testing.T) {
 	assert.Equal(t, expectedContentSize, content.Size())
 }
 
-func Test_canvas_ScrollFocusedEntry(t *testing.T) {
+func Test_canvas_ScrollFocusedObject(t *testing.T) {
 	dev := &device{keyboardShown: true}
 	c := newCanvas(dev).(*canvas)
 
-	first := widget.NewEntry()
-	last := widget.NewEntry()
-	content := container.NewVBox(first)
+	firstObject := widget.NewButton("First", nil)
+	lastObject := widget.NewButton("Last", nil)
+	content := container.NewVBox(firstObject)
 	for range 8 {
 		content.Add(widget.NewLabel("More content"))
 	}
-	content.Add(last)
+	content.Add(lastObject)
 	scroll := container.NewVScroll(content)
 	c.SetContent(scroll)
 	c.Resize(fyne.NewSize(200, 100))
 
-	c.Focus(last)
-	c.scrollFocusedEntry()
+	c.Focus(lastObject)
+	c.scrollFocusedObject()
 	assert.Greater(t, scroll.Offset.Y, float32(0))
 
-	c.Focus(first)
-	c.scrollFocusedEntry()
+	c.Focus(firstObject)
+	c.scrollFocusedObject()
 	assert.Equal(t, float32(0), scroll.Offset.Y)
 }
 
