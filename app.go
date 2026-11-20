@@ -58,7 +58,7 @@ type App interface {
 	Driver() Driver
 
 	// UniqueID returns the application unique identifier, if set.
-	// This must be set for use of the [App.Preferences]. see [NewWithID].
+	// This must be set for use of the [App.Preferences]. see [fyne.io/fyne/v2/app.NewWithID].
 	UniqueID() string
 
 	// SendNotification sends a system notification that will be displayed in the operating system's notification area.
@@ -106,7 +106,7 @@ type App interface {
 	// An error is returned, with no store, if the stored values could not be read - [ErrPasswordIncorrect]
 	// when the password does not match the one the values were saved with. The stored values are left untouched.
 	//
-	// As with [App.Preferences] a unique ID must be set for values to be persisted, see [NewWithID].
+	// As with [App.Preferences] a unique ID must be set for values to be persisted, see [fyne.io/fyne/v2/app.NewWithID].
 	//
 	// Since: 2.9
 	SecretPreferences(password []byte) (Preferences, error)
