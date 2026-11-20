@@ -8,7 +8,6 @@
 					</widget>
 					<widget pos="127,0" size="60x35" type="*widget.SelectEntry">
 						<rectangle fillColor="inputBackground" pos="2,2" radius="4" size="56x31"/>
-						<rectangle pos="1,1" radius="4" size="58x32" strokeColor="inputBorder" strokeWidth="2"/>
 						<widget pos="0,2" size="24x31" type="*widget.Scroll">
 							<widget size="24x31" type="*widget.entryContent">
 								<widget size="24x31" type="*widget.RichText">
@@ -24,6 +23,7 @@
 							<rectangle size="36x31"/>
 							<image fillMode="contain" pos="8,5" rsc="menuDropDownIcon" size="iconInlineSize" themed="foreground"/>
 						</widget>
+						<rectangle pos="1,1" radius="4" size="58x32" strokeColor="inputBorder" strokeWidth="2"/>
 					</widget>
 				</container>
 			</container>

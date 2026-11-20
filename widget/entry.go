@@ -223,7 +223,9 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 	}
 
 	if e.ActionItem != nil {
-		objects = append(objects, e.ActionItem)
+		// Keep the transparent input border above the accessory's background.
+		objects[1], objects[2] = objects[2], e.ActionItem
+		objects = append(objects, border)
 	}
 
 	icon := canvas.NewImageFromResource(e.Icon)

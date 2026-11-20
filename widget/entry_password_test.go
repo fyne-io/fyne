@@ -16,7 +16,7 @@ func TestNewPasswordEntry(t *testing.T) {
 	p.Text = "visible"
 	r := test.TempWidgetRenderer(t, p)
 
-	cont := r.Objects()[2].(*container.Scroll).Content.(fyne.Widget)
+	cont := r.Objects()[1].(*container.Scroll).Content.(fyne.Widget)
 	r = test.TempWidgetRenderer(t, cont)
 	rich := r.Objects()[1].(*widget.RichText)
 	r = test.TempWidgetRenderer(t, rich)
