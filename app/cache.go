@@ -39,7 +39,7 @@ func makeCache(a fyne.App) fyne.Cache {
 }
 
 func (c *cache) RootURI() fyne.URI {
-	return storage.NewFileURI(rootCacheDir(c.a))
+	return rootCacheURI(c.a)
 }
 
 func (c *cache) Exists(name string) bool {
