@@ -2,7 +2,9 @@ package canvas
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"errors"
+	"fmt"
 	"image"
 	_ "image/jpeg" // avoid users having to import when using image widget
 	_ "image/png"  // avoid the same for PNG images
@@ -83,6 +85,8 @@ type Image struct {
 	CornerRadius float32
 
 	previousRender bool // did we successfully draw before? if so a nil content will need a reset
+
+	lastSourceKey string // cache key of the source that produced the current Image
 }
 
 // Alpha is a convenience function that returns the alpha value for an image
@@ -131,7 +135,7 @@ func (i *Image) Move(pos fyne.Position) {
 
 // Refresh causes this image to be redrawn with its configured state.
 func (i *Image) Refresh() {
-	rc, err := i.updateReader()
+	rc, key, err := i.updateReader()
 	if err != nil {
 		fyne.LogError("Failed to load image", err)
 		return
@@ -139,6 +143,24 @@ func (i *Image) Refresh() {
 	if rc != nil {
 		rcMem := rc
 		defer rcMem.Close()
+	}
+
+	// Repeated refreshes of the same source can reuse the already decoded image.
+	if key != "" && i.Image != nil && i.lastSourceKey == key {
+		i.updateAspectAndMinSizeFromImage(i.Image)
+		Refresh(i)
+		return
+	}
+
+	if key != "" {
+		if cached := cache.GetImage(key, i); cached != nil {
+			i.Image = cached
+			i.lastSourceKey = key
+			i.updateAspectAndMinSizeFromImage(cached)
+			i.previousRender = true
+			Refresh(i)
+			return
+		}
 	}
 
 	if i.File != "" || i.Resource != nil || i.Image != nil {
@@ -186,6 +208,10 @@ func (i *Image) Refresh() {
 				return
 			}
 			i.Image = img
+			if key != "" {
+				cache.SetImage(key, i, img)
+				i.lastSourceKey = key
+			}
 		}
 	}
 
@@ -310,7 +336,7 @@ func (i *Image) name() string {
 	return ""
 }
 
-func (i *Image) updateReader() (io.ReadCloser, error) {
+func (i *Image) updateReader() (io.ReadCloser, string, error) {
 	i.isSVG = false
 	if i.Resource != nil {
 		i.isSVG = svg.IsResourceSVG(i.Resource)
@@ -326,43 +352,65 @@ func (i *Image) updateReader() (io.ReadCloser, error) {
 				}
 			}
 		}
-		return io.NopCloser(bytes.NewReader(content)), nil
+		key := ""
+		if !i.isSVG {
+			key = resourceCacheKey(i.Resource, content)
+		}
+		return io.NopCloser(bytes.NewReader(content)), key, nil
 	} else if i.File != "" {
 		var err error
 
 		fd, err := os.Open(i.File)
 		if err != nil {
-			return nil, err
+			return nil, "", err
 		}
 		i.isSVG = svg.IsFileSVG(i.File)
-		return fd, nil
+		key := ""
+		if !i.isSVG {
+			if info, statErr := fd.Stat(); statErr == nil {
+				key = fileCacheKey(i.File, info)
+			}
+		}
+		return fd, key, nil
 	}
-	return nil, nil
+	return nil, "", nil
+}
+
+// resourceCacheKey identifies the decoded bytes, not just the resource pointer,
+// so that resources whose content changes get a fresh cache entry.
+func resourceCacheKey(res fyne.Resource, content []byte) string {
+	sum := sha256.Sum256(content)
+	return fmt.Sprintf("resource:%s:%x", res.Name(), sum)
+}
+
+func fileCacheKey(path string, info os.FileInfo) string {
+	return fmt.Sprintf("file:%s:%d:%d", path, info.Size(), info.ModTime().UnixNano())
 }
 
 func (i *Image) updateAspectAndMinSize(reader io.Reader) (io.Reader, error) {
-	var pixWidth, pixHeight int
-
 	if reader != nil {
 		r, width, height, aspect, err := i.imageDetailsFromReader(reader)
 		if err != nil {
 			return nil, err
 		}
-		reader = r
 		i.aspect = aspect
-		pixWidth, pixHeight = width, height
+		if i.FillMode == ImageFillOriginal {
+			i.SetMinSize(scale.ToFyneSize(i, width, height))
+		}
+		return r, nil
 	} else if i.Image != nil {
-		original := i.Image.Bounds().Size()
-		i.aspect = float32(original.X) / float32(original.Y)
-		pixWidth, pixHeight = original.X, original.Y
-	} else {
-		return nil, errors.New("no matching image source")
+		i.updateAspectAndMinSizeFromImage(i.Image)
+		return nil, nil
 	}
+	return nil, errors.New("no matching image source")
+}
 
+func (i *Image) updateAspectAndMinSizeFromImage(original image.Image) {
+	size := original.Bounds().Size()
+	i.aspect = float32(size.X) / float32(size.Y)
 	if i.FillMode == ImageFillOriginal {
-		i.SetMinSize(scale.ToFyneSize(i, pixWidth, pixHeight))
+		i.SetMinSize(scale.ToFyneSize(i, size.X, size.Y))
 	}
-	return reader, nil
 }
 
 func (i *Image) imageDetailsFromReader(source io.Reader) (reader io.Reader, width, height int, aspect float32, err error) {
