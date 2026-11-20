@@ -82,7 +82,8 @@ type Image struct {
 	// Since: 2.7
 	CornerRadius float32
 
-	previousRender bool // did we successfully draw before? if so a nil content will need a reset
+	previousRender bool   // did we successfully draw before? if so a nil content will need a reset
+	lastLoadError  string // remember the last failure so repeated refreshes don't spam the log
 }
 
 // Alpha is a convenience function that returns the alpha value for an image
@@ -133,7 +134,7 @@ func (i *Image) Move(pos fyne.Position) {
 func (i *Image) Refresh() {
 	rc, err := i.updateReader()
 	if err != nil {
-		fyne.LogError("Failed to load image", err)
+		i.logLoadError("Failed to load image", err)
 		return
 	}
 	if rc != nil {
@@ -144,7 +145,7 @@ func (i *Image) Refresh() {
 	if i.File != "" || i.Resource != nil || i.Image != nil {
 		r, err := i.updateAspectAndMinSize(rc)
 		if err != nil {
-			fyne.LogError("Failed to load image", err)
+			i.logLoadError("Failed to load image", err)
 			return
 		}
 		if r != nil {
@@ -190,7 +191,22 @@ func (i *Image) Refresh() {
 	}
 
 	i.previousRender = true
+	i.lastLoadError = ""
 	Refresh(i)
+}
+
+// logLoadError reports a load failure only when it differs from the previous one.
+func (i *Image) logLoadError(reason string, err error) {
+	if err == nil {
+		return
+	}
+
+	msg := i.name() + ": " + reason + ": " + err.Error()
+	if msg == i.lastLoadError {
+		return
+	}
+	i.lastLoadError = msg
+	fyne.LogError(reason, err)
 }
 
 // RefreshRegion causes this image to be redrawn after the pixels of Image have
