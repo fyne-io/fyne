@@ -11,7 +11,14 @@ import (
 )
 
 func (p *preferences) storageWriter() (writeSyncCloser, error) {
-	return p.storageWriterForPath(p.storagePath())
+	path := p.storagePath()
+	writer, err := p.storageWriterForPath(path)
+	if err != nil {
+		return nil, err
+	}
+	// After creating the directory, ensure the watcher is watching it
+	p.ensureWatching()
+	return writer, nil
 }
 
 func (p *preferences) storageReader() (io.ReadCloser, error) {
@@ -40,9 +47,6 @@ func (*preferences) storageReaderForPath(path string) (io.ReadCloser, error) {
 	file, err := os.Open(path) // #nosec
 	if err != nil {
 		if os.IsNotExist(err) {
-			if err := os.MkdirAll(filepath.Dir(path), repository.PermUserReadWriteExec); err != nil {
-				return nil, err
-			}
 			return nil, errEmptyPreferencesStore
 		}
 		return nil, err
