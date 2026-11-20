@@ -58,6 +58,24 @@ public class GoNativeActivity extends NativeActivity {
 	private static final int NUMBER_KEYBOARD_CODE = 2;
 	private static final int PASSWORD_KEYBOARD_CODE = 3;
 
+	// Absorbs the short lag between native deletes and Go processing them. If the
+	// buffer emptied while deletes were still queued, the reset would end the
+	// IME's repeat before the last characters were deleted.
+	private static final String BACKSPACE_SLACK = makeSlack(64);
+	private static final int BACKSPACE_SLACK_LENGTH = BACKSPACE_SLACK.length();
+
+	private static String makeSlack(int count) {
+		StringBuilder b = new StringBuilder(count);
+		for (int i = 0; i < count; i++) {
+			b.append('\u200B');
+		}
+		return b.toString();
+	}
+
+	private static String keyboardBuffer(String text) {
+		return BACKSPACE_SLACK + text + " ";
+	}
+
     private native void filePickerReturned(String str);
     private native void insetsChanged(int top, int bottom, int left, int right);
     private native void keyboardTyped(String str);
@@ -110,11 +128,10 @@ public class GoNativeActivity extends NativeActivity {
 
 		@Override
 		public void afterTextChanged(Editable s) {
-			// always place one character so all keyboards can send backspace
-			if (s.length() < 1) {
+			if (s.length() < BACKSPACE_SLACK_LENGTH) {
 				ignoreKey = true;
-				mTextEdit.setText(" ");
-				mTextEdit.setSelection(mTextEdit.getText().length());
+				mTextEdit.setText(keyboardBuffer(""));
+				mTextEdit.setSelection(BACKSPACE_SLACK_LENGTH);
 				ignoreKey = false;
 			}
 		}
@@ -160,6 +177,35 @@ public class GoNativeActivity extends NativeActivity {
     static void showKeyboard(int keyboardType) {
         goNativeActivity.doShowKeyboard(keyboardType);
         goNativeActivity.keyboardUp = true;
+    }
+
+    static void setKeyboardText(String text, int cursor) {
+        goNativeActivity.doSetKeyboardText(text, cursor);
+    }
+
+    void doSetKeyboardText(final String text, final int cursor) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (mTextEdit == null || text == null) {
+                    return;
+                }
+
+                int runes = text.codePointCount(0, text.length());
+                int runeIndex = Math.max(0, Math.min(cursor, runes));
+                int selection = BACKSPACE_SLACK_LENGTH + text.offsetByCodePoints(0, runeIndex);
+                String desired = keyboardBuffer(text);
+
+                if (!desired.equals(mTextEdit.getText().toString())) {
+                    ignoreKey = true;
+                    mTextEdit.setText(desired);
+                    ignoreKey = false;
+                }
+                if (mTextEdit.getSelectionStart() != selection) {
+                    mTextEdit.setSelection(selection);
+                }
+            }
+        });
     }
 
     void doShowKeyboard(final int keyboardType) {
@@ -215,10 +261,9 @@ public class GoNativeActivity extends NativeActivity {
 
         mTextEdit.setOnEditorActionListener(mEditorActionListener);
 
-        // always place one character so all keyboards can send backspace
         ignoreKey = true;
-        mTextEdit.setText(" ");
-        mTextEdit.setSelection(mTextEdit.getText().length());
+        mTextEdit.setText(keyboardBuffer(""));
+        mTextEdit.setSelection(BACKSPACE_SLACK_LENGTH);
         ignoreKey = false;
     }
 
@@ -441,9 +486,8 @@ public class GoNativeActivity extends NativeActivity {
                 mTextEdit.setLayoutParams(mEditTextLayoutParams);
                 addContentView(mTextEdit, mEditTextLayoutParams);
 
-                // always place one character so all keyboards can send backspace
-                mTextEdit.setText(" ");
-                mTextEdit.setSelection(mTextEdit.getText().length());
+                mTextEdit.setText(keyboardBuffer(""));
+                mTextEdit.setSelection(BACKSPACE_SLACK_LENGTH);
 
                 mTextEdit.addTextChangedListener(mTextWatcher);
             }

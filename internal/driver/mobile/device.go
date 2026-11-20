@@ -6,6 +6,7 @@ import (
 	"fyne.io/fyne/v2/internal/driver/mobile/app"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/size"
 	"fyne.io/fyne/v2/lang"
+	"fyne.io/fyne/v2/widget"
 )
 
 type device struct {
@@ -78,6 +79,35 @@ func (d *device) HideVirtualKeyboard() {
 	}
 }
 
+// keyboardText returns the text and rune offset of a focused text input.
+func keyboardText(obj fyne.Focusable) (string, int, bool) {
+	entry, ok := obj.(*widget.Entry)
+	if !ok {
+		return "", 0, false
+	}
+	return entry.Text, entry.CursorTextOffset(), true
+}
+
+// syncKeyboardText mirrors the focused entry into the native keyboard proxy.
+// While a soft backspace repeats, Java is ahead of Go by a few events, so this
+// must not be called for those events - a setText there would end the repeat.
+func (d *device) syncKeyboardText(obj fyne.Focusable) {
+	if !d.keyboardShown {
+		return
+	}
+
+	text, cursor, ok := keyboardText(obj)
+	if !ok {
+		return
+	}
+
+	drv, ok := fyne.CurrentApp().Driver().(*driver)
+	if !ok || drv.app == nil {
+		return
+	}
+	drv.app.SetKeyboardText(text, cursor)
+}
+
 func (d *device) handleKeyboard(obj fyne.Focusable) {
 	isDisabled := false
 	if disWid, ok := obj.(fyne.Disableable); ok {
@@ -89,6 +119,7 @@ func (d *device) handleKeyboard(obj fyne.Focusable) {
 		} else {
 			d.ShowVirtualKeyboardType(mobile.DefaultKeyboard)
 		}
+		d.syncKeyboardText(obj)
 	} else {
 		d.HideVirtualKeyboard()
 	}
