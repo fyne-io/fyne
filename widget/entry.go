@@ -536,8 +536,7 @@ func (e *Entry) SetPlaceHolder(text string) {
 	e.PlaceHolder = text
 
 	e.placeholderProvider().Segments[0].(*TextSegment).Text = text
-	e.placeholderWidget.updateRowBounds()
-	e.placeholderProvider().Refresh()
+	e.placeholderProvider().Refresh() // Refresh re-runs updateRowBounds itself
 }
 
 // SetText manually sets the text of the Entry to the given text value.
@@ -1778,8 +1777,8 @@ func (r *entryRenderer) Refresh() {
 	wrapping := r.entry.Wrapping
 
 	r.entry.syncSegments()
-	r.entry.textWidget.updateRowBounds()
-	r.entry.placeholderWidget.updateRowBounds()
+	// Refresh re-runs updateRowBounds itself, so there is no need to lay the
+	// text out twice on the per-keystroke path.
 	r.entry.textWidget.Refresh()
 	r.entry.placeholderWidget.Refresh()
 

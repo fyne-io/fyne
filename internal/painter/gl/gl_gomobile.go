@@ -6,6 +6,7 @@ import (
 	"math"
 
 	"fyne.io/fyne/v2/internal/driver/mobile/gl"
+	paint "fyne.io/fyne/v2/internal/painter"
 )
 
 const (
@@ -76,6 +77,8 @@ func (p *painter) Init() {
 	p.maxTextureSize = p.ctx.GetInteger(maxTextureSizeParam)
 	p.blurSnap.texValid = false   // reset on context recreation; old texture IDs are no longer valid
 	p.blurKernel.texValid = false // kernel texture must also be re-created
+	p.atlasTexValid = false       // the atlas texture went with the old context
+	p.atlas = paint.GlyphAtlas{}  // drop cached glyph slots so they re-upload to the new texture
 	if compiled == nil {
 		compiled = p.compilePrograms()
 	}
@@ -291,7 +294,12 @@ func (c *mobileContext) Viewport(x, y, width, height int) {
 	c.glContext.Viewport(x, y, width, height)
 }
 
-// toLEByteOrder returns the byte representation of float32 values in little endian byte order.
+// toLEByteOrder returns the byte representation of float32 values in little
+// endian byte order. Each call allocates its own slice: on the gomobile
+// backend BufferData/BufferSubData only enqueue the payload pointer and the
+// GL worker reads it later from the work queue (internal/driver/mobile/gl),
+// so a shared scratch buffer would let a later upload overwrite an earlier
+// queued payload and corrupt mobile vertex/UV uploads outside debug builds.
 func toLEByteOrder(values ...float32) []byte {
 	b := make([]byte, 4*len(values))
 	for i, v := range values {

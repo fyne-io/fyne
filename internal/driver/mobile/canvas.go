@@ -301,15 +301,28 @@ func (c *canvas) tapMove(pos fyne.Position, tapID int,
 	offset := fyne.Delta{DX: deltaX, DY: deltaY}
 	c.lastTapDelta[tapID] = offset
 
-	co, objPos, _ := c.findObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {
-		if _, ok := object.(fyne.Draggable); ok {
-			return true
-		} else if _, ok := object.(mobile.Touchable); ok {
-			return true
-		}
+	// While a drag is in flight its target is locked, so the visible tree only
+	// needs walking again if there is a touch target to cancel. Skipping the
+	// walk keeps the per-move cost off the scroll and text-entry hot path, where
+	// move events arrive at up to twice the display refresh rate.
+	//
+	// Upstream develop (PR #6667) moved the scroll-direction walk into the
+	// drag-start block below, keyed on pressPos; this keeps that structure and
+	// keeps our guard over the hot-path tree walk for issue #1062.
+	var co fyne.CanvasObject
+	var objPos fyne.Position
+	if c.dragging == nil || c.touched[tapID] != nil {
+		co, objPos, _ = c.findObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {
+			if _, ok := object.(fyne.Draggable); ok {
+				return true
+			} else if _, ok := object.(mobile.Touchable); ok {
+				return true
+			}
 
-		return false
-	})
+			return false
+		})
+	}
+
 
 	if c.touched[tapID] != nil {
 		if touch, ok := co.(mobile.Touchable); !ok || c.touched[tapID] != touch {
