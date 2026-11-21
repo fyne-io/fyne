@@ -13,6 +13,9 @@ void sendNotification(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx, char 
 bool scheduleNotification(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx,
 	char *id, char *title, char *body, bool silent, long long deliveryMillis);
 void cancelScheduledNotification(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx, char *id);
+char *startForegroundService(uintptr_t jni_env, uintptr_t ctx, char *title, char *content);
+void stopForegroundService(uintptr_t jni_env, uintptr_t ctx);
+void requestNotificationPermission(uintptr_t jni_env, uintptr_t ctx);
 */
 import "C"
 
@@ -23,6 +26,7 @@ import (
 	"unsafe"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/driver/mobile"
 	"fyne.io/fyne/v2/internal/driver/mobile/app"
 	"fyne.io/fyne/v2/internal/scheduler"
 )
@@ -36,6 +40,44 @@ func (a *fyneApp) OpenURL(url *url.URL) error {
 		return nil
 	})
 	return nil
+}
+
+var (
+	_ mobile.ForegroundService      = (*fyneApp)(nil)
+	_ mobile.NotificationPermission = (*fyneApp)(nil)
+)
+
+// StartForegroundService implements [mobile.ForegroundService].
+func (a *fyneApp) StartForegroundService(title, content string) error {
+	cTitle := C.CString(title)
+	defer C.free(unsafe.Pointer(cTitle))
+	cContent := C.CString(content)
+	defer C.free(unsafe.Pointer(cContent))
+
+	return app.RunOnJVM(func(vm, env, ctx uintptr) error {
+		cErr := C.startForegroundService(C.uintptr_t(env), C.uintptr_t(ctx), cTitle, cContent)
+		if cErr == nil {
+			return nil
+		}
+		defer C.free(unsafe.Pointer(cErr))
+		return errors.New(C.GoString(cErr))
+	})
+}
+
+// StopForegroundService implements [mobile.ForegroundService].
+func (a *fyneApp) StopForegroundService() {
+	app.RunOnJVM(func(vm, env, ctx uintptr) error {
+		C.stopForegroundService(C.uintptr_t(env), C.uintptr_t(ctx))
+		return nil
+	})
+}
+
+// RequestNotificationPermission implements [mobile.NotificationPermission].
+func (a *fyneApp) RequestNotificationPermission() {
+	app.RunOnJVM(func(vm, env, ctx uintptr) error {
+		C.requestNotificationPermission(C.uintptr_t(env), C.uintptr_t(ctx))
+		return nil
+	})
 }
 
 func (a *fyneApp) SendNotification(n *fyne.Notification) {

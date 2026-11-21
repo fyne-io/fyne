@@ -577,3 +577,93 @@ void keepScreenOn(uintptr_t jni_env, uintptr_t ctx, bool disabled) {
 
    	(*env)->CallVoidMethod(env, win, action, screenFlag);
 }
+
+static jclass find_app_class(JNIEnv *env, jobject ctx, const char *class_name) {
+	jclass ctxClass = (*env)->GetObjectClass(env, ctx);
+	jmethodID getClassLoader = find_method(env, ctxClass, "getClassLoader", "()Ljava/lang/ClassLoader;");
+	if (getClassLoader == 0) return NULL;
+	jobject loader = (*env)->CallObjectMethod(env, ctx, getClassLoader);
+	if (loader == NULL) {
+		(*env)->ExceptionClear(env);
+		LOG_FATAL("cannot get class loader");
+		return NULL;
+	}
+
+	jclass loaderClass = (*env)->GetObjectClass(env, loader);
+	jmethodID loadClass = find_method(env, loaderClass, "loadClass", "(Ljava/lang/String;)Ljava/lang/Class;");
+	if (loadClass == 0) return NULL;
+
+	jstring name = (*env)->NewStringUTF(env, class_name);
+	jclass clazz = (jclass)(*env)->CallObjectMethod(env, loader, loadClass, name);
+	(*env)->DeleteLocalRef(env, name);
+	if ((*env)->ExceptionCheck(env) || clazz == NULL) {
+		(*env)->ExceptionClear(env);
+		LOG_FATAL("cannot load %s", class_name);
+		return NULL;
+	}
+	return clazz;
+}
+
+// startForegroundService returns NULL on success, or a description of the
+// failure that the caller must free.
+char *startForegroundService(uintptr_t jni_env, uintptr_t ctx, char *title, char *content) {
+	JNIEnv *env = (JNIEnv*)jni_env;
+
+	jclass serviceClass = find_app_class(env, (jobject)ctx, "org.golang.app.GoForegroundService");
+	if (serviceClass == NULL) {
+		return strdup("cannot load org.golang.app.GoForegroundService");
+	}
+
+	jmethodID start = find_static_method(env, serviceClass, "start",
+		"(Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;");
+	if (start == 0) {
+		return strdup("cannot find GoForegroundService.start");
+	}
+
+	jstring jTitle   = (*env)->NewStringUTF(env, title);
+	jstring jContent = (*env)->NewStringUTF(env, content);
+
+	char *err = NULL;
+	jstring jErr = (jstring)(*env)->CallStaticObjectMethod(env, serviceClass, start, (jobject)ctx, jTitle, jContent);
+	if ((*env)->ExceptionCheck(env)) {
+		(*env)->ExceptionDescribe(env);
+		(*env)->ExceptionClear(env);
+		err = strdup("exception while starting the foreground service");
+	} else if (jErr != NULL) {
+		err = (char *)getString(jni_env, ctx, jErr);
+		(*env)->DeleteLocalRef(env, jErr);
+	}
+
+	(*env)->DeleteLocalRef(env, jTitle);
+	(*env)->DeleteLocalRef(env, jContent);
+	return err;
+}
+
+void stopForegroundService(uintptr_t jni_env, uintptr_t ctx) {
+	JNIEnv *env = (JNIEnv*)jni_env;
+
+	jclass serviceClass = find_app_class(env, (jobject)ctx, "org.golang.app.GoForegroundService");
+	if (serviceClass == NULL) return;
+
+	jmethodID stop = find_static_method(env, serviceClass, "stop",
+		"(Landroid/content/Context;)V");
+	if (stop == 0) return;
+
+	(*env)->CallStaticVoidMethod(env, serviceClass, stop, (jobject)ctx);
+}
+
+void requestNotificationPermission(uintptr_t jni_env, uintptr_t ctx) {
+	JNIEnv *env = (JNIEnv*)jni_env;
+
+	// The activity decides whether a request is needed and issues it on its
+	// UI thread, as this code runs on a thread attached just for the call.
+	jclass ctxClass = (*env)->GetObjectClass(env, (jobject)ctx);
+	jmethodID request = find_method(env, ctxClass, "requestNotificationPermission", "()V");
+	if (request == 0) return;
+
+	(*env)->CallVoidMethod(env, (jobject)ctx, request);
+	if ((*env)->ExceptionCheck(env)) {
+		(*env)->ExceptionDescribe(env);
+		(*env)->ExceptionClear(env);
+	}
+}
