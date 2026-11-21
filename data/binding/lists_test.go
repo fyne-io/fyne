@@ -1,6 +1,7 @@
 package binding
 
 import (
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -151,6 +152,67 @@ func TestFloatList_Append(t *testing.T) {
 
 	f.Append(0.5)
 	assert.Equal(t, 1, f.Length())
+}
+
+func TestFloatList_AppendNotifiesOnlyList(t *testing.T) {
+	f := NewFloatList()
+	f.Append(0.5)
+	f.Append(0.7)
+
+	calledList, calledChild := 0, 0
+	f.AddListener(NewDataListener(func() {
+		calledList++
+	}))
+	for i := 0; i < f.Length(); i++ {
+		child, err := f.GetItem(i)
+		assert.Nil(t, err)
+		child.AddListener(NewDataListener(func() {
+			calledChild++
+		}))
+	}
+
+	calledList, calledChild = 0, 0
+	err := f.Append(0.3)
+	assert.Nil(t, err)
+	assert.Equal(t, 1, calledList)
+	assert.Zero(t, calledChild)
+
+	v, err := f.GetValue(2)
+	assert.Nil(t, err)
+	assert.Equal(t, 0.3, v)
+}
+
+func TestExternalFloatList_AppendChecksEveryItem(t *testing.T) {
+	l := []float64{1.0, 5.0}
+	f := BindFloatList(&l)
+
+	calledChild := false
+	child, err := f.GetItem(0)
+	assert.Nil(t, err)
+	child.AddListener(NewDataListener(func() {
+		calledChild = true
+	}))
+
+	calledChild = false
+	l[0] = 2.0
+	err = f.Append(3.0)
+	assert.Nil(t, err)
+	assert.True(t, calledChild)
+	assert.Equal(t, 3, f.Length())
+}
+
+func BenchmarkFloatList_Append(b *testing.B) {
+	for _, n := range []int{100, 1000, 10000} {
+		b.Run(strconv.Itoa(n), func(b *testing.B) {
+			b.ReportAllocs()
+			for i := 0; i < b.N; i++ {
+				f := NewFloatList()
+				for j := 0; j < n; j++ {
+					f.Append(float64(j))
+				}
+			}
+		})
+	}
 }
 
 func TestFloatList_GetValue(t *testing.T) {
