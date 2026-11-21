@@ -61,6 +61,7 @@ func Clean(canvasRefreshed bool) {
 		return
 	}
 	destroyExpiredSvgs(now)
+	destroyExpiredImages(now)
 	destroyExpiredFontMetrics(now)
 	destroyExpiredBlurKernels(now)
 	if canvasRefreshed {
@@ -99,9 +100,10 @@ func CleanCanvas(canvas fyne.Canvas) {
 	})
 }
 
-// ResetThemeCaches clears all the svg and text size cache maps
+// ResetThemeCaches clears all the svg, decoded image and text size cache maps
 func ResetThemeCaches() {
 	svgs.Clear()
+	images.Clear()
 	ClearFontMetrics()
 }
 
