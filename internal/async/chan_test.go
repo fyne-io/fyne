@@ -4,9 +4,33 @@ import (
 	"runtime"
 	"sync"
 	"testing"
+	"time"
 
 	"fyne.io/fyne/v2/internal/async"
 )
+
+func TestUnboundedChanReadyNotification(t *testing.T) {
+	ready := make(chan int, 1)
+	var ch *async.UnboundedChan[int]
+	ch = async.NewUnboundedChan[int](func() {
+		select {
+		case value := <-ch.Out():
+			ready <- value
+		default:
+			ready <- -1
+		}
+	})
+	defer ch.Close()
+	ch.In() <- 42
+	select {
+	case value := <-ready:
+		if value != 42 {
+			t.Fatalf("notification ran before output became available: got %d", value)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("output became available without a notification")
+	}
+}
 
 func TestUnboundedChann(t *testing.T) {
 	testCount := 200
