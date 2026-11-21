@@ -9,7 +9,7 @@ require (
 	github.com/anthonynsimon/bild v0.14.0
 	github.com/fogleman/gg v1.3.0
 	github.com/fsnotify/fsnotify v1.9.0
-	github.com/fyne-io/gl-js v0.2.1-0.20260315212741-029c47fd27e8
+	github.com/fyne-io/gl-js v0.2.1-0.20261121122654-840fe93a293a
 	github.com/fyne-io/glfw-js v0.4.0
 	github.com/fyne-io/image v0.1.1
 	github.com/fyne-io/oksvg v0.2.1-0.20260918172519-a9af55fa95d9
