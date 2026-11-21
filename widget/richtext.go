@@ -1458,7 +1458,7 @@ func (r *textRenderer) Refresh() {
 				inner.Objects = r.obj.layeredVisuals()
 			}
 		}
-		r.obj.scr.Refresh()
+		r.obj.scr.RefreshBarsOnly()
 	} else {
 		r.SetObjects(objs)
 	}

@@ -82,7 +82,10 @@ type Image struct {
 	// Since: 2.7
 	CornerRadius float32
 
-	previousRender bool // did we successfully draw before? if so a nil content will need a reset
+	previousRender bool          // did we successfully draw before? if so a nil content will need a reset
+	loadedSource   string        // source for which a load was already attempted
+	loadedResource fyne.Resource // resource instance belonging to loadedSource
+	lastLoadError  string        // error from the last load attempt for loadedSource
 }
 
 // Alpha is a convenience function that returns the alpha value for an image
@@ -110,10 +113,8 @@ func (i *Image) Hide() {
 
 // MinSize returns the specified minimum size, if set, or {1, 1} otherwise.
 func (i *Image) MinSize() fyne.Size {
-	if i.Image == nil || i.aspect == 0 {
-		if i.File != "" || i.Resource != nil {
-			i.Refresh()
-		}
+	if source := i.name(); source != "" && source != i.loadedSource {
+		i.Refresh()
 	}
 	return i.baseObject.MinSize()
 }
@@ -131,8 +132,16 @@ func (i *Image) Move(pos fyne.Position) {
 
 // Refresh causes this image to be redrawn with its configured state.
 func (i *Image) Refresh() {
+	source := i.name()
+	if i.Image == nil && i.lastLoadError != "" && source == i.loadedSource && i.Resource == i.loadedResource {
+		return
+	}
+	i.loadedSource = source
+	i.loadedResource = i.Resource
+	i.lastLoadError = ""
 	rc, err := i.updateReader()
 	if err != nil {
+		i.lastLoadError = err.Error()
 		fyne.LogError("Failed to load image", err)
 		return
 	}
@@ -144,6 +153,7 @@ func (i *Image) Refresh() {
 	if i.File != "" || i.Resource != nil || i.Image != nil {
 		r, err := i.updateAspectAndMinSize(rc)
 		if err != nil {
+			i.lastLoadError = err.Error()
 			fyne.LogError("Failed to load image", err)
 			return
 		}
@@ -171,6 +181,7 @@ func (i *Image) Refresh() {
 		if i.isSVG {
 			tex, err := i.renderSVG(width, height)
 			if err != nil {
+				i.lastLoadError = err.Error()
 				fyne.LogError("Failed to render SVG", err)
 				return
 			}
@@ -182,6 +193,7 @@ func (i *Image) Refresh() {
 
 			img, _, err := image.Decode(rc)
 			if err != nil {
+				i.lastLoadError = err.Error()
 				fyne.LogError("Failed to render image", err)
 				return
 			}
@@ -226,8 +238,8 @@ func (i *Image) Resize(s fyne.Size) {
 		}
 		i.Image = tex
 		Refresh(i) // invalidate texture
-	} else if i.Image == nil {
-		i.Refresh()
+	} else if i.Image == nil && i.lastLoadError == "" {
+		i.Refresh() // initial load, but don't retry a source that already failed
 	} else {
 		Refresh(i) // just re-size using GPU scaling
 	}

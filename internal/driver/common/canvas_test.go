@@ -1,8 +1,13 @@
 package common
 
 import (
+	"bytes"
 	"fmt"
 	"image/color"
+	"log"
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -402,6 +407,39 @@ type dummyCanvas struct {
 
 func (dummyCanvas) Scale() float32 {
 	return 1.0
+}
+
+func (dummyCanvas) Resize(fyne.Size) {}
+
+func (dummyCanvas) MinSize() fyne.Size {
+	return fyne.NewSize(100, 100)
+}
+
+func TestCanvas_EnsureMinSizeDoesNotRefreshImagesEveryFrame(t *testing.T) {
+	test.NewTempApp(t)
+
+	var buf bytes.Buffer
+	log.SetOutput(&buf)
+	t.Cleanup(func() { log.SetOutput(os.Stderr) })
+
+	img := canvas.NewImageFromFile(filepath.Join(t.TempDir(), "missing.png"))
+	base := test.NewCanvas()
+	base.SetContent(img)
+	impl := &dummyCanvas{Canvas: base}
+
+	c := &Canvas{}
+	c.Initialize(impl, func() {})
+	c.SetContentTreeAndFocusMgr(impl.Content())
+
+	for i := 0; i < 3; i++ {
+		c.EnsureMinSize()
+	}
+	initial := strings.Count(buf.String(), "Failed to load image")
+
+	for i := 0; i < 10; i++ {
+		c.EnsureMinSize()
+	}
+	assert.Equal(t, initial, strings.Count(buf.String(), "Failed to load image"), buf.String())
 }
 
 func TestRefreshCount(t *testing.T) { // Issue 2548.
