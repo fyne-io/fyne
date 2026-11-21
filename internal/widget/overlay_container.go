@@ -121,7 +121,10 @@ func (r *overlayRenderer) Layout(s fyne.Size) {
 		r.o.Background.Resize(s)
 	}
 
-	if r.o.manual { // position is overridden
+	if r.o.manual {
+		if _, canvasArea := r.o.canvas.InteractiveArea(); s == canvasArea {
+			r.keepContentInside(s, size)
+		}
 		return
 	}
 
@@ -130,6 +133,14 @@ func (r *overlayRenderer) Layout(s fyne.Size) {
 	midY := s.Height / 2
 	midY -= size.Height / 2
 	r.o.Content.Move(fyne.NewPos(midX, midY))
+}
+
+func (r *overlayRenderer) keepContentInside(area, size fyne.Size) {
+	pos := r.o.Content.Position()
+	inside := fyne.NewPos(max(0, min(pos.X, area.Width-size.Width)), max(0, min(pos.Y, area.Height-size.Height)))
+	if inside != pos {
+		r.o.Content.Move(inside)
+	}
 }
 
 func (r *overlayRenderer) MinSize() fyne.Size {
