@@ -122,16 +122,8 @@ func (r *overlayRenderer) Layout(s fyne.Size) {
 	}
 
 	if r.o.manual {
-		// PopUpMenu sizes the overlay to MinSize before it is on the canvas.
-		// That placeholder is not the canvas bounds; clamping it would replace the
-		// manual anchor (a non-zero position) and Show would keep the origin.
-		_, area := r.o.canvas.InteractiveArea()
-		if !area.IsZero() && s == area {
-			pos := r.o.Content.Position()
-			bounded := fyne.NewPos(max(0, min(pos.X, s.Width-size.Width)), max(0, min(pos.Y, s.Height-size.Height)))
-			if bounded != pos {
-				r.o.Content.Move(bounded)
-			}
+		if _, canvasArea := r.o.canvas.InteractiveArea(); s == canvasArea {
+			r.keepContentInside(s, size)
 		}
 		return
 	}
@@ -141,6 +133,14 @@ func (r *overlayRenderer) Layout(s fyne.Size) {
 	midY := s.Height / 2
 	midY -= size.Height / 2
 	r.o.Content.Move(fyne.NewPos(midX, midY))
+}
+
+func (r *overlayRenderer) keepContentInside(area, size fyne.Size) {
+	pos := r.o.Content.Position()
+	inside := fyne.NewPos(max(0, min(pos.X, area.Width-size.Width)), max(0, min(pos.Y, area.Height-size.Height)))
+	if inside != pos {
+		r.o.Content.Move(inside)
+	}
 }
 
 func (r *overlayRenderer) MinSize() fyne.Size {
