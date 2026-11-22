@@ -89,6 +89,12 @@ type canvas struct {
 	propertyLock sync.RWMutex
 }
 
+// scratchPainter is implemented by painters that can render into a pooled frame.
+type scratchPainter interface {
+	PaintScratch(fyne.Canvas) *image.NRGBA
+	ReleaseScratch(*image.NRGBA)
+}
+
 func (c *canvas) Capture() image.Image {
 	cache.Clean(true)
 	size := c.Size()
@@ -99,7 +105,13 @@ func (c *canvas) Capture() image.Image {
 	}
 
 	if c.painter != nil {
-		draw.Draw(img, bounds, c.painter.Paint(c), image.Point{}, draw.Over)
+		if scratch, ok := c.painter.(scratchPainter); ok {
+			frame := scratch.PaintScratch(c)
+			defer scratch.ReleaseScratch(frame)
+			draw.Draw(img, bounds, frame, image.Point{}, draw.Over)
+		} else {
+			draw.Draw(img, bounds, c.painter.Paint(c), image.Point{}, draw.Over)
+		}
 	}
 
 	return img
