@@ -17,8 +17,8 @@ var (
 	_ fyne.Focusable    = (*radioItem)(nil)
 )
 
-func newRadioItem(label string, onTap func(*radioItem)) *radioItem {
-	i := &radioItem{Label: label, onTap: onTap}
+func newRadioItem(label string, wrap fyne.TextWrap, onTap func(*radioItem)) *radioItem {
+	i := &radioItem{Label: label, wrapping: wrap, onTap: onTap}
 	i.ExtendBaseWidget(i)
 	return i
 }
@@ -30,6 +30,8 @@ type radioItem struct {
 	Label    string
 	Selected bool
 
+	wrapping fyne.TextWrap
+
 	focused bool
 	hovered bool
 	onTap   func(item *radioItem)
@@ -37,10 +39,10 @@ type radioItem struct {
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer.
 func (i *radioItem) CreateRenderer() fyne.WidgetRenderer {
-	txt := canvas.Text{Alignment: fyne.TextAlignLeading}
-	txt.TextSize = i.Theme().Size(theme.SizeNameText)
-	r := &radioItemRenderer{item: i, label: &txt}
-	r.SetObjects([]fyne.CanvasObject{&r.focusIndicator, &r.icon, &r.over, &txt})
+	label := NewRichTextWithText(i.Label)
+	label.Wrapping = i.wrapping
+	r := &radioItemRenderer{item: i, label: label}
+	r.SetObjects([]fyne.CanvasObject{&r.focusIndicator, &r.icon, &r.over, label})
 	r.update()
 	return r
 }
@@ -124,7 +126,14 @@ type radioItemRenderer struct {
 
 	focusIndicator canvas.Circle
 	icon, over     canvas.Image
-	label          *canvas.Text
+	label          *RichText
+}
+
+// labelOffset returns the x offset of the label inside the radio item.
+func (r *radioItemRenderer) labelOffset() float32 {
+	th := r.item.Theme()
+	focusIndicatorWidth := th.Size(theme.SizeNameInlineIcon) + th.Size(theme.SizeNameInnerPadding)
+	return focusIndicatorWidth + th.Size(theme.SizeNamePadding)
 }
 
 func (r *radioItemRenderer) Layout(size fyne.Size) {
@@ -137,9 +146,17 @@ func (r *radioItemRenderer) Layout(size fyne.Size) {
 	r.focusIndicator.Resize(focusIndicatorSize)
 	r.focusIndicator.Move(fyne.NewPos(borderSize, (size.Height-focusIndicatorSize.Height)/2))
 
-	labelSize := fyne.NewSize(size.Width, size.Height)
-	r.label.Resize(labelSize)
-	r.label.Move(fyne.NewPos(focusIndicatorSize.Width+th.Size(theme.SizeNamePadding), 0))
+	labelX := r.labelOffset()
+	labelWidth := size.Width
+	if r.item.wrapping != fyne.TextWrapOff {
+		// constrain wrap to the space remaining after the icon column
+		labelWidth = size.Width - labelX
+		if labelWidth < 0 {
+			labelWidth = 0
+		}
+	}
+	r.label.Resize(fyne.NewSize(labelWidth, size.Height))
+	r.label.Move(fyne.NewPos(labelX, 0))
 
 	iconPos := fyne.NewPos(innerPadding/2+borderSize, (size.Height-iconInlineSize)/2)
 	iconSize := fyne.NewSquareSize(iconInlineSize)
@@ -166,13 +183,19 @@ func (r *radioItemRenderer) update() {
 	th := r.item.Theme()
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 
-	r.label.Text = r.item.Label
-	r.label.TextSize = th.Size(theme.SizeNameText)
+	seg := r.label.Segments[0].(*TextSegment)
+	seg.Text = r.item.Label
+	seg.Style.SizeName = theme.SizeNameText
 	if r.item.Disabled() {
-		r.label.Color = th.Color(theme.ColorNameDisabled, v)
+		seg.Style.ColorName = theme.ColorNameDisabled
 	} else {
-		r.label.Color = th.Color(theme.ColorNameForeground, v)
+		seg.Style.ColorName = theme.ColorNameForeground
 	}
+	r.label.Wrapping = r.item.wrapping
+	// Negate RichText's built-in inner padding so the label keeps the same
+	// position and MinSize that the previous canvas.Text-based renderer had.
+	r.label.inset = fyne.NewSquareSize(th.Size(theme.SizeNameInnerPadding))
+	r.label.Refresh()
 
 	out := theme.NewThemedResource(th.Icon(theme.IconNameRadioButton))
 	out.ColorName = theme.ColorNameInputBorder
