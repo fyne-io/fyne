@@ -21,9 +21,11 @@ type noosDriver struct {
 	size   func() fyne.Size
 	done   bool
 
-	wins    []fyne.Window
-	current int
-	device  noosDevice
+	wins       []fyne.Window
+	current    int
+	device     noosDevice
+	inertia    *inertiaState
+	drawTicker *time.Ticker
 }
 
 func (n *noosDriver) CreateWindow(_ string) fyne.Window {
@@ -73,8 +75,19 @@ func (n *noosDriver) doRun() {
 		n.renderWindow(w)
 	}
 
+	defer n.stopDrawTicker()
+
 	for !n.done {
+		var draw <-chan time.Time
+		if n.drawTicker != nil {
+			draw = n.drawTicker.C
+		}
+
 		select {
+		case <-draw:
+			if w := n.stepInertia(); w != nil {
+				n.renderWindow(w)
+			}
 		case fn := <-n.queue:
 			fn.f()
 			if fn.done != nil {
@@ -141,6 +154,9 @@ func (n *noosDriver) doRun() {
 }
 
 func (n *noosDriver) handleTouchDown(ev *embedded.TouchDownEvent, w *noosWindow) {
+	// A new touch takes over from a running flick.
+	n.stopInertia()
+
 	w.c.tapDown(ev.Position, ev.ID)
 	n.renderWindow(w)
 }
@@ -153,6 +169,7 @@ func (n *noosDriver) handleTouchMove(ev *embedded.TouchMoveEvent, w *noosWindow)
 }
 
 func (n *noosDriver) handleTouchUp(ev *embedded.TouchUpEvent, w *noosWindow) {
+	var inertia []inertiaTarget
 	w.c.tapUp(ev.Position, ev.ID, func(wid fyne.Tappable, ev *fyne.PointEvent) {
 		wid.Tapped(ev)
 	}, func(wid fyne.SecondaryTappable, ev *fyne.PointEvent) {
@@ -165,24 +182,9 @@ func (n *noosDriver) handleTouchUp(ev *embedded.TouchUpEvent, w *noosWindow) {
 			return
 		}
 
-		go func() {
-			for math.Abs(float64(ev.Dragged.DX)) > tapMoveEndThreshold || math.Abs(float64(ev.Dragged.DY)) > tapMoveEndThreshold {
-				if math.Abs(float64(ev.Dragged.DX)) > 0 {
-					ev.Dragged.DX *= tapMoveDecay
-				}
-				if math.Abs(float64(ev.Dragged.DY)) > 0 {
-					ev.Dragged.DY *= tapMoveDecay
-				}
-
-				n.DoFromGoroutine(func() {
-					wid.Dragged(ev)
-				}, false)
-				time.Sleep(time.Millisecond * 16)
-			}
-
-			n.DoFromGoroutine(wid.DragEnd, false)
-		}()
+		inertia = append(inertia, inertiaTarget{wid: wid, event: *ev})
 	})
+	n.startInertia(w, inertia)
 	n.renderWindow(w)
 }
 

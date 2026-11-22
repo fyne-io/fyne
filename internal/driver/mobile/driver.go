@@ -41,6 +41,17 @@ const (
 	tapDoubleDelay      = 500 * time.Millisecond // max duration between taps for a DoubleTap event
 )
 
+// inertiaTarget is a draggable and a snapshot of its drag event.
+type inertiaTarget struct {
+	wid   fyne.Draggable
+	event fyne.DragEvent
+}
+
+// inertiaState is the active flick, accessed on the event loop.
+type inertiaState struct {
+	targets []inertiaTarget
+}
+
 // Configuration is the system information about the current device
 type Configuration struct {
 	SystemTheme fyne.ThemeVariant
@@ -65,6 +76,7 @@ type driver struct {
 	painting        bool
 	running         bool
 	queuedFuncs     *async.UnboundedChan[func()]
+	inertia         *inertiaState
 }
 
 // Declare conformity with Driver
@@ -217,6 +229,7 @@ func (d *driver) Run() {
 		for {
 			select {
 			case <-draw.C:
+				d.stepInertia()
 				d.sendPaintEvent()
 			case fn := <-d.queuedFuncs.Out():
 				fn()
@@ -450,7 +463,10 @@ func (d *driver) setTheme(dark bool) {
 	d.theme = mode
 }
 
-func (*driver) tapDownCanvas(w *window, x, y float32, tapID touch.Sequence) {
+func (d *driver) tapDownCanvas(w *window, x, y float32, tapID touch.Sequence) {
+	// Stop the old flick before the canvas resets its drag state.
+	d.stopInertia()
+
 	tapX := scale.ToFyneCoordinate(w.canvas, int(x))
 	tapY := scale.ToFyneCoordinate(w.canvas, int(y))
 	pos := fyne.NewPos(tapX, tapY+tapYOffset)
@@ -491,6 +507,7 @@ func (d *driver) tapUpCanvas(w *window, x, y float32, tapID touch.Sequence) {
 	tapY := scale.ToFyneCoordinate(w.canvas, int(y))
 	pos := fyne.NewPos(tapX, tapY+tapYOffset)
 
+	var inertia []inertiaTarget
 	w.canvas.tapUp(pos, int(tapID), func(wid fyne.Tappable, ev *fyne.PointEvent) {
 		wid.Tapped(ev)
 	}, func(wid fyne.SecondaryTappable, ev *fyne.PointEvent) {
@@ -503,24 +520,61 @@ func (d *driver) tapUpCanvas(w *window, x, y float32, tapID touch.Sequence) {
 			return
 		}
 
-		go func() {
-			for math.Abs(float64(ev.Dragged.DX)) > tapMoveEndThreshold || math.Abs(float64(ev.Dragged.DY)) > tapMoveEndThreshold {
-				if math.Abs(float64(ev.Dragged.DX)) > 0 {
-					ev.Dragged.DX *= tapMoveDecay
-				}
-				if math.Abs(float64(ev.Dragged.DY)) > 0 {
-					ev.Dragged.DY *= tapMoveDecay
-				}
-
-				d.DoFromGoroutine(func() {
-					wid.Dragged(ev)
-				}, false)
-				time.Sleep(time.Millisecond * 16)
-			}
-
-			d.DoFromGoroutine(wid.DragEnd, false)
-		}()
+		// Copy the event; the canvas mutates it for companion scrollers.
+		inertia = append(inertia, inertiaTarget{wid: wid, event: *ev})
 	})
+	d.startInertia(inertia)
+}
+
+// startInertia stores the flick to decay each frame.
+func (d *driver) startInertia(targets []inertiaTarget) {
+	if len(targets) == 0 {
+		d.inertia = nil
+		return
+	}
+	d.inertia = &inertiaState{targets: targets}
+}
+
+// stopInertia ends a running flick and its drag.
+func (d *driver) stopInertia() {
+	state := d.inertia
+	if state == nil {
+		return
+	}
+	d.inertia = nil
+	for _, target := range state.targets {
+		target.wid.DragEnd()
+	}
+}
+
+// stepInertia applies one frame of momentum.
+func (d *driver) stepInertia() {
+	state := d.inertia
+	if state == nil {
+		return
+	}
+	d.inertia = nil
+
+	active := make([]inertiaTarget, 0, len(state.targets))
+	for _, target := range state.targets {
+		event := target.event
+		event.Dragged.DX *= tapMoveDecay
+		event.Dragged.DY *= tapMoveDecay
+
+		if math.Abs(float64(event.Dragged.DX)) <= tapMoveEndThreshold &&
+			math.Abs(float64(event.Dragged.DY)) <= tapMoveEndThreshold {
+			target.wid.DragEnd()
+			continue
+		}
+
+		target.event = event
+		active = append(active, target)
+		target.wid.Dragged(&event)
+	}
+
+	if len(active) > 0 {
+		d.inertia = &inertiaState{targets: active}
+	}
 }
 
 // scrollCanvas sends a vertical mouse wheel scroll from the simulator to the
