@@ -2,11 +2,7 @@
 
 package gl
 
-import (
-	"math"
-
-	"github.com/fyne-io/gl-js"
-)
+import "github.com/fyne-io/gl-js"
 
 const (
 	arrayBuffer           = gl.ARRAY_BUFFER
@@ -282,17 +278,4 @@ func (c *xjsContext) VertexAttribPointerWithOffset(attribute Attribute, size int
 
 func (c *xjsContext) Viewport(x, y, width, height int) {
 	gl.Viewport(x, y, width, height)
-}
-
-// toLEByteOrder returns the byte representation of float32 values in little endian byte order.
-func toLEByteOrder(values ...float32) []byte {
-	b := make([]byte, 4*len(values))
-	for i, v := range values {
-		u := math.Float32bits(v)
-		b[4*i+0] = byte(u >> 0)
-		b[4*i+1] = byte(u >> 8)
-		b[4*i+2] = byte(u >> 16)
-		b[4*i+3] = byte(u >> 24)
-	}
-	return b
 }
