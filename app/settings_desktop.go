@@ -14,11 +14,21 @@ import (
 
 func watchFileAddTarget(watcher *fsnotify.Watcher, path string) {
 	dir := filepath.Dir(path)
-	ensureDirExists(dir)
+	if stat, err := os.Stat(dir); err != nil || !stat.IsDir() {
+		return // directory doesn't exist yet, skip watching until it's created
+	}
 
 	err := watcher.Add(dir)
 	if err != nil {
 		fyne.LogError("Settings watch error:", err)
+	}
+}
+
+// addWatcherTarget is called to add the watcher target after the directory is created.
+// It's a wrapper that accepts any type for the watcher to avoid importing fsnotify in preferences.
+func addWatcherTarget(watcher any, path string) {
+	if w, ok := watcher.(*fsnotify.Watcher); ok {
+		watchFileAddTarget(w, path)
 	}
 }
 
