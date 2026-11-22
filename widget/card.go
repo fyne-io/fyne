@@ -31,6 +31,26 @@ func NewCard(title, subtitle string, content fyne.CanvasObject) *Card {
 	return card
 }
 
+// AccessibilityLabel for a card is its title, followed by the subtitle if set.
+//
+// Since: 2.8
+func (c *Card) AccessibilityLabel() string {
+	if c.Title == "" {
+		return c.Subtitle
+	}
+	if c.Subtitle == "" {
+		return c.Title
+	}
+	return c.Title + ", " + c.Subtitle
+}
+
+// AccessibilityRole for a card is fyne.AccessibleRoleContainer, so its content is also exposed.
+//
+// Since: 2.8
+func (*Card) AccessibilityRole() fyne.AccessibleRole {
+	return fyne.AccessibleRoleContainer
+}
+
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (c *Card) CreateRenderer() fyne.WidgetRenderer {
 	c.ExtendBaseWidget(c)

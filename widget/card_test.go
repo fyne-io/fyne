@@ -142,3 +142,16 @@ func newContentRect() *canvas.Rectangle {
 
 	return rect
 }
+
+func TestCard_Accessibility(t *testing.T) {
+	c := widget.NewCard("Title", "Subtitle", nil)
+	assert.Equal(t, fyne.AccessibleRoleContainer, c.AccessibilityRole())
+	assert.Equal(t, "Title, Subtitle", c.AccessibilityLabel())
+
+	c.SetSubTitle("")
+	assert.Equal(t, "Title", c.AccessibilityLabel())
+
+	c.SetTitle("")
+	c.SetSubTitle("Subtitle")
+	assert.Equal(t, "Subtitle", c.AccessibilityLabel())
+}
