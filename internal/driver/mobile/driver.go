@@ -34,7 +34,7 @@ import (
 )
 
 const (
-	tapMoveDecay        = 0.92                   // how much should the scroll continue decay on each frame?
+	tapMoveDecay        = 0.97                   // how much should the scroll continue decay on each frame?
 	tapMoveEndThreshold = 2.0                    // at what offset will we stop decaying?
 	tapMoveThreshold    = 4.0                    // how far can we move before it is a drag
 	tapSecondaryDelay   = 300 * time.Millisecond // how long before secondary tap
