@@ -2,11 +2,7 @@
 
 package gl
 
-import (
-	"math"
-
-	"fyne.io/fyne/v2/internal/driver/mobile/gl"
-)
+import "fyne.io/fyne/v2/internal/driver/mobile/gl"
 
 const (
 	arrayBuffer           = gl.ArrayBuffer
@@ -289,17 +285,4 @@ func (c *mobileContext) VertexAttribPointerWithOffset(attribute Attribute, size 
 
 func (c *mobileContext) Viewport(x, y, width, height int) {
 	c.glContext.Viewport(x, y, width, height)
-}
-
-// toLEByteOrder returns the byte representation of float32 values in little endian byte order.
-func toLEByteOrder(values ...float32) []byte {
-	b := make([]byte, 4*len(values))
-	for i, v := range values {
-		u := math.Float32bits(v)
-		b[4*i+0] = byte(u >> 0)
-		b[4*i+1] = byte(u >> 8)
-		b[4*i+2] = byte(u >> 16)
-		b[4*i+3] = byte(u >> 24)
-	}
-	return b
 }
