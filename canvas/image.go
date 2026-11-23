@@ -82,10 +82,10 @@ type Image struct {
 	// Since: 2.7
 	CornerRadius float32
 
-	previousRender bool          // did we successfully draw before? if so a nil content will need a reset
-	loadedSource   string        // source for which a load was already attempted
-	loadedResource fyne.Resource // resource instance belonging to loadedSource
-	lastLoadError  string        // error from the last load attempt for loadedSource
+	previousRender    bool          // did we successfully draw before? if so a nil content will need a reset
+	attemptedSource   string        // source of the last load attempt
+	attemptedResource fyne.Resource // resource instance of the last load attempt
+	lastLoadError     string        // error from the last load attempt
 }
 
 // Alpha is a convenience function that returns the alpha value for an image
@@ -99,7 +99,11 @@ func (i *Image) Alpha() float64 {
 // Since: 2.4
 func (i *Image) Aspect() float32 {
 	if i.aspect == 0 {
-		i.Refresh()
+		if i.File == "" && i.Resource == nil {
+			i.Refresh()
+		} else if i.Image == nil {
+			i.refreshIfNeeded()
+		}
 	}
 	return i.aspect
 }
@@ -113,10 +117,26 @@ func (i *Image) Hide() {
 
 // MinSize returns the specified minimum size, if set, or {1, 1} otherwise.
 func (i *Image) MinSize() fyne.Size {
-	if source := i.name(); source != "" && source != i.loadedSource {
-		i.Refresh()
+	if i.Image == nil && (i.File != "" || i.Resource != nil) &&
+		(i.aspect == 0 || i.sourceChangedSinceAttempt()) {
+		i.refreshIfNeeded()
 	}
 	return i.baseObject.MinSize()
+}
+
+func (i *Image) sourceChangedSinceAttempt() bool {
+	return i.name() != i.attemptedSource || i.Resource != i.attemptedResource
+}
+
+func (i *Image) loadAttemptFailed() bool {
+	return i.lastLoadError != "" && !i.sourceChangedSinceAttempt()
+}
+
+// refreshIfNeeded skips a retry if the unchanged source just failed.
+func (i *Image) refreshIfNeeded() {
+	if !i.loadAttemptFailed() {
+		i.Refresh()
+	}
 }
 
 // Move the image object to a new position, relative to its parent top, left corner.
@@ -132,12 +152,8 @@ func (i *Image) Move(pos fyne.Position) {
 
 // Refresh causes this image to be redrawn with its configured state.
 func (i *Image) Refresh() {
-	source := i.name()
-	if i.Image == nil && i.lastLoadError != "" && source == i.loadedSource && i.Resource == i.loadedResource {
-		return
-	}
-	i.loadedSource = source
-	i.loadedResource = i.Resource
+	i.attemptedSource = i.name()
+	i.attemptedResource = i.Resource
 	i.lastLoadError = ""
 	rc, err := i.updateReader()
 	if err != nil {
@@ -229,17 +245,23 @@ func (i *Image) Resize(s fyne.Size) {
 	}
 
 	i.baseObject.Resize(s)
+	if i.isSVG && i.loadAttemptFailed() {
+		Refresh(i)
+		return
+	}
 	if i.isSVG {
 		// we need to rasterize at the new size
 		tex, err := i.renderSVG(s.Width, s.Height)
 		if err != nil {
+			i.lastLoadError = err.Error()
 			fyne.LogError("Failed to render SVG", err)
 			return
 		}
 		i.Image = tex
+		i.lastLoadError = ""
 		Refresh(i) // invalidate texture
-	} else if i.Image == nil && i.lastLoadError == "" {
-		i.Refresh() // initial load, but don't retry a source that already failed
+	} else if i.Image == nil && !i.loadAttemptFailed() {
+		i.Refresh()
 	} else {
 		Refresh(i) // just re-size using GPU scaling
 	}
