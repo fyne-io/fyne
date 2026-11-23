@@ -106,7 +106,7 @@ func (d *gLDriver) runGL() (quitEarly bool) {
 	if !running.CompareAndSwap(false, true) {
 		return false
 	}
-	if d.quitBeforeRun.Load() {
+	if d.quitBeforeRun {
 		running.Store(false)
 		return true
 	}
