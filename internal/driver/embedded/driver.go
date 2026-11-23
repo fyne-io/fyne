@@ -21,11 +21,10 @@ type noosDriver struct {
 	size   func() fyne.Size
 	done   bool
 
-	wins       []fyne.Window
-	current    int
-	device     noosDevice
-	inertia    *inertiaState
-	drawTicker *time.Ticker
+	wins          []fyne.Window
+	current       int
+	device        noosDevice
+	inertiaCancel chan struct{}
 }
 
 func (n *noosDriver) CreateWindow(_ string) fyne.Window {
@@ -75,19 +74,8 @@ func (n *noosDriver) doRun() {
 		n.renderWindow(w)
 	}
 
-	defer n.stopDrawTicker()
-
 	for !n.done {
-		var draw <-chan time.Time
-		if n.drawTicker != nil {
-			draw = n.drawTicker.C
-		}
-
 		select {
-		case <-draw:
-			if w := n.stepInertia(); w != nil {
-				n.renderWindow(w)
-			}
 		case fn := <-n.queue:
 			fn.f()
 			if fn.done != nil {
@@ -154,11 +142,22 @@ func (n *noosDriver) doRun() {
 }
 
 func (n *noosDriver) handleTouchDown(ev *embedded.TouchDownEvent, w *noosWindow) {
-	// A new touch takes over from a running flick.
-	n.stopInertia()
+	n.cancelInertia()
 
 	w.c.tapDown(ev.Position, ev.ID)
 	n.renderWindow(w)
+}
+
+func (n *noosDriver) cancelInertia() {
+	if n.inertiaCancel == nil {
+		return
+	}
+	select {
+	case <-n.inertiaCancel:
+	default:
+		close(n.inertiaCancel)
+	}
+	n.inertiaCancel = nil
 }
 
 func (n *noosDriver) handleTouchMove(ev *embedded.TouchMoveEvent, w *noosWindow) {
@@ -169,7 +168,11 @@ func (n *noosDriver) handleTouchMove(ev *embedded.TouchMoveEvent, w *noosWindow)
 }
 
 func (n *noosDriver) handleTouchUp(ev *embedded.TouchUpEvent, w *noosWindow) {
-	var inertia []inertiaTarget
+	n.cancelInertia()
+	cancel := make(chan struct{})
+	n.inertiaCancel = cancel
+	started := false
+
 	w.c.tapUp(ev.Position, ev.ID, func(wid fyne.Tappable, ev *fyne.PointEvent) {
 		wid.Tapped(ev)
 	}, func(wid fyne.SecondaryTappable, ev *fyne.PointEvent) {
@@ -177,15 +180,53 @@ func (n *noosDriver) handleTouchUp(ev *embedded.TouchUpEvent, w *noosWindow) {
 	}, func(wid fyne.DoubleTappable, ev *fyne.PointEvent) {
 		wid.DoubleTapped(ev)
 	}, func(wid fyne.Draggable, ev *fyne.DragEvent) {
-		if math.Abs(float64(ev.Dragged.DX)) <= tapMoveEndThreshold && math.Abs(float64(ev.Dragged.DY)) <= tapMoveEndThreshold {
+		e := *ev
+		if math.Abs(float64(e.Dragged.DX)) <= tapMoveEndThreshold && math.Abs(float64(e.Dragged.DY)) <= tapMoveEndThreshold {
 			wid.DragEnd()
 			return
 		}
 
-		inertia = append(inertia, inertiaTarget{wid: wid, event: *ev})
+		started = true
+		go n.flick(cancel, wid, e)
 	})
-	n.startInertia(w, inertia)
+
+	if !started {
+		n.cancelInertia()
+	}
 	n.renderWindow(w)
+}
+
+// flick decays a drag until it stops or a new touch cancels it.
+func (n *noosDriver) flick(cancel <-chan struct{}, wid fyne.Draggable, e fyne.DragEvent) {
+	ticker := time.NewTicker(time.Millisecond * 16)
+	defer ticker.Stop()
+	defer func() { n.DoFromGoroutine(wid.DragEnd, false) }()
+
+	for math.Abs(float64(e.Dragged.DX)) > tapMoveEndThreshold || math.Abs(float64(e.Dragged.DY)) > tapMoveEndThreshold {
+		select {
+		case <-cancel:
+			return
+		default:
+		}
+
+		e.Dragged.DX *= tapMoveDecay
+		e.Dragged.DY *= tapMoveDecay
+
+		event := e
+		n.DoFromGoroutine(func() {
+			select {
+			case <-cancel:
+			default:
+				wid.Dragged(&event)
+			}
+		}, false)
+
+		select {
+		case <-cancel:
+			return
+		case <-ticker.C:
+		}
+	}
 }
 
 func (n *noosDriver) Quit() {

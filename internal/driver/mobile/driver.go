@@ -41,17 +41,6 @@ const (
 	tapDoubleDelay      = 500 * time.Millisecond // max duration between taps for a DoubleTap event
 )
 
-// inertiaTarget is a draggable and a snapshot of its drag event.
-type inertiaTarget struct {
-	wid   fyne.Draggable
-	event fyne.DragEvent
-}
-
-// inertiaState is the active flick, accessed on the event loop.
-type inertiaState struct {
-	targets []inertiaTarget
-}
-
 // Configuration is the system information about the current device
 type Configuration struct {
 	SystemTheme fyne.ThemeVariant
@@ -76,7 +65,7 @@ type driver struct {
 	painting        bool
 	running         bool
 	queuedFuncs     *async.UnboundedChan[func()]
-	inertia         *inertiaState
+	inertiaCancel   chan struct{}
 }
 
 // Declare conformity with Driver
@@ -229,7 +218,6 @@ func (d *driver) Run() {
 		for {
 			select {
 			case <-draw.C:
-				d.stepInertia()
 				d.sendPaintEvent()
 			case fn := <-d.queuedFuncs.Out():
 				fn()
@@ -464,14 +452,25 @@ func (d *driver) setTheme(dark bool) {
 }
 
 func (d *driver) tapDownCanvas(w *window, x, y float32, tapID touch.Sequence) {
-	// Stop the old flick before the canvas resets its drag state.
-	d.stopInertia()
+	d.cancelInertia()
 
 	tapX := scale.ToFyneCoordinate(w.canvas, int(x))
 	tapY := scale.ToFyneCoordinate(w.canvas, int(y))
 	pos := fyne.NewPos(tapX, tapY+tapYOffset)
 
 	w.canvas.tapDown(pos, int(tapID))
+}
+
+func (d *driver) cancelInertia() {
+	if d.inertiaCancel == nil {
+		return
+	}
+	select {
+	case <-d.inertiaCancel:
+	default:
+		close(d.inertiaCancel)
+	}
+	d.inertiaCancel = nil
 }
 
 func (*driver) tapMoveCanvas(w *window, x, y float32, tapID touch.Sequence) {
@@ -507,7 +506,11 @@ func (d *driver) tapUpCanvas(w *window, x, y float32, tapID touch.Sequence) {
 	tapY := scale.ToFyneCoordinate(w.canvas, int(y))
 	pos := fyne.NewPos(tapX, tapY+tapYOffset)
 
-	var inertia []inertiaTarget
+	d.cancelInertia()
+	cancel := make(chan struct{})
+	d.inertiaCancel = cancel
+	started := false
+
 	w.canvas.tapUp(pos, int(tapID), func(wid fyne.Tappable, ev *fyne.PointEvent) {
 		wid.Tapped(ev)
 	}, func(wid fyne.SecondaryTappable, ev *fyne.PointEvent) {
@@ -515,65 +518,51 @@ func (d *driver) tapUpCanvas(w *window, x, y float32, tapID touch.Sequence) {
 	}, func(wid fyne.DoubleTappable, ev *fyne.PointEvent) {
 		wid.DoubleTapped(ev)
 	}, func(wid fyne.Draggable, ev *fyne.DragEvent) {
-		if math.Abs(float64(ev.Dragged.DX)) <= tapMoveEndThreshold && math.Abs(float64(ev.Dragged.DY)) <= tapMoveEndThreshold {
+		e := *ev
+		if math.Abs(float64(e.Dragged.DX)) <= tapMoveEndThreshold && math.Abs(float64(e.Dragged.DY)) <= tapMoveEndThreshold {
 			wid.DragEnd()
 			return
 		}
 
-		// Copy the event; the canvas mutates it for companion scrollers.
-		inertia = append(inertia, inertiaTarget{wid: wid, event: *ev})
+		started = true
+		go d.flick(cancel, wid, e)
 	})
-	d.startInertia(inertia)
-}
 
-// startInertia stores the flick to decay each frame.
-func (d *driver) startInertia(targets []inertiaTarget) {
-	if len(targets) == 0 {
-		d.inertia = nil
-		return
-	}
-	d.inertia = &inertiaState{targets: targets}
-}
-
-// stopInertia ends a running flick and its drag.
-func (d *driver) stopInertia() {
-	state := d.inertia
-	if state == nil {
-		return
-	}
-	d.inertia = nil
-	for _, target := range state.targets {
-		target.wid.DragEnd()
+	if !started {
+		d.cancelInertia()
 	}
 }
 
-// stepInertia applies one frame of momentum.
-func (d *driver) stepInertia() {
-	state := d.inertia
-	if state == nil {
-		return
-	}
-	d.inertia = nil
+// flick decays a drag until it stops or a new touch cancels it.
+func (d *driver) flick(cancel <-chan struct{}, wid fyne.Draggable, e fyne.DragEvent) {
+	ticker := time.NewTicker(time.Millisecond * 16)
+	defer ticker.Stop()
+	defer func() { d.DoFromGoroutine(wid.DragEnd, false) }()
 
-	active := make([]inertiaTarget, 0, len(state.targets))
-	for _, target := range state.targets {
-		event := target.event
-		event.Dragged.DX *= tapMoveDecay
-		event.Dragged.DY *= tapMoveDecay
-
-		if math.Abs(float64(event.Dragged.DX)) <= tapMoveEndThreshold &&
-			math.Abs(float64(event.Dragged.DY)) <= tapMoveEndThreshold {
-			target.wid.DragEnd()
-			continue
+	for math.Abs(float64(e.Dragged.DX)) > tapMoveEndThreshold || math.Abs(float64(e.Dragged.DY)) > tapMoveEndThreshold {
+		select {
+		case <-cancel:
+			return
+		default:
 		}
 
-		target.event = event
-		active = append(active, target)
-		target.wid.Dragged(&event)
-	}
+		e.Dragged.DX *= tapMoveDecay
+		e.Dragged.DY *= tapMoveDecay
 
-	if len(active) > 0 {
-		d.inertia = &inertiaState{targets: active}
+		event := e
+		d.DoFromGoroutine(func() {
+			select {
+			case <-cancel:
+			default:
+				wid.Dragged(&event)
+			}
+		}, false)
+
+		select {
+		case <-cancel:
+			return
+		case <-ticker.C:
+		}
 	}
 }
 
