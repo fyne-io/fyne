@@ -22,11 +22,14 @@ type overrideScope struct {
 // This should be used sparingly to avoid a jarring user experience.
 // If the object is a container it will theme the children, if it is a canvas primitive it will do nothing.
 //
+// It returns the ID of the new scope that caches key by.
+//
 // Since: 2.5
-func OverrideTheme(o fyne.CanvasObject, th fyne.Theme) {
+func OverrideTheme(o fyne.CanvasObject, th fyne.Theme) string {
 	id := overrideCount.Add(1)
 	s := &overrideScope{th: th, cacheID: strconv.Itoa(int(id))}
 	overrideThemeWithScope(o, s)
+	return s.cacheID
 }
 
 func OverrideThemeMatchingScope(o, parent fyne.CanvasObject) bool {

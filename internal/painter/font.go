@@ -2,10 +2,10 @@ package painter
 
 import (
 	"bytes"
+	"hash/maphash"
 	"image/color"
 	"image/draw"
 	"math"
-	"reflect"
 	"slices"
 	"strings"
 	"sync"
@@ -138,21 +138,15 @@ func CachedFontFace(style fyne.TextStyle, source fyne.Resource, o fyne.CanvasObj
 		return val
 	}
 
-	th := theme.CurrentForWidget(o)
-	font1 := th.Font(style)
-	// A scope's faces differ from the app's only by its theme's font, and every
-	// ThemeOverride makes a new scope on each Refresh. Key by that font so that
-	// scopes share an entry rather than each adding one that is never freed.
-	id := cacheID{style: style, font: font1}
-	if !hashable(font1) {
-		id = cacheID{style: style}
-		if o != nil { // for overridden themes get the cache key right
-			id.scope = cache.WidgetScopeID(o)
-		}
+	id := cacheID{style: style}
+	if o != nil { // for overridden themes get the cache key right
+		id.scope = cache.WidgetScopeID(o)
 	}
 
 	val, ok := fontCache.Load(id)
 	if !ok {
+		th := theme.CurrentForWidget(o)
+		font1 := th.Font(style)
 		var faces *dynamicFontMap
 
 		// Skip any nil fallback fonts — they can be nil when built with
@@ -204,6 +198,19 @@ func ClearFontCache() {
 	runBufferMut.Lock()
 	clear(shapeCache)
 	runBufferMut.Unlock()
+}
+
+// ReleaseFontScope drops the faces cached for a theme scope that is no longer in use.
+func ReleaseFontScope(scope string) {
+	if scope == "" {
+		return
+	}
+	fontCache.Range(func(id cacheID, _ *FontCacheItem) bool {
+		if id.scope == scope {
+			fontCache.Delete(id)
+		}
+		return true
+	})
 }
 
 // DrawString draws a string into an image.
@@ -284,30 +291,22 @@ func RasteriseGlyph(dst draw.Image, g PlacedGlyph, c color.Color, fontSize, scal
 	r.DrawShapedRunAt(run, dst, x, y)
 }
 
-// hashable reports whether res can be used as a map key.
-func hashable(res fyne.Resource) bool {
-	return res != nil && reflect.ValueOf(res).Comparable()
-}
-
 // loadMeasureFont returns a new face for the font, which callers may use
 // without locking. Faces are not safe for concurrent use, but the parsed Font
 // they share is, so the parse is reused.
 func loadMeasureFont(data fyne.Resource) *font.Face {
-	// a theme may return a resource that cannot be a map key; parse it each time
-	shared := hashable(data)
-	if shared {
-		if ft, ok := parsedFonts.Load(data); ok {
-			return font.NewFace(ft)
-		}
+	content := data.Content()
+	// Keyed by content, as a theme may return a new resource for the same font on each call.
+	key := parsedFontKey{sum: maphash.Bytes(parsedFontSeed, content), size: len(content)}
+	if ft, ok := parsedFonts.Load(key); ok {
+		return font.NewFace(ft)
 	}
-	loaded, err := font.ParseTTF(bytes.NewReader(data.Content()))
+	loaded, err := font.ParseTTF(bytes.NewReader(content))
 	if err != nil {
 		fyne.LogError("font load error", err)
 		return nil
 	}
-	if shared {
-		parsedFonts.Store(data, loaded.Font)
-	}
+	parsedFonts.Store(key, loaded.Font)
 	return loaded
 }
 
@@ -689,8 +688,12 @@ type FontCacheItem struct {
 
 type cacheID struct {
 	style fyne.TextStyle
-	font  fyne.Resource
 	scope string
+}
+
+type parsedFontKey struct {
+	sum  uint64
+	size int
 }
 
 var (
@@ -700,7 +703,8 @@ var (
 	// parsedFonts holds each font resource parsed once. Every style's face list
 	// includes the fallback and emoji fonts, and parsing the emoji font alone
 	// takes several MB, so parsing per style multiplied that.
-	parsedFonts async.Map[fyne.Resource, *font.Font]
+	parsedFonts    async.Map[parsedFontKey, *font.Font]
+	parsedFontSeed = maphash.MakeSeed()
 )
 
 type noopLogger struct{}
