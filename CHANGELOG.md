@@ -3,6 +3,45 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
+## 2.8.3 - 24 Nov 2026
+
+### Changed
+
+* The scroll bar gutter is now draggable and as wide as the expanded scroll bar
+* Tab icons are now shown in the tab overflow menus
+* The mobile simulator now scrolls with the mouse wheel
+* Markdown: 2 spaces or more at line end forces line break inside paragraph (#3813)
+
+### Fixed
+
+* iOS apps were killed on launch by Xcode 27
+* iOS widget.Entry: secondary tap changes range of selected text (#4123)
+* Calling Hide() on a widget.PopUp does not call FocusLost() on focused widgets contained in it (#4374)
+* Table Keyboard Navigation with Header Row Hides First Data Row (#5088)
+* Focus events cause multiline entry to change scroll position to show cursor (#6042)
+* Android/mobile: Text selection + tap hold changes the selection (#6207)
+* For some CJK strings, fallback font selection oscillates between two fonts every character or few (#6450)
+* Modal PopUp/dialog content shifts under the finger mid-tap when the Android soft keyboard resizes the canvas (#6527)
+* binding.ExternalTree.Reload does not respect binding's nested structure (#6570)
+* TextGrid under ThemeOverride draws letters in mixed fonts and sizes (#6589)
+* Window content jumps vertically during quick resize (#6596)
+* Mobile: Triple tap can select wrong line (#6604)
+* MultiLineEntry: scroll direction changes on first click (#6630)
+* Mobile drag can scroll the companion scroller of a different column (#6666)
+* RichText Markdown panics when a task list label starts with emphasis or a link (#6671)
+* A drag could start on an object that was not under the initial press, on desktop and mobile
+* Mobile drag events did not set AbsolutePosition
+* Mobile touch-scroll over an Entry could select text or move the cursor
+* Modifier keys were dropped from CurrentKeyModifiers on key repeat events
+* Android: system locale was not detected as the lookup ran before the runtime was ready
+* Cursor at the end of a word-wrapped Entry line ending in a space was not positioned correctly
+* Markdown link text containing underscores gained an extra space
+* Form could report as valid while an item was invalid
+* TextGrid append then scroll could miss the last line
+* wasm: errors reported in the browser console for calls not wrapped in fyne.Do
+* Performance boost in text and scroll and reduce memory used (#6602, #6640, #6655)
+
+
 ## 2.8.2 - 12 Oct 2026
 
 ### Changed
