@@ -319,6 +319,10 @@ func driverShowVirtualKeyboard(keyboard KeyboardType) {
 	C.showKeyboard(C.int(int32(keyboard)))
 }
 
+// driverSetKeyboardText does nothing, iOS uses a native input widget
+func driverSetKeyboardText(string, int) {
+}
+
 // driverHideVirtualKeyboard requests the driver to hide any visible virtual keyboard
 func driverHideVirtualKeyboard() {
 	C.hideKeyboard()

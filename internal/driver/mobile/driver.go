@@ -39,6 +39,7 @@ const (
 	tapMoveThreshold    = 4.0                    // how far can we move before it is a drag
 	tapSecondaryDelay   = 300 * time.Millisecond // how long before secondary tap
 	tapDoubleDelay      = 500 * time.Millisecond // max duration between taps for a DoubleTap event
+	pointsPerInch       = 72                     // PixelsPerPt is measured in points, 72 per inch
 )
 
 // Configuration is the system information about the current device
@@ -230,33 +231,13 @@ func (d *driver) Run() {
 				}
 				c, _ := current.Canvas().(*canvas)
 
-				switch e := a.Filter(e).(type) {
+				filtered := a.Filter(e)
+
+				switch e := filtered.(type) {
 				case lifecycle.Event:
 					d.handleLifecycle(e, current)
 				case size.Event:
-					if e.WidthPx <= 0 {
-						continue
-					}
-					d.currentSize = e
-					currentOrientation = e.Orientation
-					currentDPI = e.PixelsPerPt * 72
-					d.setTheme(e.DarkMode)
-
-					dev := &d.device
-					insetChange := dev.safeTop != e.InsetTopPx || dev.safeBottom != e.InsetBottomPx ||
-						dev.safeLeft != e.InsetLeftPx || dev.safeRight != e.InsetRightPx
-					dev.safeTop = e.InsetTopPx
-					dev.safeLeft = e.InsetLeftPx
-					dev.safeBottom = e.InsetBottomPx
-					dev.safeRight = e.InsetRightPx
-					c.scale = fyne.CurrentDevice().SystemScaleForWindow(nil)
-					c.Painter().SetFrameBufferScale(1.0)
-
-					if insetChange {
-						current.canvas.sizeContent(current.canvas.size) // even if size didn't change we invalidate
-					}
-					// make sure that we paint on the next frame
-					c.Content().Refresh()
+					d.handleSizeEvent(e, current, c)
 				case paint.Event:
 					d.handlePaint(e, current)
 				case touch.Event:
@@ -282,9 +263,55 @@ func (d *driver) Run() {
 						d.typeUpCanvas(c, e.Rune, e.Code, e.Modifiers)
 					}
 				}
+
+				if d.device.keyboardShown {
+					d.syncKeyboardTextForEvent(filtered, c)
+				}
 			}
 		}
 	})
+}
+
+func (d *driver) handleSizeEvent(e size.Event, current *window, c *canvas) {
+	if e.WidthPx <= 0 {
+		return
+	}
+	d.currentSize = e
+	currentOrientation = e.Orientation
+	currentDPI = e.PixelsPerPt * pointsPerInch
+	d.setTheme(e.DarkMode)
+
+	dev := &d.device
+	insetChange := dev.safeTop != e.InsetTopPx || dev.safeBottom != e.InsetBottomPx ||
+		dev.safeLeft != e.InsetLeftPx || dev.safeRight != e.InsetRightPx
+	dev.safeTop = e.InsetTopPx
+	dev.safeLeft = e.InsetLeftPx
+	dev.safeBottom = e.InsetBottomPx
+	dev.safeRight = e.InsetRightPx
+	c.scale = fyne.CurrentDevice().SystemScaleForWindow(nil)
+	c.Painter().SetFrameBufferScale(1.0)
+
+	if insetChange {
+		current.canvas.sizeContent(current.canvas.size) // even if size didn't change we invalidate
+	}
+	c.Content().Refresh()
+}
+
+// syncKeyboardTextForEvent mirrors input events into the native keyboard proxy.
+func (d *driver) syncKeyboardTextForEvent(e any, c *canvas) {
+	switch ev := e.(type) {
+	case key.Event:
+		if ev.Code == key.CodeDeleteBackspace {
+			return
+		}
+		if ev.Direction == key.DirPress {
+			d.device.syncKeyboardText(c.Focused())
+		}
+	case touch.Event:
+		if ev.Type == touch.TypeEnd {
+			d.device.syncKeyboardText(c.Focused()) // taps can move the cursor or change the text
+		}
+	}
 }
 
 func (*driver) SetDisableScreenBlanking(disable bool) {

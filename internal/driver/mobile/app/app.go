@@ -47,6 +47,7 @@ type App interface {
 	RegisterFilter(f func(any) any)
 
 	ShowVirtualKeyboard(KeyboardType)
+	SetKeyboardText(text string, cursor int)
 	HideVirtualKeyboard()
 	ShowFileOpenPicker(func(string, func()), *FileFilter)
 	ShowFileSavePicker(func(string, func()), *FileFilter, string)
@@ -122,6 +123,10 @@ func (a *app) RegisterFilter(f func(any) any) {
 
 func (*app) ShowVirtualKeyboard(keyboard KeyboardType) {
 	driverShowVirtualKeyboard(keyboard)
+}
+
+func (*app) SetKeyboardText(text string, cursor int) {
+	driverSetKeyboardText(text, cursor)
 }
 
 func (*app) HideVirtualKeyboard() {

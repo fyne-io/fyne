@@ -405,6 +405,10 @@ func onStop() {
 func driverShowVirtualKeyboard(KeyboardType) {
 }
 
+// driverSetKeyboardText does nothing on desktop
+func driverSetKeyboardText(string, int) {
+}
+
 // driverHideVirtualKeyboard does nothing on desktop
 func driverHideVirtualKeyboard() {
 }
