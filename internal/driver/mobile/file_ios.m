@@ -19,9 +19,18 @@ void* iosParseUrl(const char* url) {
     return [NSURL URLWithString:urlStr];
 }
 
+bool iosCanReadURL(void* urlPtr) {
+    NSURL* url = (NSURL*)urlPtr;
+    return [url checkResourceIsReachableAndReturnError:nil];
+}
+
 const void* iosReadFromURL(void* urlPtr, int* len)  {
     NSURL* url = (NSURL*)urlPtr;
     NSData* data = [NSData dataWithContentsOfURL:url];
+    if (data == nil) {
+        *len = -1;
+        return NULL;
+    }
 
     *len = data.length;
     return data.bytes;
@@ -34,9 +43,8 @@ const void* iosOpenFileWriter(void* urlPtr, bool truncate) {
         [[NSFileManager defaultManager] createFileAtPath:url.path contents:nil attributes:nil];
     }
 
-    NSError *err = nil;
-    // TODO handle error
-    NSFileHandle* handle = [NSFileHandle fileHandleForWritingToURL:url error:&err];
+    // handle will be nil if the file could not be created or opened
+    NSFileHandle* handle = [NSFileHandle fileHandleForWritingToURL:url error:nil];
 
     if (!truncate) {
         [handle seekToEndOfFile];
