@@ -96,3 +96,29 @@ func TestCache_SetTest(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, []byte("data"), data)
 }
+
+func TestCache_URLName(t *testing.T) {
+	c := NewWithID("io.fyne.test").Cache()
+	testName := "https://example.com/icons.png?size=64" // standard base64 of this contains "/"
+
+	_, err := c.Read(testName)
+	assert.Error(t, err)
+	assert.False(t, c.Exists(testName))
+
+	w, err := c.Write(testName)
+	assert.NoError(t, err)
+	n, _ := w.Write([]byte("data"))
+	assert.Equal(t, 4, n)
+	_ = w.Close()
+
+	assert.True(t, c.Exists(testName))
+	read, err := c.Read(testName)
+	assert.NoError(t, err)
+	data, err := io.ReadAll(read)
+	_ = read.Close()
+	assert.NoError(t, err)
+	assert.Equal(t, []byte("data"), data)
+
+	_ = c.Remove(testName)
+	assert.False(t, c.Exists(testName))
+}
