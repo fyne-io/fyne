@@ -2,9 +2,9 @@ package canvas
 
 import (
 	"bytes"
-	"crypto/sha256"
 	"errors"
 	"fmt"
+	"hash/maphash"
 	"image"
 	_ "image/jpeg" // avoid users having to import when using image widget
 	_ "image/png"  // avoid the same for PNG images
@@ -376,11 +376,11 @@ func (i *Image) updateReader() (io.ReadCloser, string, error) {
 	return nil, "", nil
 }
 
-// resourceCacheKey identifies the decoded bytes, not just the resource pointer,
-// so that resources whose content changes get a fresh cache entry.
+var imageHashSeed = maphash.MakeSeed()
+
 func resourceCacheKey(res fyne.Resource, content []byte) string {
-	sum := sha256.Sum256(content)
-	return fmt.Sprintf("resource:%s:%x", res.Name(), sum)
+	h := maphash.Bytes(imageHashSeed, content)
+	return fmt.Sprintf("resource:%s:%016x", res.Name(), h)
 }
 
 func fileCacheKey(path string, info os.FileInfo) string {
