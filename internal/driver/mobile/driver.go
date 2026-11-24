@@ -65,6 +65,7 @@ type driver struct {
 	painting        bool
 	running         bool
 	queuedFuncs     *async.UnboundedChan[func()]
+	inertiaCancel   chan struct{}
 }
 
 // Declare conformity with Driver
@@ -450,12 +451,26 @@ func (d *driver) setTheme(dark bool) {
 	d.theme = mode
 }
 
-func (*driver) tapDownCanvas(w *window, x, y float32, tapID touch.Sequence) {
+func (d *driver) tapDownCanvas(w *window, x, y float32, tapID touch.Sequence) {
+	d.cancelInertia()
+
 	tapX := scale.ToFyneCoordinate(w.canvas, int(x))
 	tapY := scale.ToFyneCoordinate(w.canvas, int(y))
 	pos := fyne.NewPos(tapX, tapY+tapYOffset)
 
 	w.canvas.tapDown(pos, int(tapID))
+}
+
+func (d *driver) cancelInertia() {
+	if d.inertiaCancel == nil {
+		return
+	}
+	select {
+	case <-d.inertiaCancel:
+	default:
+		close(d.inertiaCancel)
+	}
+	d.inertiaCancel = nil
 }
 
 func (*driver) tapMoveCanvas(w *window, x, y float32, tapID touch.Sequence) {
@@ -491,6 +506,11 @@ func (d *driver) tapUpCanvas(w *window, x, y float32, tapID touch.Sequence) {
 	tapY := scale.ToFyneCoordinate(w.canvas, int(y))
 	pos := fyne.NewPos(tapX, tapY+tapYOffset)
 
+	d.cancelInertia()
+	cancel := make(chan struct{})
+	d.inertiaCancel = cancel
+	started := false
+
 	w.canvas.tapUp(pos, int(tapID), func(wid fyne.Tappable, ev *fyne.PointEvent) {
 		wid.Tapped(ev)
 	}, func(wid fyne.SecondaryTappable, ev *fyne.PointEvent) {
@@ -498,29 +518,52 @@ func (d *driver) tapUpCanvas(w *window, x, y float32, tapID touch.Sequence) {
 	}, func(wid fyne.DoubleTappable, ev *fyne.PointEvent) {
 		wid.DoubleTapped(ev)
 	}, func(wid fyne.Draggable, ev *fyne.DragEvent) {
-		if math.Abs(float64(ev.Dragged.DX)) <= tapMoveEndThreshold && math.Abs(float64(ev.Dragged.DY)) <= tapMoveEndThreshold {
+		e := *ev
+		if math.Abs(float64(e.Dragged.DX)) <= tapMoveEndThreshold && math.Abs(float64(e.Dragged.DY)) <= tapMoveEndThreshold {
 			wid.DragEnd()
 			return
 		}
 
-		go func() {
-			for math.Abs(float64(ev.Dragged.DX)) > tapMoveEndThreshold || math.Abs(float64(ev.Dragged.DY)) > tapMoveEndThreshold {
-				if math.Abs(float64(ev.Dragged.DX)) > 0 {
-					ev.Dragged.DX *= tapMoveDecay
-				}
-				if math.Abs(float64(ev.Dragged.DY)) > 0 {
-					ev.Dragged.DY *= tapMoveDecay
-				}
-
-				d.DoFromGoroutine(func() {
-					wid.Dragged(ev)
-				}, false)
-				time.Sleep(time.Millisecond * 16)
-			}
-
-			d.DoFromGoroutine(wid.DragEnd, false)
-		}()
+		started = true
+		go d.flick(cancel, wid, e)
 	})
+
+	if !started {
+		d.cancelInertia()
+	}
+}
+
+// flick decays a drag until it stops or a new touch cancels it.
+func (d *driver) flick(cancel <-chan struct{}, wid fyne.Draggable, e fyne.DragEvent) {
+	ticker := time.NewTicker(time.Millisecond * 16)
+	defer ticker.Stop()
+	defer func() { d.DoFromGoroutine(wid.DragEnd, false) }()
+
+	for math.Abs(float64(e.Dragged.DX)) > tapMoveEndThreshold || math.Abs(float64(e.Dragged.DY)) > tapMoveEndThreshold {
+		select {
+		case <-cancel:
+			return
+		default:
+		}
+
+		e.Dragged.DX *= tapMoveDecay
+		e.Dragged.DY *= tapMoveDecay
+
+		event := e
+		d.DoFromGoroutine(func() {
+			select {
+			case <-cancel:
+			default:
+				wid.Dragged(&event)
+			}
+		}, false)
+
+		select {
+		case <-cancel:
+			return
+		case <-ticker.C:
+		}
+	}
 }
 
 // scrollCanvas sends a vertical mouse wheel scroll from the simulator to the
