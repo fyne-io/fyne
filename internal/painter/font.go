@@ -297,7 +297,7 @@ func RasteriseGlyph(dst draw.Image, g PlacedGlyph, c color.Color, fontSize, scal
 func loadMeasureFont(data fyne.Resource) *font.Face {
 	content := data.Content()
 	// Keyed by content, as a theme may return a new resource for the same font on each call.
-	key := parsedFontKey{sum: maphash.Bytes(parsedFontSeed, content), size: len(content)}
+	key := maphash.Bytes(parsedFontSeed, content)
 	if ft, ok := parsedFonts.Load(key); ok {
 		return font.NewFace(ft)
 	}
@@ -691,11 +691,6 @@ type cacheID struct {
 	scope string
 }
 
-type parsedFontKey struct {
-	sum  uint64
-	size int
-}
-
 var (
 	fontCache       async.Map[cacheID, *FontCacheItem]
 	fontCustomCache async.Map[fyne.Resource, *FontCacheItem] // for custom resources
@@ -703,7 +698,7 @@ var (
 	// parsedFonts holds each font resource parsed once. Every style's face list
 	// includes the fallback and emoji fonts, and parsing the emoji font alone
 	// takes several MB, so parsing per style multiplied that.
-	parsedFonts    async.Map[parsedFontKey, *font.Font]
+	parsedFonts    async.Map[uint64, *font.Font]
 	parsedFontSeed = maphash.MakeSeed()
 )
 
