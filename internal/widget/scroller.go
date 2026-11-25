@@ -575,7 +575,7 @@ func (s *Scroll) SetMinSize(size fyne.Size) {
 func (s *Scroll) Refresh() {
 	s.refreshBars()
 
-	if s.Content != nil {
+	if s.Content != nil && !fyne.IsThemeRefreshing() {
 		s.Content.Refresh()
 	}
 }
