@@ -114,3 +114,22 @@ func TestCustomTheme(t *testing.T) {
 	assert.Equal(t, set.Theme(), ctheme)
 	assert.Equal(t, theme.VariantDark, set.ThemeVariant())
 }
+
+func TestSetTheme_ActiveThemeIsNoOp(t *testing.T) {
+	set := &settings{}
+	calls := 0
+	set.AddListener(func(fyne.Settings) { calls++ })
+
+	light := internalTest.LightTheme(theme.DefaultTheme())
+	set.SetTheme(light)
+	require.Equal(t, 1, calls)
+
+	set.SetTheme(light)
+	assert.Equal(t, 1, calls, "the same instance is ignored")
+
+	set.SetTheme(internalTest.LightTheme(theme.DefaultTheme()))
+	assert.Equal(t, 1, calls, "an equal wrapper is ignored")
+
+	set.SetTheme(internalTest.DarkTheme(theme.DefaultTheme()))
+	assert.Equal(t, 2, calls, "a different theme still notifies")
+}
