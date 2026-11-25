@@ -3,6 +3,7 @@ package app
 import (
 	"os"
 	"path/filepath"
+	"reflect"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/app"
@@ -73,6 +74,10 @@ func (s *settings) Theme() fyne.Theme {
 }
 
 func (s *settings) SetTheme(t fyne.Theme) {
+	if reflect.DeepEqual(s.theme, t) {
+		return
+	}
+
 	s.themeSpecified = true
 	s.applyTheme(t, s.variant)
 }
