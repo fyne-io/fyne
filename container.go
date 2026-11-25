@@ -132,8 +132,10 @@ func (c *Container) Position() Position {
 func (c *Container) Refresh() {
 	c.layout()
 
-	for _, child := range c.Objects {
-		child.Refresh()
+	if !IsThemeRefreshing() {
+		for _, child := range c.Objects {
+			child.Refresh()
+		}
 	}
 
 	// this is basically just canvas.Refresh(c) without the package loop

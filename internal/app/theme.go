@@ -12,16 +12,30 @@ func ApplyThemeTo(content fyne.CanvasObject, canv fyne.Canvas) {
 		return
 	}
 
+	// The tree walk below refreshes every object. Suppress recursive child
+	// refresh in Container.Refresh and Scroll.Refresh so a leaf is not
+	// refreshed once per ancestor level.
+	end := fyne.BeginThemeRefresh()
+	defer end()
+
+	applyThemeRecursive(content, canv)
+}
+
+func applyThemeRecursive(content fyne.CanvasObject, canv fyne.Canvas) {
+	if content == nil {
+		return
+	}
+
 	switch o := content.(type) {
 	case fyne.Widget:
 		renderer := cache.Renderer(o)
 		for _, co := range renderer.Objects() {
-			ApplyThemeTo(co, canv)
+			applyThemeRecursive(co, canv)
 		}
 		renderer.Layout(content.Size()) // theme can cause sizing changes
 	case *fyne.Container:
 		for _, co := range o.Objects {
-			ApplyThemeTo(co, canv)
+			applyThemeRecursive(co, canv)
 		}
 		if l := o.Layout; l != nil {
 			l.Layout(o.Objects, o.Size()) // theme can cause sizing changes
