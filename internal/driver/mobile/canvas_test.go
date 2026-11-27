@@ -77,6 +77,30 @@ func Test_canvas_ChildMinSizeChangeAffectsAncestorsUpToRoot(t *testing.T) {
 	assert.Equal(t, expectedContentSize, content.Size())
 }
 
+func Test_canvas_ScrollFocusedObject(t *testing.T) {
+	dev := &device{keyboardShown: true}
+	c := newCanvas(dev).(*canvas)
+
+	firstObject := widget.NewButton("First", nil)
+	lastObject := widget.NewButton("Last", nil)
+	content := container.NewVBox(firstObject)
+	for range 8 {
+		content.Add(widget.NewLabel("More content"))
+	}
+	content.Add(lastObject)
+	scroll := container.NewVScroll(content)
+	c.SetContent(scroll)
+	c.Resize(fyne.NewSize(200, 100))
+
+	c.Focus(lastObject)
+	c.scrollFocusedObject()
+	assert.Greater(t, scroll.Offset.Y, float32(0))
+
+	c.Focus(firstObject)
+	c.scrollFocusedObject()
+	assert.Equal(t, float32(0), scroll.Offset.Y)
+}
+
 func Test_canvas_DraggingOutOfWidget(t *testing.T) {
 	c := newCanvas(fyne.CurrentDevice()).(*canvas)
 	slider := widget.NewSlider(0.0, 100.0)
