@@ -51,6 +51,21 @@ func TestShowPopUp(t *testing.T) {
 }
 
 func TestShowPopUpAtPosition(t *testing.T) {
+	t.Run("canvas bounds", func(t *testing.T) {
+		w := test.NewTempWindow(t, canvas.NewRectangle(color.Transparent))
+		w.Resize(fyne.NewSize(200, 150))
+		c := w.Canvas()
+		size := c.Size()
+		ShowPopUpAtPosition(NewLabel("First\nSecond"), c, fyne.NewPos(10, size.Height-1))
+		pop := c.Overlays().Top().(*widget.OverlayContainer).Content
+		assert.Equal(t, fyne.NewPos(10, size.Height-pop.Size().Height), pop.Position())
+
+		w.Resize(fyne.NewSize(pop.Size().Width+5, size.Height))
+		assert.Equal(t, fyne.NewPos(5, size.Height-pop.Size().Height), pop.Position())
+		w.Resize(fyne.NewSize(pop.Size().Width, size.Height))
+		assert.Equal(t, float32(0), pop.Position().X)
+	})
+
 	c := test.NewCanvas()
 	c.Resize(fyne.NewSize(100, 100))
 	pos := fyne.NewPos(6, 9)
