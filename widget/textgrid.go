@@ -5,6 +5,7 @@ import (
 	"math"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -750,9 +751,10 @@ func (t *textGridRow) setCellRune(str rune, pos int, style, rowStyle TextGridSty
 		fg = rowStyle.TextColor()
 	}
 
-	newStr := string(str)
-	if text.Text != newStr || text.Color != fg || textStyle != text.TextStyle {
-		text.Text = newStr
+	var buf [utf8.UTFMax]byte
+	runeBytes := buf[:utf8.EncodeRune(buf[:], str)]
+	if text.Text != string(runeBytes) || text.Color != fg || textStyle != text.TextStyle {
+		text.Text = string(runeBytes)
 		text.Color = fg
 		text.TextStyle = textStyle
 		text.Refresh()
