@@ -535,6 +535,7 @@ func layoutRun(out shaping.Output, x, scale float32, cb func(shaping.Output, flo
 
 			adv = 0
 			start = i + 1
+			continue
 		}
 		adv += g.Advance
 	}
