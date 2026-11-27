@@ -41,6 +41,8 @@ type gLDriver struct {
 	initialized bool
 	done        chan struct{}
 
+	quitBeforeRun bool
+
 	animation animation.Runner
 
 	currentKeyModifiers fyne.KeyModifier // desktop driver only
@@ -105,7 +107,9 @@ func (d *gLDriver) Quit() {
 	// Only call close once to avoid panic.
 	if running.CompareAndSwap(true, false) {
 		close(d.done)
+		return
 	}
+	d.quitBeforeRun = true
 }
 
 func (*gLDriver) RenderedTextSize(text string, textSize float32, style fyne.TextStyle, source fyne.Resource) (size fyne.Size, baseline float32) {
@@ -118,7 +122,9 @@ func (d *gLDriver) Run() {
 	}
 
 	go d.catchTerm()
-	d.runGL()
+	if quitEarly := d.runGL(); quitEarly {
+		return
+	}
 
 	// Ensure lifecycle events run to completion before the app exits
 	l, _ := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle)
