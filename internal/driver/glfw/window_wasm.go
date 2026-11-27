@@ -510,9 +510,10 @@ func (w *window) charInput(viewport *glfw.Window, char rune) {
 }
 
 func (w *window) focused(_ *glfw.Window, focused bool) {
-	runOnMain(func() {
+	// We must not wait on this one, the browser event can happen whilst we are processing other main thread items.
+	runOnMainWithWait(func() {
 		w.processFocused(focused)
-	})
+	}, false)
 }
 
 func (w *window) DetachCurrentContext() {

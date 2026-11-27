@@ -75,6 +75,9 @@ func stopWatchingTheme() {
 }
 
 func (a *fyneApp) registerRepositories() {
+	// there are no files to open by path in a browser, only those the user has chosen
+	repository.Register(fyne.URISchemeFile, intRepo.BrowserFiles())
+
 	repo, err := intRepo.NewIndexDBRepository()
 	if err != nil {
 		fyne.LogError("failed to create repository: %v", err)

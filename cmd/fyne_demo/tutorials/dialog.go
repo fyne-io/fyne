@@ -82,12 +82,6 @@ func dialogScreen(win fyne.Window) fyne.CanvasObject {
 		}, win)
 	})
 
-	if fyne.CurrentDevice().IsBrowser() {
-		openFile.Disable()
-		saveFile.Disable()
-		openFolder.Disable()
-	}
-
 	advancedPicker := dialog.NewColorPicker("Pick a Color", "What is your favorite color?", func(c color.Color) {
 		colorPicked(c, win)
 	}, win)
