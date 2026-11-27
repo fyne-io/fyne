@@ -10,15 +10,19 @@ type UnboundedChan[T any] struct {
 	in, out chan T
 	close   chan struct{}
 	q       []T
+	onReady []func()
 }
 
 // NewUnboundedChan returns a unbounded channel with unlimited capacity.
-func NewUnboundedChan[T any]() *UnboundedChan[T] {
+// Optional onReady callbacks run after an item becomes available on Out.
+// They must not block channel processing.
+func NewUnboundedChan[T any](onReady ...func()) *UnboundedChan[T] {
 	ch := &UnboundedChan[T]{
 		// We make the channels fit into CPU cache lines, which may reduce cache misses.
-		in:    make(chan T, maxEntitiesPerCPUCacheLine),
-		out:   make(chan T, maxEntitiesPerCPUCacheLine),
-		close: make(chan struct{}),
+		in:      make(chan T, maxEntitiesPerCPUCacheLine),
+		out:     make(chan T, maxEntitiesPerCPUCacheLine),
+		close:   make(chan struct{}),
+		onReady: onReady,
 	}
 	go ch.processing()
 	return ch
@@ -59,6 +63,9 @@ func (ch *UnboundedChan[T]) processing() {
 		for len(ch.q) > 0 {
 			select {
 			case ch.out <- ch.q[0]:
+				for _, notify := range ch.onReady {
+					notify()
+				}
 				ch.q[0] = *new(T) // de-reference earlier to help GC (use clear() when Go 1.21 is base)
 				ch.q = ch.q[1:]
 			case e, ok := <-ch.in:
@@ -90,6 +97,9 @@ func (ch *UnboundedChan[T]) closed() {
 	for len(ch.q) > 0 {
 		select {
 		case ch.out <- ch.q[0]:
+			for _, notify := range ch.onReady {
+				notify()
+			}
 			ch.q[0] = *new(T) // de-reference earlier to help GC (use clear() when Go 1.21 is base)
 			ch.q = ch.q[1:]
 		default:
