@@ -616,12 +616,26 @@ func processEvent(env *C.JNIEnv, e *C.AInputEvent) bool {
 				Y:        float32(C.AMotionEvent_getY(e, i)),
 				Sequence: touch.Sequence(C.AMotionEvent_getPointerId(e, i)),
 				Type:     t,
+				Precise:  motionEventPrecise(e, i),
 			}
 		}
 	default:
 		log.Printf("unknown input event, type=%d", C.AInputEvent_getType(e))
 	}
 	return false
+}
+
+// motionEventPrecise reports whether one pointer in a motion event is a
+// stylus, eraser, or mouse. Finger, palm, and unknown tools are not precise.
+// The tool type is read for this pointer only, so a finger beside a stylus
+// does not inherit the stylus classification.
+func motionEventPrecise(e *C.AInputEvent, index C.size_t) bool {
+	switch C.AMotionEvent_getToolType(e, index) {
+	case C.AMOTION_EVENT_TOOL_TYPE_STYLUS, C.AMOTION_EVENT_TOOL_TYPE_ERASER, C.AMOTION_EVENT_TOOL_TYPE_MOUSE:
+		return true
+	default:
+		return false
+	}
 }
 
 func processKey(env *C.JNIEnv, e *C.AInputEvent) bool {
