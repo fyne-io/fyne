@@ -3,6 +3,7 @@ package container
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/internal/painter"
 	intTheme "fyne.io/fyne/v2/internal/theme"
 	"fyne.io/fyne/v2/widget"
 )
@@ -19,6 +20,7 @@ type ThemeOverride struct {
 	Theme   fyne.Theme
 
 	holder *fyne.Container
+	scope  string
 
 	mobile bool
 }
@@ -35,14 +37,14 @@ func NewThemeOverride(obj fyne.CanvasObject, th fyne.Theme) *ThemeOverride {
 	t := &ThemeOverride{Content: obj, Theme: th, holder: NewStack(obj)}
 	t.ExtendBaseWidget(t)
 
-	cache.OverrideTheme(obj, addFeatures(th, t))
+	t.rescope()
 	obj.Refresh() // required as the widgets passed in could have been initially rendered with default theme
 	return t
 }
 
 // CreateRenderer implements the [fyne.Widget] interface.
 func (t *ThemeOverride) CreateRenderer() fyne.WidgetRenderer {
-	cache.OverrideTheme(t.Content, addFeatures(t.Theme, t))
+	t.rescope()
 
 	return &overrideRenderer{parent: t, objs: []fyne.CanvasObject{t.holder}}
 }
@@ -54,9 +56,16 @@ func (t *ThemeOverride) Refresh() {
 		t.holder.Refresh()
 	}
 
-	cache.OverrideTheme(t.Content, addFeatures(t.Theme, t))
+	t.rescope()
 	t.Content.Refresh()
 	t.BaseWidget.Refresh()
+}
+
+// rescope gives the content a fresh scope, as the theme may have changed, and frees the old scope's faces.
+func (t *ThemeOverride) rescope() {
+	old := t.scope
+	t.scope = cache.OverrideTheme(t.Content, addFeatures(t.Theme, t))
+	painter.ReleaseFontScope(old)
 }
 
 // SetDeviceIsMobile allows a ThemeOverride container to shape the contained widgets as a mobile device.
