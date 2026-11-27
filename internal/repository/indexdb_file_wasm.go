@@ -40,6 +40,9 @@ type idbfile struct {
 	parts       []any
 	add         bool
 	isAdding    bool
+
+	content []byte // what the file holds, once it has been read
+	offset  int    // how much of content has been read
 }
 
 func (f *idbfile) Close() error {
@@ -158,18 +161,30 @@ func getBytes(b js.Value) js.Value {
 }
 
 func (f *idbfile) Read(data []byte) (int, error) {
-	b, err := get(f.db, "data", f.path)
-	if err != nil {
-		return 0, err
+	if f.content == nil {
+		// load the content once, later reads carry on from where the last one finished
+		b, err := get(f.db, "data", f.path)
+		if err != nil {
+			return 0, err
+		}
+
+		if b.IsUndefined() {
+			return 0, fmt.Errorf("idbfile undefined")
+		}
+
+		if !b.InstanceOf(blob) {
+			return 0, fmt.Errorf("returned object not of type blob")
+		}
+
+		bytes := getBytes(b)
+		f.content = make([]byte, bytes.Length())
+		js.CopyBytesToGo(f.content, bytes)
 	}
 
-	if b.IsUndefined() {
-		return 0, fmt.Errorf("idbfile undefined")
+	if f.offset >= len(f.content) {
+		return 0, io.EOF
 	}
-
-	if !b.InstanceOf(blob) {
-		return 0, fmt.Errorf("returned object not of type blob")
-	}
-
-	return js.CopyBytesToGo(data, getBytes(b)), io.EOF
+	n := copy(data, f.content[f.offset:])
+	f.offset += n
+	return n, nil
 }
