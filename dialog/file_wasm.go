@@ -128,8 +128,25 @@ func browserAccept(filter storage.FileFilter) string {
 }
 
 func fileSaveOSOverride(f *FileDialog) bool {
-	// TODO #2738
+	showBrowserFileSave(f.callback.(func(fyne.URIWriteCloser, error)), f.filter, f.initialFileName)
 	return true
+}
+
+// showBrowserFileSave passes callback somewhere to write a file that the browser will then download.
+// A page cannot ask where a file should be saved: the browser decides that, asking the user if it is
+// set to, once everything has been written and the writer is closed.
+func showBrowserFileSave(callback func(fyne.URIWriteCloser, error), filter storage.FileFilter, name string) {
+	if name == "" {
+		name = "untitled"
+		if ext, ok := filter.(*storage.ExtensionFileFilter); ok && len(ext.Extensions) > 0 {
+			name += ext.Extensions[0]
+		}
+	}
+
+	// later, as on other systems the callback is not run until the dialog has been shown
+	go fyne.Do(func() {
+		callback(intRepo.BrowserFiles().Download(name), nil)
+	})
 }
 
 func (f *fileDialog) getPlaces() []favoriteItem {

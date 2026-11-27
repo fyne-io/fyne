@@ -10,6 +10,7 @@ import (
 	"strings"
 	"sync"
 	"syscall/js"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/storage/repository"
@@ -17,6 +18,7 @@ import (
 
 var (
 	_ repository.Repository             = (*BrowserFileRepository)(nil)
+	_ repository.WritableRepository     = (*BrowserFileRepository)(nil)
 	_ repository.ListableRepository     = (*BrowserFileRepository)(nil)
 	_ repository.HierarchicalRepository = (*BrowserFileRepository)(nil)
 )
@@ -28,6 +30,9 @@ var (
 // be read for as long as the page is open, but nothing of where it is. So each is given a URI
 // by name alone - file:///<file> or file:///<folder>/<path within it> - that can be listed and
 // read here. Choosing something of the same name again replaces what was chosen before.
+//
+// Nor can a page write files by where they are. What is written to a file URI is handed to the
+// browser as a download, under the name of the URI, once the writer is closed.
 type BrowserFileRepository struct {
 	mu      sync.Mutex
 	files   map[string]js.Value // by path
@@ -149,6 +154,34 @@ func (r *BrowserFileRepository) CanRead(u fyne.URI) (bool, error) {
 	return isFile, nil
 }
 
+// Download returns a writer for a file of the given name that the browser will download once
+// everything has been written and the writer is closed.
+func (r *BrowserFileRepository) Download(name string) fyne.URIWriteCloser {
+	name = path.Base(path.Clean("/" + name))
+	return &browserDownload{uri: repository.NewFileURI("/" + name), name: name}
+}
+
+// Writer implements repository.WritableRepository.Writer
+//
+// What is written is downloaded by the browser when the writer is closed, see Download.
+func (r *BrowserFileRepository) Writer(u fyne.URI) (fyne.URIWriteCloser, error) {
+	if _, _, isFolder := r.lookup(u); isFolder || u.Name() == "" || u.Name() == "/" {
+		return nil, repository.ErrOperationNotSupported
+	}
+	return &browserDownload{uri: u, name: u.Name()}, nil
+}
+
+// CanWrite implements repository.WritableRepository.CanWrite
+func (r *BrowserFileRepository) CanWrite(u fyne.URI) (bool, error) {
+	_, _, isFolder := r.lookup(u)
+	return !isFolder && u.Name() != "" && u.Name() != "/", nil
+}
+
+// Delete implements repository.WritableRepository.Delete
+func (r *BrowserFileRepository) Delete(fyne.URI) error {
+	return errors.New("files chosen in the browser cannot be deleted")
+}
+
 // Destroy implements repository.Repository.Destroy
 func (r *BrowserFileRepository) Destroy(string) {
 }
@@ -252,4 +285,54 @@ func ReadBrowserFile(file js.Value, uri fyne.URI) (fyne.URIReadCloser, error) {
 		uri = &browserURI{URI: uri, mime: mime}
 	}
 	return &browserFile{Reader: bytes.NewReader(data), uri: uri}, nil
+}
+
+// browserDownload gathers what is written to a file, which the browser downloads when it is closed.
+type browserDownload struct {
+	uri    fyne.URI
+	name   string
+	parts  []any
+	closed bool
+}
+
+func (d *browserDownload) URI() fyne.URI {
+	return d.uri
+}
+
+func (d *browserDownload) Write(data []byte) (int, error) {
+	if d.closed {
+		return 0, errors.New("the file has already been closed")
+	}
+
+	// kept by the browser rather than by us, so that a large file is only held once
+	part := uint8Array.New(len(data))
+	js.CopyBytesToJS(part, data)
+	d.parts = append(d.parts, part)
+	return len(data), nil
+}
+
+func (d *browserDownload) Close() error {
+	if d.closed {
+		return nil
+	}
+	d.closed = true
+
+	content := blob.New(js.ValueOf(d.parts), map[string]any{"type": d.uri.MimeType()})
+	d.parts = nil
+	address := js.Global().Get("URL").Call("createObjectURL", content)
+
+	document := js.Global().Get("document")
+	link := document.Call("createElement", "a")
+	link.Set("href", address)
+	link.Set("download", d.name)
+	link.Get("style").Set("display", "none")
+	document.Get("body").Call("appendChild", link)
+	link.Call("click")
+	link.Call("remove")
+
+	// the browser needs the content for as long as it takes to start the download
+	time.AfterFunc(time.Minute, func() {
+		js.Global().Get("URL").Call("revokeObjectURL", address)
+	})
+	return nil
 }
