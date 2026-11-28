@@ -1,6 +1,10 @@
 package canvas_test
 
 import (
+	"bytes"
+	"image"
+	"image/color"
+	"image/png"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -12,6 +16,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/software"
+	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
@@ -152,4 +157,61 @@ func TestImage_CornerRadius(t *testing.T) {
 	i.CornerRadius = 20
 	c.Resize(fyne.NewSize(60, 100))
 	test.AssertRendersToImage(t, "image_cover_rounded_corners.png", c)
+}
+
+func TestImage_SharedResourceIsDecodedOnce(t *testing.T) {
+	cache.ResetThemeCaches()
+	pwd, _ := os.Getwd()
+	path := filepath.Join(filepath.Dir(pwd), "theme", "icons", "fyne.png")
+	data, err := os.ReadFile(path)
+	assert.NoError(t, err)
+
+	res := fyne.NewStaticResource("shared.png", data)
+	first := canvas.NewImageFromResource(res)
+	second := canvas.NewImageFromResource(res)
+	first.Resize(fyne.NewSize(64, 64))
+	second.Resize(fyne.NewSize(64, 64))
+
+	assert.NotNil(t, first.Image)
+	assert.Same(t, first.Image, second.Image)
+}
+
+func TestImage_RefreshKeepsDecodedImageWhenSourceUnchanged(t *testing.T) {
+	cache.ResetThemeCaches()
+	res := fyne.NewStaticResource("shared.png", makeTestPNG(t, color.White))
+	img := canvas.NewImageFromResource(res)
+	img.Resize(fyne.NewSize(16, 16))
+	decoded := img.Image
+
+	cache.ResetThemeCaches() // simulate the shared cache having expired
+
+	img.Refresh()
+	assert.Same(t, decoded, img.Image)
+}
+
+func TestImage_RefreshRedecodesWhenContentChanges(t *testing.T) {
+	cache.ResetThemeCaches()
+	res := fyne.NewStaticResource("shared.png", makeTestPNG(t, color.White))
+	img := canvas.NewImageFromResource(res)
+	img.Resize(fyne.NewSize(16, 16))
+	decoded := img.Image
+
+	res.StaticContent = makeTestPNG(t, color.Black)
+	img.Refresh()
+	assert.NotSame(t, decoded, img.Image)
+}
+
+func makeTestPNG(t *testing.T, clr color.Color) []byte {
+	t.Helper()
+
+	img := image.NewNRGBA(image.Rect(0, 0, 2, 2))
+	for y := 0; y < 2; y++ {
+		for x := 0; x < 2; x++ {
+			img.Set(x, y, clr)
+		}
+	}
+
+	var buf bytes.Buffer
+	assert.NoError(t, png.Encode(&buf, img))
+	return buf.Bytes()
 }
