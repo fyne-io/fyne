@@ -68,7 +68,8 @@ func (c *cache) Remove(name string) error {
 }
 
 func (c *cache) encodePath(badName string) fyne.URI {
-	name := base64.StdEncoding.EncodeToString([]byte(badName))
+	// URL encoding is used as the standard alphabet contains "/", which is a path separator
+	name := base64.URLEncoding.EncodeToString([]byte(badName))
 	child, _ := storage.Child(c.a.Cache().RootURI(), name)
 	return child
 }

@@ -12,6 +12,7 @@ package mobile
 void iosDeletePath(const char* path);
 bool iosExistsPath(const char* path);
 void* iosParseUrl(const char* url);
+bool iosCanReadURL(void* url);
 const void* iosReadFromURL(void* url, int* len);
 
 const void* iosOpenFileWriter(void* url, bool truncate);
@@ -26,6 +27,7 @@ import (
 	"unsafe"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/storage/repository"
 )
 
@@ -43,7 +45,11 @@ var _ io.ReadCloser = (*secureReadCloser)(nil)
 func (s *secureReadCloser) Read(p []byte) (int, error) {
 	if s.data == nil {
 		var length C.int
-		s.data = C.GoBytes(C.iosReadFromURL(s.url, &length), length)
+		bytes := C.iosReadFromURL(s.url, &length)
+		if length < 0 {
+			return 0, errors.New("failed to read file content")
+		}
+		s.data = C.GoBytes(bytes, length)
 	}
 
 	count := len(p)
@@ -132,6 +138,9 @@ func nativeFileOpen(f *fileOpen) (io.ReadCloser, error) {
 	defer C.free(unsafe.Pointer(cStr))
 
 	url := C.iosParseUrl(cStr)
+	if !bool(C.iosCanReadURL(url)) {
+		return nil, storage.ErrNotExists
+	}
 
 	fileStruct := &secureReadCloser{url: url, closer: f.done}
 	return fileStruct, nil
@@ -148,6 +157,9 @@ func nativeFileSave(f *fileSave, truncate bool) (io.WriteCloser, error) {
 	url := C.iosParseUrl(cStr)
 
 	handle := C.iosOpenFileWriter(url, C.bool(truncate))
+	if handle == nil {
+		return nil, errors.New("failed to open file for writing: " + f.uri.String())
+	}
 	fileStruct := &secureWriteCloser{handle: handle, closer: f.done}
 	return fileStruct, nil
 }
