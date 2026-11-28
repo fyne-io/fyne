@@ -49,6 +49,7 @@ public class GoNativeActivity extends NativeActivity {
 	private static GoNativeActivity goNativeActivity;
 	private static final int FILE_OPEN_CODE = 1;
 	private static final int FILE_SAVE_CODE = 2;
+	private static final int NOTIFICATION_PERMISSION_CODE = 1;
 
 	private static final int DEFAULT_INPUT_TYPE = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS;
 
@@ -236,6 +237,38 @@ public class GoNativeActivity extends NativeActivity {
             @Override
             public void run() {
                 mTextEdit.setVisibility(View.GONE);
+            }
+        });
+    }
+
+    // requestNotificationPermission asks the user to allow notifications,
+    // which Android 13+ requires before any are shown.
+    // Called from Go through JNI, on a thread that is not the UI thread.
+    void requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT < 33) {
+            return; // granted at install time before Android 13
+        }
+
+        // Apps targeting an SDK below 33 cannot request POST_NOTIFICATIONS
+        // themselves: the permission controller rejects the request without
+        // showing a dialog, and Android instead prompts on its own when the app
+        // first creates a notification channel. Issuing the request anyway can
+        // dismiss that system prompt, so leave legacy targets to the platform.
+        if (getApplicationInfo().targetSdkVersion < 33) {
+            return;
+        }
+
+        final String permission = "android.permission.POST_NOTIFICATIONS";
+
+        // The dialog is part of the activity's UI, so it has to be requested
+        // from the UI thread.
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED) {
+                    return;
+                }
+                requestPermissions(new String[]{permission}, NOTIFICATION_PERMISSION_CODE);
             }
         });
     }
