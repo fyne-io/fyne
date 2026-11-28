@@ -212,15 +212,31 @@ func (i *ImageSegment) Visual() fyne.CanvasObject {
 
 // Update applies the current state of this image segment to an existing visual.
 func (i *ImageSegment) Update(o fyne.CanvasObject) {
-	newer := canvas.NewImageFromURI(i.Source)
-	img, _ := o.(*richImage)
+	img, ok := o.(*richImage)
+	if !ok {
+		return
+	}
 
+	if img.align != i.Alignment {
+		img.setAlign(i.Alignment)
+	}
+	if sameURI(img.source, i.Source) {
+		return
+	}
+
+	img.source = i.Source
+	newer := canvas.NewImageFromURI(i.Source)
 	// one of the following will be used
 	img.img.File = newer.File
 	img.img.Resource = newer.Resource
-	img.setAlign(i.Alignment)
-
 	img.Refresh()
+}
+
+func sameURI(a, b fyne.URI) bool {
+	if a == nil || b == nil {
+		return a == b
+	}
+	return a.String() == b.String()
 }
 
 // Select tells the segment that the user is selecting the content between the two positions.
@@ -1016,12 +1032,13 @@ type richImage struct {
 	oldMin fyne.Size
 	layout *fyne.Container
 	min    fyne.Size
+	source fyne.URI
 }
 
 func newRichImage(u fyne.URI, align fyne.TextAlign) *richImage {
 	img := canvas.NewImageFromURI(u)
 	img.FillMode = canvas.ImageFillOriginal
-	i := &richImage{img: img, align: align}
+	i := &richImage{img: img, align: align, source: u}
 	i.ExtendBaseWidget(i)
 	return i
 }
@@ -1047,10 +1064,10 @@ func (r *richImage) MinSize() fyne.Size {
 }
 
 func (r *richImage) setAlign(a fyne.TextAlign) {
+	r.align = a
 	if r.layout != nil {
 		r.layout.Refresh()
 	}
-	r.align = a
 }
 
 type richImageLayout struct {

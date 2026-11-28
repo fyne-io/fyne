@@ -1,6 +1,11 @@
 package canvas_test
 
 import (
+	"bytes"
+	"image"
+	"image/color"
+	"image/png"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -45,6 +50,109 @@ func TestImage_RefreshBlank(t *testing.T) {
 	img.Resource = nil
 	img.Refresh()
 	assert.Nil(t, img.Image)
+}
+
+func TestImage_MinSizeLoadsSourceOnce(t *testing.T) {
+	var buf bytes.Buffer
+	log.SetOutput(&buf)
+	t.Cleanup(func() { log.SetOutput(os.Stderr) })
+
+	dir := t.TempDir()
+	img := canvas.NewImageFromFile(filepath.Join(dir, "missing.png"))
+	for i := 0; i < 10; i++ {
+		img.MinSize()
+	}
+	assert.Equal(t, 1, strings.Count(buf.String(), "Failed to load image"), buf.String())
+
+	img.File = filepath.Join(dir, "other.png")
+	for i := 0; i < 10; i++ {
+		img.MinSize()
+	}
+	assert.Equal(t, 2, strings.Count(buf.String(), "Failed to load image"), buf.String())
+}
+
+func TestImage_RefreshRetriesFailedLoad(t *testing.T) {
+	var buf bytes.Buffer
+	log.SetOutput(&buf)
+	t.Cleanup(func() { log.SetOutput(os.Stderr) })
+
+	img := canvas.NewImageFromFile(filepath.Join(t.TempDir(), "missing.png"))
+	for i := 0; i < 10; i++ {
+		img.Refresh()
+	}
+	assert.Equal(t, 10, strings.Count(buf.String(), "Failed to load image"), buf.String())
+}
+
+func TestImage_AutomaticPathsDoNotRetryFailedLoad(t *testing.T) {
+	var buf bytes.Buffer
+	log.SetOutput(&buf)
+	t.Cleanup(func() { log.SetOutput(os.Stderr) })
+
+	img := canvas.NewImageFromFile(filepath.Join(t.TempDir(), "missing.png"))
+	for i := 0; i < 10; i++ {
+		img.MinSize()
+		img.Aspect()
+		img.Resize(fyne.NewSize(float32(i+1), float32(i+1)))
+	}
+	assert.Equal(t, 1, strings.Count(buf.String(), "Failed to load image"), buf.String())
+}
+
+func TestImage_MinSizeLoadsResourceWithoutName(t *testing.T) {
+	res := &countingResource{name: "", content: []byte(testSVG)}
+	img := canvas.NewImageFromResource(res)
+	img.MinSize()
+
+	assert.NotZero(t, res.reads)
+}
+
+func TestImage_MinSizeRetriesChangedResourceWithSameName(t *testing.T) {
+	var buf bytes.Buffer
+	log.SetOutput(&buf)
+	t.Cleanup(func() { log.SetOutput(os.Stderr) })
+
+	broken := &countingResource{name: "same-name.png", content: []byte("not an image")}
+	img := canvas.NewImageFromResource(broken)
+	img.MinSize()
+	assert.Equal(t, 1, strings.Count(buf.String(), "Failed to load image"), buf.String())
+
+	fixed := &countingResource{name: "same-name.png", content: testPNG()}
+	img.Resource = fixed
+	img.MinSize()
+
+	assert.Equal(t, 1, strings.Count(buf.String(), "Failed to load image"), buf.String())
+	assert.NotZero(t, fixed.reads)
+}
+
+func TestImage_AutomaticPathsDoNotReloadSuccessfulSource(t *testing.T) {
+	res := &countingResource{name: "success-no-reload.svg", content: []byte(testSVG)}
+	img := canvas.NewImageFromResource(res)
+	img.Resize(fyne.NewSize(64, 64))
+	img.Refresh()
+	initial := res.reads
+
+	for i := 0; i < 10; i++ {
+		img.MinSize()
+		img.Aspect()
+		img.Resize(fyne.NewSize(float32(64+i), 64))
+	}
+	assert.Equal(t, initial, res.reads)
+
+	img.Refresh()
+	assert.Equal(t, initial+1, res.reads)
+}
+
+func TestImage_ResizeDoesNotRetryFailedLoad(t *testing.T) {
+	var buf bytes.Buffer
+	log.SetOutput(&buf)
+	t.Cleanup(func() { log.SetOutput(os.Stderr) })
+
+	img := canvas.NewImageFromFile(filepath.Join(t.TempDir(), "missing.png"))
+	img.Refresh()
+
+	for i := 1; i <= 10; i++ {
+		img.Resize(fyne.NewSize(float32(i), float32(i)))
+	}
+	assert.Equal(t, 1, strings.Count(buf.String(), "Failed to load image"), buf.String())
 }
 
 func TestNewImageFromFile(t *testing.T) {
@@ -152,4 +260,36 @@ func TestImage_CornerRadius(t *testing.T) {
 	i.CornerRadius = 20
 	c.Resize(fyne.NewSize(60, 100))
 	test.AssertRendersToImage(t, "image_cover_rounded_corners.png", c)
+}
+
+const testSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><rect width="10" height="10"/></svg>`
+
+func testPNG() []byte {
+	img := image.NewNRGBA(image.Rect(0, 0, 10, 10))
+	for y := 0; y < 10; y++ {
+		for x := 0; x < 10; x++ {
+			img.SetNRGBA(x, y, color.NRGBA{R: 0xff, A: 0xff})
+		}
+	}
+
+	var buf bytes.Buffer
+	if err := png.Encode(&buf, img); err != nil {
+		panic(err)
+	}
+	return buf.Bytes()
+}
+
+type countingResource struct {
+	name    string
+	content []byte
+	reads   int
+}
+
+func (r *countingResource) Name() string {
+	return r.name
+}
+
+func (r *countingResource) Content() []byte {
+	r.reads++
+	return r.content
 }

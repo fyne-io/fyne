@@ -1,7 +1,10 @@
 package widget
 
 import (
+	"bytes"
+	"log"
 	"net/url"
+	"os"
 	"strings"
 	"testing"
 
@@ -13,6 +16,31 @@ import (
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/test"
 )
+
+func TestRichText_ImageRefreshDoesNotReloadSource(t *testing.T) {
+	test.NewTempApp(t)
+
+	var buf bytes.Buffer
+	log.SetOutput(&buf)
+	t.Cleanup(func() { log.SetOutput(os.Stderr) })
+
+	r := NewRichTextFromMarkdown("![title](missing.png)")
+	r.Scroll = fyne.ScrollBoth
+	r.CreateRenderer()
+	r.Resize(fyne.NewSize(100, 100))
+	r.Refresh()
+	initial := strings.Count(buf.String(), "Failed to load image")
+
+	for i := 0; i < 10; i++ {
+		r.Refresh()
+	}
+	assert.Equal(t, initial, strings.Count(buf.String(), "Failed to load image"), buf.String())
+
+	for i := 0; i < 10; i++ {
+		r.scr.Scrolled(&fyne.ScrollEvent{Scrolled: fyne.NewDelta(0, 10)})
+	}
+	assert.Equal(t, initial, strings.Count(buf.String(), "Failed to load image"), buf.String())
+}
 
 func TestRichText_Image(t *testing.T) {
 	img := &ImageSegment{Title: "test", Source: storage.NewFileURI("./testdata/richtext/richtext_multiline.png")}
